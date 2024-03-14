@@ -15,8 +15,9 @@ type GTtable =
             Html.button [
                 prop.onClick (fun _ -> setCount(count + 1))
                 prop.text "Increment"
+            ]    
             ]
-        ]
+        
 
 
     // <summary>

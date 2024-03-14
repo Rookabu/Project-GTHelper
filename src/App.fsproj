@@ -9,6 +9,8 @@
     <Compile Include="Main.fs" />
     <Compile Include="Feedback.fs" />
     <Compile Include="Contact.fs" />
+    <Compile Include="NavBar.fs" />
+    <Compile Include="styling.css" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Feliz" Version="2.6.0" />
