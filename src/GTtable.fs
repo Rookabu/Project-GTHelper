@@ -1,6 +1,8 @@
+
 namespace Components
 
 open Feliz
+//open Feliz.
 
 type GTtable =
 
@@ -11,7 +13,7 @@ type GTtable =
     static member Main() =
         Html.div [
             Html.button [
-                prop.className "button"
+                //prop.className 
                 prop.onClick (fun _ ->())
                 prop.text "upload abstract"
             ]    
