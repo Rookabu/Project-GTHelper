@@ -1,10 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
     background-color: #44546a;
-    color: white 	
+    color: white; 
+    width: 100vw;
+    height: 100vh 	
 }
 
 .button {
     background-color:#ed7d31;
     color: white;
-    font-size: 14;
+    font-size: 8;
+}
+
+.text {
+    color: white;
 }

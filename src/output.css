@@ -1,0 +1,13 @@
+paket add Feliz.DaisyUI
+
+
+body {
+  background-color: #44546a;
+  color: white
+}
+
+.button {
+  background-color:#ed7d31;
+  color: white;
+  font-size: 14;
+}
