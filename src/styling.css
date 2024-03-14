@@ -1,4 +1,10 @@
 body {
-    background-color: #24253d;
-    color: white
+    background-color: #44546a;
+    color: white 	
+}
+
+.button {
+    background-color:#ed7d31;
+    color: white;
+    font-size: 14;
 }
