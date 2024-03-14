@@ -5,4 +5,5 @@ open Feliz
 type Feedback =
 
     [<ReactComponent>]
-    static member Main() = ()
+    static member Main() =         
+        Html.div "Feedback"

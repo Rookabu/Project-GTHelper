@@ -5,4 +5,5 @@ open Feliz
 type Contact =
 
     [<ReactComponent>]
-    static member Main() = ()
+    static member Main() =
+        Html.div "Contact"

@@ -6,11 +6,11 @@
     <None Include="index.html" />
     <Compile Include="Extensions.fs" />
     <Compile Include="GTtable.fs" />
-    <Compile Include="Main.fs" />
     <Compile Include="Feedback.fs" />
     <Compile Include="Contact.fs" />
     <Compile Include="NavBar.fs" />
-    <Compile Include="styling.css" />
+    <Compile Include="Main.fs" />
+    <None Include="styling.css" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Feliz" Version="2.6.0" />
