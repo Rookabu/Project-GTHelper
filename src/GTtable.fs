@@ -1,4 +1,4 @@
-namespace App
+namespace Components
 
 open Feliz
 
