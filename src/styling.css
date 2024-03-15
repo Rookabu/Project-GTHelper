@@ -12,8 +12,14 @@ body {
 .button {
     background-color:#ed7d31;
     color: white;
-    font-size: 8;
+    border: #8e4b1d;
+
 }
+
+.button:hover {
+    background-color: #8e4b1d 
+}
+
 
 .text {
     color: white;
