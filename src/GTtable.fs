@@ -75,7 +75,7 @@ type GTtable =
                             Html.tr [
                                 prop.className "title"
                                 prop.style [
-                                    style.fontSize 16
+                                    style.fontSize 15
                                 ]
                                 prop.children [
                                     Html.th "Nr."
@@ -90,75 +90,44 @@ type GTtable =
                             Html.tr [
                                 prop.children [ 
                                     Html.td "1" 
-                                    // Html.td [
-                                    //     Daisy.collapse [
-                                    //             prop.tabIndex 0
-                                    //             collapse.arrow
-                                    //             prop.children [
-                                    //                 Daisy.collapseTitle [
-                                    //                     prop.style [
-                                    //                         style.width 900
-                                    //                         style.fontSize 16 
-                                    //                     ]                                            
-                                    //                     prop.text "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis"
-                                    //                     prop.className "tableElement"
-                                    //                 ]
-                                    //                 Daisy.collapseContent [
-                                    //                     prop.style [
-                                    //                         style.width 900
-                                    //                         style.fontSize 16
-                                                            // style.flexDirection.row
-                                                            // style.flexWrap.wrap
-                                    //                     ]
-                                    //                     prop.children [
-                                    //                         Daisy.cardBody [
-                                    //                             prop.style [
-                                    //                                 style.flexDirection.row
-                                    //                                 style.flexWrap.wrap
-                                    //                             ]
-                                                                
-                                    //                             prop.children [
-                                    //                                 for word in (splitTextIntoWords exAbstract) do
-                                    //                                     Html.span [
-                                    //                                         //prop.className 
-                                    //                                         prop.onClick (fun _ ->())
-                                    //                                         prop.text word
-                                    //                                         prop.className "hover:bg-sky-700"  
-                                    //                                         prop.style [style.cursor.pointer; style.userSelect.none] 
-                                    //                                     ]
-                                    //                             ]                                                                        
-                                    //                         ]   
-                                    //                     ]    
-                                    //                 ]
-                                    //             ]
-                                    //     ]
-                                    // ]
                                     Html.td [
                                         Daisy.collapse [
                                             prop.tabIndex 0
                                             collapse.arrow
-                                            prop.style [
-                                                style.width 900
-                                                style.fontSize 16 
-                                                style.flexDirection.row
-                                                style.flexWrap.wrap
-                                            ]
                                             prop.children [
-                                                Daisy.collapseTitle "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis"
+                                                Html.input [prop.type' "checkbox"]
+                                                Daisy.collapseTitle [ 
+                                                    prop.style [
+                                                        style.width 900
+                                                        style.fontSize 15 
+                                                    ]  
+                                                    prop.text "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis"
+                                                ]
                                                 Daisy.collapseContent [
-                                                    for word in (splitTextIntoWords exAbstract) do
-                                                        Html.span [
-                                                            //prop.className 
-                                                            prop.onClick (fun _ ->())
-                                                            prop.text word
-                                                            prop.className "hover:bg-sky-700"  
-                                                            prop.style [style.cursor.pointer; style.userSelect.none] 
+                                                    prop.children [
+                                                        Daisy.cardBody [
+                                                            prop.style [
+                                                                style.flexDirection.row
+                                                                style.flexWrap.wrap
+                                                                style.width 900
+                                                                style.fontSize 15
+                                                            ]    
+                                                            prop.children [
+                                                                for word in (splitTextIntoWords exAbstract) do
+                                                                    Html.span [
+                                                                        //prop.className 
+                                                                        prop.onClick (fun _ ->())
+                                                                        prop.text word
+                                                                        prop.className "hover:bg-sky-700"  
+                                                                        prop.style [style.cursor.pointer; style.userSelect.none] 
+                                                                    ]
+                                                            ]
                                                         ]
+                                                    ] 
                                                 ]
                                             ]
-
-                                        ] 
-                                    ]                
+                                        ]
+                                    ]                           
                                     Html.td "RDO5"
                                     Html.td "APUM9"
                                     Html.td [
@@ -166,16 +135,16 @@ type GTtable =
                                             Daisy.button.button [
                                                 prop.style [
                                                     style.width 200
-                                                    style.height 5    
+                                                    style.fontSize 15  
                                                 ]                                            
                                                 prop.text input
                                                 prop.className "tableElement"
                                             ]
                                             Daisy.dropdownContent [
                                                 prop.className "p-1 shadow menu sm-base-150"
-                                                //prop.className "dropDownElement"
                                                 prop.style [
                                                     style.width 200
+                                                    style.fontSize 15 
                                                 ]
                                                 prop.tabIndex 0
                                                 prop.children [
