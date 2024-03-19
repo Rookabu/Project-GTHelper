@@ -10,6 +10,7 @@
     <Compile Include="Contact.fs" />
     <Compile Include="NavBar.fs" />
     <Compile Include="Main.fs" />
+    <Compile Include="Types.fs" />
     <None Include="styling.css" />
   </ItemGroup>
   <ItemGroup>

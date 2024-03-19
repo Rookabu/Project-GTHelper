@@ -1,3 +1,5 @@
+module Types
+
 type InteractionType =
     |ProteinProtein
     |ProteineGene
