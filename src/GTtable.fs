@@ -29,7 +29,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellPaperContent (abst: string) =
+    let tableCellPaperContent (abst: string, setPartner) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -53,7 +53,7 @@ module private Helper =
                                 for word in (splitTextIntoWords abst) do
                                     Html.span [
                                         //prop.className 
-                                        prop.onClick (fun _ ->())
+                                        prop.onClick (fun _ ->(setPartner word)) //soll den aktuellen string nehmen
                                         prop.text word
                                         prop.className "hover:bg-sky-700"  
                                         prop.style [style.cursor.pointer; style.userSelect.none] 
@@ -65,13 +65,13 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setInput) = 
+    let form(inp: string, setType, interPartner) = 
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
                 Daisy.formControl [
                     Daisy.label [prop.className "title"; prop.text "Partner 1"; prop.style [style.fontSize 15]]
-                    Daisy.input [input.bordered; input.sm; prop.style [style.color.black; style.maxWidth 150]]
+                    Daisy.input [input.bordered; input.sm; prop.text interPartner; prop.style [style.color.black; style.maxWidth 150]] //einfügbaren input adden
                 ]
                 Daisy.formControl [
                     Daisy.label [prop.className "title"; prop.text"Partner 2"; prop.style [style.fontSize 15]]
@@ -98,9 +98,9 @@ module private Helper =
                             ]
                             prop.tabIndex 0
                             prop.children [
-                                Html.li [Html.a [prop.text "Protein-Gene"; prop.onClick (fun _ -> setInput "Protein-Gene"); prop.className "dropDownElement"]]
-                                Html.li [Html.a [prop.text "Protein-Protein"; prop.onClick (fun _ -> setInput "Protein-Protein"); prop.className "dropDownElement"]]
-                                Html.li [Html.a [prop.text "Other"; prop.onClick (fun _ -> setInput "Other"); prop.className "dropDownElement"]]
+                                Html.li [Html.a [prop.text "Protein-Gene"; prop.onClick (fun _ -> setType "Protein-Gene"); prop.className "dropDownElement"]]
+                                Html.li [Html.a [prop.text "Protein-Protein"; prop.onClick (fun _ -> setType "Protein-Protein"); prop.className "dropDownElement"]]
+                                Html.li [Html.a [prop.text "Other"; prop.onClick (fun _ -> setType "Other"); prop.className "dropDownElement"]]
                             ]
                         ]
                     ]
@@ -108,7 +108,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setInput) =
+    let tableCellFormInput (inp: string, setType, setPartner) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -125,7 +125,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setInput)
+                            form(inp, setType, setPartner)
                         ]
                     ]
                 ]
@@ -139,7 +139,9 @@ type GTtable =
     /// </summary>
     [<ReactComponent>]
     static member Main() =
-        let (myInput, setinput) = React.useState("Proteine-Gene")
+        let (interType, setType) = React.useState("Proteine-Gene")
+        let (interPartner, setPartner) = React.useState("")
+
 
 
         let exAbstract =
@@ -206,15 +208,15 @@ type GTtable =
                             Html.tr [
                                 prop.children [
                                     Html.td "1"
-                                    Helper.tableCellPaperContent exAbstract 
-                                    Helper.tableCellFormInput(myInput,setinput)
+                                    Helper.tableCellPaperContent (exAbstract, setPartner) 
+                                    Helper.tableCellFormInput(interType, setType, setPartner)
                                 ]
                             ]
                             Html.tr [
                                 prop.children [
                                     Html.td "2"
-                                    Helper.tableCellPaperContent exAbstract 
-                                    Helper.tableCellFormInput(myInput,setinput)
+                                    Helper.tableCellPaperContent (exAbstract, setPartner) 
+                                    Helper.tableCellFormInput(interType, setType, setPartner)
                                 ]
                             ]
                         ]
