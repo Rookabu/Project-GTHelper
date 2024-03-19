@@ -71,11 +71,13 @@ module private Helper =
             prop.children [
                 Daisy.formControl [
                     Daisy.label [prop.className "title"; prop.text "Partner 1"; prop.style [style.fontSize 15]]
-                    Daisy.input [input.bordered; input.sm; prop.text interPartner; prop.style [style.color.black; style.maxWidth 150]] //einfügbaren input adden
+                    Daisy.input [input.bordered; input.sm;prop.style [style.color.white; style.maxWidth 150];prop.className "dropDownElement"] //einfügbaren input (interParnter) adden
+                    
                 ]
                 Daisy.formControl [
                     Daisy.label [prop.className "title"; prop.text"Partner 2"; prop.style [style.fontSize 15]]
-                    Daisy.input [input.bordered; input.sm; prop.style [style.color.black; style.maxWidth 150]]
+                    Daisy.input [input.bordered; input.sm; prop.style [style.color.white; style.maxWidth 150];prop.className "dropDownElement"]
+                    
                 ]
                 Daisy.formControl [
                     Daisy.label [prop.className "title"; prop.text"InteractionType"; prop.style [style.fontSize 15]]
@@ -108,7 +110,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType, setPartner) =
+    let tableCellFormInput (inp: string, setType, interPartner) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -125,7 +127,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, setPartner)
+                            form(inp, setType, interPartner)
                         ]
                     ]
                 ]
@@ -209,14 +211,14 @@ type GTtable =
                                 prop.children [
                                     Html.td "1"
                                     Helper.tableCellPaperContent (exAbstract, setPartner) 
-                                    Helper.tableCellFormInput(interType, setType, setPartner)
+                                    Helper.tableCellFormInput(interType, setType, interPartner)
                                 ]
                             ]
                             Html.tr [
                                 prop.children [
                                     Html.td "2"
                                     Helper.tableCellPaperContent (exAbstract, setPartner) 
-                                    Helper.tableCellFormInput(interType, setType, setPartner)
+                                    Helper.tableCellFormInput(interType, setType, interPartner)
                                 ]
                             ]
                         ]
