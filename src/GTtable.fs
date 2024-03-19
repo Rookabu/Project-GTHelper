@@ -92,39 +92,42 @@ type GTtable =
                             //         Html.td "RDO5"
                             //         Html.td "APUM9"
                             Html.tr [
-                                prop.style [style.width 900]
+                                // prop.style [style.width 900]
                                 prop.children [
                                     Html.td "1"
                                     Html.td [
-                                        Daisy.collapse [
-                                            prop.tabIndex 0
-                                            collapse.arrow
-                                            prop.children [
-                                                Html.input [prop.type' "checkbox"]
-                                                Daisy.collapseTitle [ 
-                                                    prop.style [
-                                                        style.width 900
-                                                        style.fontSize 15 
-                                                    ]  
-                                                    prop.text "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis"
-                                                ]
-                                                Daisy.collapseContent [
-                                                    Daisy.cardBody [
+                                        prop.style [style.maxWidth (length.perc 60)]
+                                        prop.children [
+                                            Daisy.collapse [
+                                                prop.tabIndex 0
+                                                collapse.arrow
+                                                prop.children [
+                                                    Html.input [prop.type' "checkbox"]
+                                                    Daisy.collapseTitle [ 
                                                         prop.style [
-                                                            style.flexDirection.row
-                                                            style.flexWrap.wrap
-                                                            style.width 900
-                                                            style.fontSize 15
-                                                        ]    
-                                                        prop.children [
-                                                            for word in (splitTextIntoWords exAbstract) do
-                                                                Html.span [
-                                                                    //prop.className 
-                                                                    prop.onClick (fun _ ->())
-                                                                    prop.text word
-                                                                    prop.className "hover:bg-sky-700"  
-                                                                    prop.style [style.cursor.pointer; style.userSelect.none] 
-                                                                ]
+                                                            // style.width 900
+                                                            style.fontSize 15 
+                                                        ]  
+                                                        prop.text "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis"
+                                                    ]
+                                                    Daisy.collapseContent [
+                                                        Daisy.cardBody [
+                                                            prop.style [
+                                                                style.flexDirection.row
+                                                                style.flexWrap.wrap
+                                                                // style.width 900
+                                                                style.fontSize 15
+                                                            ]    
+                                                            prop.children [
+                                                                for word in (splitTextIntoWords exAbstract) do
+                                                                    Html.span [
+                                                                        //prop.className 
+                                                                        prop.onClick (fun _ ->())
+                                                                        prop.text word
+                                                                        prop.className "hover:bg-sky-700"  
+                                                                        prop.style [style.cursor.pointer; style.userSelect.none] 
+                                                                    ]
+                                                            ]
                                                         ]
                                                     ]
                                                 ]
@@ -146,7 +149,7 @@ type GTtable =
                                                 Daisy.collapseContent [
                                                     Daisy.cardBody [
                                                         prop.style [
-                                                            style.width 135
+                                                            // style.width 135
                                                             style.fontSize 15
                                                             style.color.black
                                                             style.padding 1
