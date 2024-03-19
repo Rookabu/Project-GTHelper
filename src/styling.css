@@ -50,6 +50,10 @@ body {
   background-color: #8f98a6;
 }
 
+.dropDownElement:hover {
+  background-color:#293240 ;
+}
+
 .alignment {
     flex-direction: column
   }
