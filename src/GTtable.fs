@@ -14,7 +14,8 @@ type ActiveField =
     |Partner2
 
 type Interaction = {
-    Partners: ActiveField
+    Partner1: string
+    Partner2: string
     InterType: InteractionType
 }
 
@@ -25,8 +26,6 @@ type GTelement = {
     Content: string list
     Interactions: Interaction  
 }
-
-
 
 module private Helper =
 
@@ -44,9 +43,6 @@ module private Helper =
                 prop.children [
                     Html.th "Nr."
                     Html.th "Title"
-                    // Html.th "Partner 1" 
-                    // Html.th "Partner 2" 
-                    // Html.th "Interactiontype"
                     Html.th ""
                 ]
             ]
@@ -62,12 +58,18 @@ module private Helper =
                     Daisy.collapseTitle [ 
                         prop.style [
                             style.fontSize 15
-                        ]  
+                            style.display.flex
+                            style.gap (length.rem 0.5)
+                            style.pointerEvents.unset
+                        ] 
+                         
                         prop.children [
                                 for word in title do
                                     Html.span [
                                         //prop.className 
-                                        prop.onClick (fun _ ->(setPartner word)) //soll den aktuellen string nehmen
+                                        prop.onClick (fun e ->
+                                            e.stopPropagation()
+                                            (setPartner word)) //soll den aktuellen string nehmen
                                         prop.text word
                                         prop.className "hover:bg-sky-700"  
                                         prop.style [style.cursor.pointer; style.userSelect.none] 
@@ -97,7 +99,7 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType, interPartner: string, activeField: (int *ActiveField) option, setField) =
+    let form(inp: string, setType, interPartner: string, activeField: ActiveField option, setField: option<ActiveField> -> unit) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -106,16 +108,18 @@ module private Helper =
                     Daisy.label [
                         prop.className "title" 
                         prop.text "Partner 1"
-                        prop.style [style.fontSize 15]]
+                        prop.style [style.fontSize 15]
+                    ]
                     Daisy.input [
                         input.bordered 
                         input.sm 
                         prop.style [style.color.white; style.maxWidth 150]
                         prop.className "dropDownElement"
-                        prop.onClick (fun _ ->()
-                            //setField {Partner1 = interPartner; Partner2 = ""; InterType = InteractionType.Other ""}
+                        prop.onClick (fun _ ->
+                            setField (Some Partner1)
                         ) 
-                        
+                        if activeField = Some Partner1 then prop.valueOrDefault interPartner
+
                         //     setPartner1 true
                         //     setPartner2 false)
                         // if partner1 = true then prop.valueOrDefault interPartner 
@@ -126,15 +130,17 @@ module private Helper =
                     Daisy.label [
                         prop.className "title"
                         prop.text "Partner 2"
-                        prop.style [style.fontSize 15]]
+                        prop.style [style.fontSize 15]
+                    ]
                     Daisy.input [
                         input.bordered
                         input.sm
                         prop.style [style.color.white; style.maxWidth 150]
                         prop.className "dropDownElement"
-                        prop.onClick (fun _ ->()
-                            //setField {Partner1 = ""; Partner2 = interPartner; InterType = InteractionType.Other ""}
-                        )
+                        prop.onClick (fun _ ->
+                            setField (Some Partner2)
+                        ) 
+                        if activeField = Some Partner2 then prop.valueOrDefault interPartner
                         
                         // prop.onClick (fun _ -> 
                         //     setPartner2 true
@@ -208,7 +214,7 @@ type GTtable =
     static member Main() =
         let (interType, setType) = React.useState("") //für dropdown interactionbar
         let (interPartner, setPartner) = React.useState("")
-        let (activeField: (int *ActiveField) option, setField) = React.useState (None)
+        let (activeField: (ActiveField) option, setField) = React.useState (None)
         let exAbstract = [{
             Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
             Content = Helper.splitTextIntoWords "Seed dormancy determines germination timing and contributes to crop production and the adaptation of natural populations to their environment. 
@@ -277,24 +283,17 @@ type GTtable =
                         Helper.headerRow
                         Html.tbody [
                             for i in [0 .. (table.Length - 1)]  do //für jedes Element in table wird folgendes gemacht:
-                            let element = List.item i table
-                            //         Html.td "RDO5"
-                            //         Html.td "APUM9"
-                            Html.tr [
-                                prop.children [
-                                    Html.td "1"
-                                    Helper.tableCellPaperContent (element.Content, setPartner, element.Title) 
-                                    Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField)
+                                let element = List.item i table
+                                //         Html.td "RDO5"
+                                //         Html.td "APUM9"
+                                Html.tr [
+                                    prop.children [
+                                        Html.td "1"
+                                        Helper.tableCellPaperContent (element.Content, setPartner, element.Title) 
+                                        Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField)
+                                    ]
                                 ]
                             ]
-                            Html.tr [
-                                prop.children [
-                                    Html.td "2"
-                                    Helper.tableCellPaperContent (element.Content, setPartner, element.Title) 
-                                    Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField)
-                                ]
-                            ]
-                        ]
                     ]
                 ]
             ]
