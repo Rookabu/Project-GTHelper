@@ -9,9 +9,12 @@ type InteractionType =
     |ProteineGene
     |Other of string
 
+type ActiveField = 
+    |Partner1
+    |Partner2
+
 type Interaction = {
-    Partner1: string
-    Partner2: string
+    Partners: ActiveField
     InterType: InteractionType
 }
 
@@ -20,8 +23,9 @@ type GTelement = {
     Title: string list 
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
-    Interactions: Interaction list 
+    Interactions: Interaction  
 }
+
 
 
 module private Helper =
@@ -48,7 +52,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellPaperContent (abst: string, setPartner) =
+    let tableCellPaperContent (abst: string list, setPartner, title: string list) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -57,9 +61,18 @@ module private Helper =
                     Html.input [prop.type' "checkbox"]
                     Daisy.collapseTitle [ 
                         prop.style [
-                            style.fontSize 15 
+                            style.fontSize 15
                         ]  
-                        prop.text "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis"
+                        prop.children [
+                                for word in title do
+                                    Html.span [
+                                        //prop.className 
+                                        prop.onClick (fun _ ->(setPartner word)) //soll den aktuellen string nehmen
+                                        prop.text word
+                                        prop.className "hover:bg-sky-700"  
+                                        prop.style [style.cursor.pointer; style.userSelect.none] 
+                                    ]
+                            ]
                     ]
                     Daisy.collapseContent [
                         Daisy.cardBody [
@@ -69,7 +82,7 @@ module private Helper =
                                 style.fontSize 15
                             ]    
                             prop.children [
-                                for word in (splitTextIntoWords abst) do
+                                for word in abst do
                                     Html.span [
                                         //prop.className 
                                         prop.onClick (fun _ ->(setPartner word)) //soll den aktuellen string nehmen
@@ -84,7 +97,8 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType, interPartner: string, partner1, partner2, setPartner1, setPartner2) = 
+    let form(inp: string, setType, interPartner: string, activeField: (int *ActiveField) option, setField) =
+        
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -98,13 +112,15 @@ module private Helper =
                         input.sm 
                         prop.style [style.color.white; style.maxWidth 150]
                         prop.className "dropDownElement"
-                        prop.onClick (fun _ -> 
-                            setPartner1 true
-                            setPartner2 false)
-                        if partner1 = true then prop.valueOrDefault interPartner 
-                        if partner2 = true then prop.valueOrDefault ""
+                        prop.onClick (fun _ ->()
+                            //setField {Partner1 = interPartner; Partner2 = ""; InterType = InteractionType.Other ""}
+                        ) 
+                        
+                        //     setPartner1 true
+                        //     setPartner2 false)
+                        // if partner1 = true then prop.valueOrDefault interPartner 
+                        // if partner2 = true then prop.valueOrDefault ""
                     ]
-                    
                 ]
                 Daisy.formControl [
                     Daisy.label [
@@ -112,17 +128,19 @@ module private Helper =
                         prop.text "Partner 2"
                         prop.style [style.fontSize 15]]
                     Daisy.input [
-
-
                         input.bordered
                         input.sm
                         prop.style [style.color.white; style.maxWidth 150]
                         prop.className "dropDownElement"
-                        prop.onClick (fun _ -> 
-                            setPartner2 true
-                            setPartner1 false)
-                        if partner1 = true then prop.valueOrDefault "" 
-                        if partner2 = true then prop.valueOrDefault interPartner 
+                        prop.onClick (fun _ ->()
+                            //setField {Partner1 = ""; Partner2 = interPartner; InterType = InteractionType.Other ""}
+                        )
+                        
+                        // prop.onClick (fun _ -> 
+                        //     setPartner2 true
+                        //     setPartner1 false)
+                        // if partner1 = true then prop.valueOrDefault "" 
+                        // if partner2 = true then prop.valueOrDefault interPartner 
                     ]
                     
                 ]
@@ -157,7 +175,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType, interPartner, partner1, partner2, setPartner1, setPartner2) =
+    let tableCellFormInput (inp: string, setType, interPartner, activeField, setField) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -174,7 +192,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, interPartner, partner1, partner2, setPartner1, setPartner2)
+                            form(inp, setType, interPartner, activeField, setField)
                         ]
                     ]
                 ]
@@ -189,19 +207,24 @@ type GTtable =
     [<ReactComponent>]
     static member Main() =
         let (interType, setType) = React.useState("") //für dropdown interactionbar
-        let (interPartner, setPartner) = React.useState("") //angeklicktes Wort
-        let (activeField, setField) = React.useState ()
-
-
-
-        let exAbstract =
-            "Seed dormancy determines germination timing and contributes to crop production and the adaptation of natural populations to their environment. 
-            Our knowledge about its regulation is limited. In a mutagenesis screen of a highly dormant Arabidopsis thaliana line, the reduced dormancy5 (rdo5) mutant was isolated based on its strongly reduced seed dormancy. 
-            Cloning of RDO5 showed that it encodes a PP2C phosphatase. Several PP2C phosphatases belonging to clade A are involved in abscisic acid signaling and control seed dormancy. However, RDO5 does not cluster with clade A phosphatases, 
-            and abscisic acid levels and sensitivity are unaltered in the rdo5 mutant. RDO5 transcript could only be detected in seeds and was most abundant in dry seeds. RDO5 was found in cells throughout the embryo and is located in the nucleus. 
-            A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
-            Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
-            indicating that RDO5 functions by suppressing APUM transcript levels."
+        let (interPartner, setPartner) = React.useState("")
+        let (activeField: (int *ActiveField) option, setField) = React.useState (None)
+        let exAbstract = [{
+            Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
+            Content = Helper.splitTextIntoWords "Seed dormancy determines germination timing and contributes to crop production and the adaptation of natural populations to their environment. 
+                Our knowledge about its regulation is limited. In a mutagenesis screen of a highly dormant Arabidopsis thaliana line, the reduced dormancy5 (rdo5) mutant was isolated based on its strongly reduced seed dormancy. 
+                Cloning of RDO5 showed that it encodes a PP2C phosphatase. Several PP2C phosphatases belonging to clade A are involved in abscisic acid signaling and control seed dormancy. However, RDO5 does not cluster with clade A phosphatases, 
+                and abscisic acid levels and sensitivity are unaltered in the rdo5 mutant. RDO5 transcript could only be detected in seeds and was most abundant in dry seeds. RDO5 was found in cells throughout the embryo and is located in the nucleus. 
+                A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
+                Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
+                indicating that RDO5 functions by suppressing APUM transcript levels."
+            Interactions = {
+                Partner1 = ""
+                Partner2 = ""
+                InterType = InteractionType.Other ""
+            }                   
+        }]
+        let (table, settable) = React.useState (exAbstract)
 
         Html.div [
             prop.className "childstyle"
@@ -253,20 +276,22 @@ type GTtable =
                     prop.children [
                         Helper.headerRow
                         Html.tbody [
+                            for i in [0 .. (table.Length - 1)]  do //für jedes Element in table wird folgendes gemacht:
+                            let element = List.item i table
                             //         Html.td "RDO5"
                             //         Html.td "APUM9"
                             Html.tr [
                                 prop.children [
                                     Html.td "1"
-                                    Helper.tableCellPaperContent (exAbstract, setPartner) 
-                                    Helper.tableCellFormInput(interType, setType, interPartner, partner1, partner2, setPartner1, setPartner2)
+                                    Helper.tableCellPaperContent (element.Content, setPartner, element.Title) 
+                                    Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField)
                                 ]
                             ]
                             Html.tr [
                                 prop.children [
                                     Html.td "2"
-                                    Helper.tableCellPaperContent (exAbstract, setPartner) 
-                                    Helper.tableCellFormInput(interType, setType, interPartner, partner1, partner2, setPartner1, setPartner2)
+                                    Helper.tableCellPaperContent (element.Content, setPartner, element.Title) 
+                                    Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField)
                                 ]
                             ]
                         ]
