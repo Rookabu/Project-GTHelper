@@ -4,6 +4,25 @@ namespace Components
 open Feliz
 open Feliz.DaisyUI
 
+type InteractionType =
+    |ProteinProtein
+    |ProteineGene
+    |Other of string
+
+type Interaction = {
+    Partner1: string
+    Partner2: string
+    InterType: InteractionType
+}
+
+type GTelement = {
+    ///PaperTitle split by whitespace into single strings/words.
+    Title: string list 
+    ///PaperContent split by whitespace into single strings/words.
+    Content: string list
+    Interactions: Interaction list 
+}
+
 
 module private Helper =
 
@@ -65,18 +84,46 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType, interPartner) = 
+    let form(inp: string, setType, interPartner: string, partner1, partner2, setPartner1, setPartner2) = 
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
                 Daisy.formControl [
-                    Daisy.label [prop.className "title"; prop.text "Partner 1"; prop.style [style.fontSize 15]]
-                    Daisy.input [input.bordered; input.sm;prop.style [style.color.white; style.maxWidth 150];prop.className "dropDownElement"] //einfügbaren input (interParnter) adden
+                    Daisy.label [
+                        prop.className "title" 
+                        prop.text "Partner 1"
+                        prop.style [style.fontSize 15]]
+                    Daisy.input [
+                        input.bordered 
+                        input.sm 
+                        prop.style [style.color.white; style.maxWidth 150]
+                        prop.className "dropDownElement"
+                        prop.onClick (fun _ -> 
+                            setPartner1 true
+                            setPartner2 false)
+                        if partner1 = true then prop.valueOrDefault interPartner 
+                        if partner2 = true then prop.valueOrDefault ""
+                    ]
                     
                 ]
                 Daisy.formControl [
-                    Daisy.label [prop.className "title"; prop.text"Partner 2"; prop.style [style.fontSize 15]]
-                    Daisy.input [input.bordered; input.sm; prop.style [style.color.white; style.maxWidth 150];prop.className "dropDownElement"]
+                    Daisy.label [
+                        prop.className "title"
+                        prop.text "Partner 2"
+                        prop.style [style.fontSize 15]]
+                    Daisy.input [
+
+
+                        input.bordered
+                        input.sm
+                        prop.style [style.color.white; style.maxWidth 150]
+                        prop.className "dropDownElement"
+                        prop.onClick (fun _ -> 
+                            setPartner2 true
+                            setPartner1 false)
+                        if partner1 = true then prop.valueOrDefault "" 
+                        if partner2 = true then prop.valueOrDefault interPartner 
+                    ]
                     
                 ]
                 Daisy.formControl [
@@ -110,7 +157,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType, interPartner) =
+    let tableCellFormInput (inp: string, setType, interPartner, partner1, partner2, setPartner1, setPartner2) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -127,7 +174,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, interPartner)
+                            form(inp, setType, interPartner, partner1, partner2, setPartner1, setPartner2)
                         ]
                     ]
                 ]
@@ -141,8 +188,9 @@ type GTtable =
     /// </summary>
     [<ReactComponent>]
     static member Main() =
-        let (interType, setType) = React.useState("Proteine-Gene")
-        let (interPartner, setPartner) = React.useState("")
+        let (interType, setType) = React.useState("") //für dropdown interactionbar
+        let (interPartner, setPartner) = React.useState("") //angeklicktes Wort
+        let (activeField, setField) = React.useState ()
 
 
 
@@ -211,14 +259,14 @@ type GTtable =
                                 prop.children [
                                     Html.td "1"
                                     Helper.tableCellPaperContent (exAbstract, setPartner) 
-                                    Helper.tableCellFormInput(interType, setType, interPartner)
+                                    Helper.tableCellFormInput(interType, setType, interPartner, partner1, partner2, setPartner1, setPartner2)
                                 ]
                             ]
                             Html.tr [
                                 prop.children [
                                     Html.td "2"
                                     Helper.tableCellPaperContent (exAbstract, setPartner) 
-                                    Helper.tableCellFormInput(interType, setType, interPartner)
+                                    Helper.tableCellFormInput(interType, setType, interPartner, partner1, partner2, setPartner1, setPartner2)
                                 ]
                             ]
                         ]

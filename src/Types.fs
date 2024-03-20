@@ -1,5 +1,6 @@
 module Types
 
+[<RequireQualifiedAccess>]
 type InteractionType =
     |ProteinProtein
     |ProteineGene
