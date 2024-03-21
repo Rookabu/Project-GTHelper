@@ -61,8 +61,7 @@ module private Helper =
                             style.display.flex
                             style.gap (length.rem 0.5)
                             style.pointerEvents.unset
-                        ] 
-                         
+                        ]
                         prop.children [
                                 for word in title do
                                     Html.span [
@@ -71,7 +70,7 @@ module private Helper =
                                             e.stopPropagation()
                                             (setPartner word)) //soll den aktuellen string nehmen
                                         prop.text word
-                                        prop.className "hover:bg-sky-700"  
+                                        prop.className "hover:bg-orange-700"  
                                         prop.style [style.cursor.pointer; style.userSelect.none] 
                                     ]
                             ]
@@ -89,7 +88,7 @@ module private Helper =
                                         //prop.className 
                                         prop.onClick (fun _ ->(setPartner word)) //soll den aktuellen string nehmen
                                         prop.text word
-                                        prop.className "hover:bg-sky-700"  
+                                        prop.className "hover:bg-orange-700"  
                                         prop.style [style.cursor.pointer; style.userSelect.none] 
                                     ]
                             ]
@@ -99,7 +98,7 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType, interPartner: string, activeField: ActiveField option, setField: option<ActiveField> -> unit) =
+    let form(inp: string, setType, interPartner: string, activeField: ActiveField option, setField: option<ActiveField> -> unit, setPartner: string -> unit) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -117,9 +116,12 @@ module private Helper =
                         prop.className "dropDownElement"
                         prop.onClick (fun _ ->
                             setField (Some Partner1)
+                            setPartner ""
                         ) 
                         if activeField = Some Partner1 then prop.valueOrDefault interPartner
-
+                        
+                        
+                    
                         //     setPartner1 true
                         //     setPartner2 false)
                         // if partner1 = true then prop.valueOrDefault interPartner 
@@ -139,8 +141,13 @@ module private Helper =
                         prop.className "dropDownElement"
                         prop.onClick (fun _ ->
                             setField (Some Partner2)
+                            setPartner ""
                         ) 
                         if activeField = Some Partner2 then prop.valueOrDefault interPartner
+                        
+                        // if prop.valueOrDefault then setPartner "" 
+                        
+                        
                         
                         // prop.onClick (fun _ -> 
                         //     setPartner2 true
@@ -171,9 +178,9 @@ module private Helper =
                             ]
                             prop.tabIndex 0
                             prop.children [
-                                Html.li [Html.a [prop.text "Protein-Gene"; prop.onClick (fun _ -> setType "Protein-Gene"); prop.className "dropDownElement"]]
-                                Html.li [Html.a [prop.text "Protein-Protein"; prop.onClick (fun _ -> setType "Protein-Protein"); prop.className "dropDownElement"]]
-                                Html.li [Html.a [prop.text "Other"; prop.onClick (fun _ -> setType "Other"); prop.className "dropDownElement"]]
+                                Html.li [Html.a [prop.text "Protein-Gene"; prop.onClick (fun _ -> setType "Protein-Gene"); prop.className "button"]]
+                                Html.li [Html.a [prop.text "Protein-Protein"; prop.onClick (fun _ -> setType "Protein-Protein"); prop.className "button"]]
+                                Html.li [Html.a [prop.text "Other"; prop.onClick (fun _ -> setType "Other"); prop.className "button"]]
                             ]
                         ]
                     ]
@@ -181,7 +188,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType, interPartner, activeField, setField) =
+    let tableCellFormInput (inp: string, setType, interPartner, activeField, setField, setPartner) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -198,7 +205,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, interPartner, activeField, setField)
+                            form(inp, setType, interPartner, activeField, setField, setPartner)
                         ]
                     ]
                 ]
@@ -290,7 +297,7 @@ type GTtable =
                                     prop.children [
                                         Html.td "1"
                                         Helper.tableCellPaperContent (element.Content, setPartner, element.Title) 
-                                        Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField)
+                                        Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField, setPartner)
                                     ]
                                 ]
                             ]
