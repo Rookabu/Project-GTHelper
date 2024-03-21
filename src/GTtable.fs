@@ -33,6 +33,13 @@ module private Helper =
         text.Split([|' '; '\n'; '\t'; '\r'|], System.StringSplitOptions.RemoveEmptyEntries)
         |> Array.toList
 
+    let updatePartner (index: int) (clickedWord: string) (activeField: ActiveField) (state: GTelement list) : GTelement list  =
+        state |> List.mapi ( fun i a -> 
+                    if activeField = (Some Partner1) && i = index then 
+                        {a with Interactions.Partner1 = clickedWord}
+                    else {a with Interactions.Partner2 = clickedWord} 
+            ) 
+
     let headerRow = 
         Html.thead [                   
             Html.tr [
@@ -48,7 +55,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellPaperContent (abst: string list, setPartner, title: string list) =
+    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -68,7 +75,8 @@ module private Helper =
                                         //prop.className 
                                         prop.onClick (fun e ->
                                             e.stopPropagation()
-                                            (setPartner word)) //soll den aktuellen string nehmen
+                                            settable (updatePartner 0 word Partner1 table)
+                                        ) //soll den aktuellen string nehmen
                                         prop.text word
                                         prop.className "hover:bg-orange-700"  
                                         prop.style [style.cursor.pointer; style.userSelect.none] 
@@ -86,7 +94,10 @@ module private Helper =
                                 for word in abst do
                                     Html.span [
                                         //prop.className 
-                                        prop.onClick (fun _ ->(setPartner word)) //soll den aktuellen string nehmen
+                                        prop.onClick (fun _ -> 
+                                        settable (updatePartner 0 word Partner1 table)
+
+                                        ) //soll den aktuellen string nehmen
                                         prop.text word
                                         prop.className "hover:bg-orange-700"  
                                         prop.style [style.cursor.pointer; style.userSelect.none] 
@@ -98,7 +109,7 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType, interPartner: string, activeField: ActiveField option, setField: option<ActiveField> -> unit, setPartner: string -> unit) =
+    let form(inp: string, setType, activeField: ActiveField option, setField: option<ActiveField> -> unit, settable, table) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -116,9 +127,9 @@ module private Helper =
                         prop.className "dropDownElement"
                         prop.onClick (fun _ ->
                             setField (Some Partner1)
-                            setPartner ""
+                            
                         ) 
-                        if activeField = Some Partner1 then prop.valueOrDefault interPartner
+                        //if activeField = Some Partner1 then prop.valueOrDefault 
                         
                         
                     
@@ -141,9 +152,9 @@ module private Helper =
                         prop.className "dropDownElement"
                         prop.onClick (fun _ ->
                             setField (Some Partner2)
-                            setPartner ""
+                            
                         ) 
-                        if activeField = Some Partner2 then prop.valueOrDefault interPartner
+                        //if activeField = Some Partner2 then prop.valueOrDefault 
                         
                         // if prop.valueOrDefault then setPartner "" 
                         
@@ -188,7 +199,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType, interPartner, activeField, setField, setPartner) =
+    let tableCellFormInput (inp: string, setType, activeField, setField, settable, table) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -205,7 +216,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, interPartner, activeField, setField, setPartner)
+                            form(inp, setType, activeField, setField, settable, table)
                         ]
                     ]
                 ]
@@ -220,8 +231,9 @@ type GTtable =
     [<ReactComponent>]
     static member Main() =
         let (interType, setType) = React.useState("") //für dropdown interactionbar
-        let (interPartner, setPartner) = React.useState("")
+        //let (interPartner, setPartner) = React.useState("")
         let (activeField: (ActiveField) option, setField) = React.useState (None)
+
         let exAbstract = [{
             Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
             Content = Helper.splitTextIntoWords "Seed dormancy determines germination timing and contributes to crop production and the adaptation of natural populations to their environment. 
@@ -296,8 +308,8 @@ type GTtable =
                                 Html.tr [
                                     prop.children [
                                         Html.td "1"
-                                        Helper.tableCellPaperContent (element.Content, setPartner, element.Title) 
-                                        Helper.tableCellFormInput(interType, setType, interPartner, activeField, setField, setPartner)
+                                        Helper.tableCellPaperContent (element.Content, settable, element.Title, table) 
+                                        Helper.tableCellFormInput(interType, setType, activeField, setField, settable, table)
                                     ]
                                 ]
                             ]
