@@ -109,7 +109,7 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType,stateActiveField, setField: option<ActiveField> -> unit, settable, table: list<GTelement>) =
+    let form(inp: string, setType,stateActiveField, setField: option<ActiveField> -> unit, settable, element) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -128,9 +128,11 @@ module private Helper =
                         prop.onClick (fun _ ->
                             setField (Some Partner1)
                         ) 
-                        table |> List.mapi (fun i element ->
-                            if stateActiveField = Some Partner1 then prop.valueOrDefault element.Interactions.Partner1
-                        )
+                        
+                        if stateActiveField = Some Partner1 then prop.valueOrDefault element.Interactions.Partner1
+                        
+
+                    
                         
                         
                     
@@ -156,7 +158,7 @@ module private Helper =
                         ) 
                         //if activeField = Some Partner2 then prop.valueOrDefault 
                         
-                        // if prop.valueOrDefault then setPartner "" 
+                        if stateActiveField = Some Partner2 then prop.valueOrDefault element.Interactions.Partner2 
                         
                         
                         
@@ -199,7 +201,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType,stateActiveField, setField, settable, table) =
+    let tableCellFormInput (inp: string, setType,stateActiveField, setField, settable, element) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -216,7 +218,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, stateActiveField, setField, settable, table)
+                            form(inp, setType, stateActiveField, setField, settable, element)
                         ]
                     ]
                 ]
@@ -309,7 +311,7 @@ type GTtable =
                                     prop.children [
                                         Html.td "1"
                                         Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField) 
-                                        Helper.tableCellFormInput(interType, setType, stateActiveField, setField, settable, table)
+                                        Helper.tableCellFormInput(interType, setType, stateActiveField, setField, settable, element)
                                     ]
                                 ]
                             ]
