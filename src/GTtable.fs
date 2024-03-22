@@ -24,21 +24,33 @@ type GTelement = {
     Title: string list 
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
-    Interactions: Interaction  
+    Interactions: Interaction list  
 }
 
 module private Helper =
 
     let splitTextIntoWords (text: string) =
         text.Split([|' '; '\n'; '\t'; '\r'|], System.StringSplitOptions.RemoveEmptyEntries)
-        |> Array.toList
+        |> Array.map (fun s -> s.Replace(",", "").Replace(".", ""))
+        |> Array.toList 
+
+    let log x = Browser.Dom.console.log x 
 
     let updatePartner (index: int) (clickedWord: string) (stateActiveField:option<ActiveField>) (state: GTelement list) : GTelement list  =
-        state |> List.mapi ( fun i a -> 
-                    if stateActiveField = Some Partner1 && i = index then 
-                        {a with Interactions.Partner1 = clickedWord}
-                    else {a with Interactions.Partner2 = clickedWord} 
-            ) 
+        state 
+        |> List.mapi ( fun i a -> 
+            if i = index then
+                match stateActiveField with
+                |Some Partner1 -> {a with Interactions = {a.Interactions with Partner1 = clickedWord}}
+                |Some Partner2 -> {a with Interactions = {a.Interactions with Partner2 = clickedWord}}
+                |None -> 
+                    if a.Interactions.Partner1 = "" then {a with Interactions = {a.Interactions with Partner1 = clickedWord}} 
+                    elif a.Interactions.Partner2 = "" then {a with Interactions = {a.Interactions with Partner2 = clickedWord}}  
+                    else a
+            else 
+                a
+        ) 
+
 
     let headerRow = 
         Html.thead [                   
@@ -55,7 +67,18 @@ module private Helper =
             ]
         ]
 
-    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table, stateActiveField) =
+    let singleWord =                                     
+        Html.span [
+            prop.onMouseDown (fun _ -> 
+                settable (updatePartner index word stateActiveField table)
+            ) 
+            prop.text word
+            prop.className "hover:bg-orange-700"  
+            prop.style [style.cursor.pointer; style.userSelect.none] 
+        ]
+
+    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table, stateActiveField, index: int) =
+        let setWord =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -73,9 +96,9 @@ module private Helper =
                                 for word in title do
                                     Html.span [
                                         //prop.className 
-                                        prop.onClick (fun e ->
-                                            e.stopPropagation()
-                                            settable (updatePartner 0 word stateActiveField table) //settet die neue GT element list mit dem wort im jeweiligen partner
+                                        prop.onMouseDown (fun e ->
+                                            //e.stopPropagation()
+                                            settable (updatePartner index word stateActiveField table) //settet die neue GT element list mit dem wort im jeweiligen partner
                                         ) //soll den aktuellen string nehmen
                                         prop.text word
                                         prop.className "hover:bg-orange-700"  
@@ -94,8 +117,8 @@ module private Helper =
                                 for word in abst do
                                     Html.span [
                                         //prop.className 
-                                        prop.onClick (fun _ -> 
-                                        settable (updatePartner 0 word stateActiveField table)
+                                        prop.onMouseDown (fun _ -> 
+                                            settable (updatePartner index word stateActiveField table)
 
                                         ) //soll den aktuellen string nehmen
                                         prop.text word
@@ -109,7 +132,7 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType,stateActiveField, setField: option<ActiveField> -> unit, settable, element) =
+    let form(inp: string, setType,stateActiveField: option<ActiveField>, setField: option<ActiveField> -> unit, settable, element) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -128,18 +151,8 @@ module private Helper =
                         prop.onClick (fun _ ->
                             setField (Some Partner1)
                         ) 
-                        
-                        if stateActiveField = Some Partner1 then prop.valueOrDefault element.Interactions.Partner1
-                        
-
-                    
-                        
-                        
-                    
-                        //     setPartner1 true
-                        //     setPartner2 false)
-                        // if partner1 = true then prop.valueOrDefault interPartner 
-                        // if partner2 = true then prop.valueOrDefault ""
+                        prop.valueOrDefault element.Interactions.Partner1
+                        prop.onBlur (fun _ -> setField None)
                     ]
                 ]
                 Daisy.formControl [
@@ -154,19 +167,13 @@ module private Helper =
                         prop.style [style.color.white; style.maxWidth 150]
                         prop.className "dropDownElement"
                         prop.onClick (fun _ ->
-                            setField (Some Partner2)
+                            setField (Some Partner2) 
+                            
                         ) 
-                        //if activeField = Some Partner2 then prop.valueOrDefault 
-                        
-                        if stateActiveField = Some Partner2 then prop.valueOrDefault element.Interactions.Partner2 
-                        
-                        
-                        
-                        // prop.onClick (fun _ -> 
-                        //     setPartner2 true
-                        //     setPartner1 false)
-                        // if partner1 = true then prop.valueOrDefault "" 
-                        // if partner2 = true then prop.valueOrDefault interPartner 
+
+                        prop.valueOrDefault element.Interactions.Partner2
+                        prop.onBlur (fun _ -> setField None)
+
                     ]
                     
                 ]
@@ -236,7 +243,8 @@ type GTtable =
         //let (interPartner, setPartner) = React.useState("")
         let (stateActiveField: (ActiveField) option, setField) = React.useState (None)
 
-        let exAbstract = [{
+        let exAbstract = [
+            {
             Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
             Content = Helper.splitTextIntoWords "Seed dormancy determines germination timing and contributes to crop production and the adaptation of natural populations to their environment. 
                 Our knowledge about its regulation is limited. In a mutagenesis screen of a highly dormant Arabidopsis thaliana line, the reduced dormancy5 (rdo5) mutant was isolated based on its strongly reduced seed dormancy. 
@@ -249,12 +257,32 @@ type GTtable =
                 Partner1 = ""
                 Partner2 = ""
                 InterType = InteractionType.Other ""
-            }                   
-        }]
+            }   
+                            
+            }
+            {
+            Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
+            Content = Helper.splitTextIntoWords "Protein phosphatase 2A (PP2A) is a strongly conserved and major protein phosphatase in all eukaryotes. 
+                The canonical PP2A complex consists of a catalytic (C), scaffolding (A), and regulatory (B) subunit. Plants have three groups of evolutionary 
+                distinct B subunits: B55, B' (B56), and B''. Here, the Arabidopsis B' group is reviewed and compared with other eukaryotes. Members of the B'α/B'β clade are especially important for chromatid cohesion, 
+                and dephosphorylation of transcription factors that mediate brassinosteroid (BR) signaling in the nucleus. Other B' subunits interact with proteins at the cell membrane to dampen BR signaling or harness immune responses. 
+                The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
+                promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
+                This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
+            Interactions = {
+                Partner1 = ""
+                Partner2 = ""
+                InterType = InteractionType.Other ""
+            }
+            }
+        ]
+
+
         let (table, settable) = React.useState (exAbstract)
 
         Html.div [
             prop.className "childstyle"
+
             prop.children [
                 Daisy.card [
                     prop.style [
@@ -308,12 +336,11 @@ type GTtable =
                                 //         Html.td "RDO5"
                                 //         Html.td "APUM9"
                                 Html.tr [
-                                    prop.children [
-                                        Html.td "1"
-                                        Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField) 
-                                        Helper.tableCellFormInput(interType, setType, stateActiveField, setField, settable, element)
-                                    ]
+                                    Html.td "1"
+                                    Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField, i) 
+                                    Helper.tableCellFormInput(interType, setType, stateActiveField, setField, settable, element)
                                 ]
+                                
                             ]
                     ]
                 ]
