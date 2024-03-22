@@ -33,9 +33,9 @@ module private Helper =
         text.Split([|' '; '\n'; '\t'; '\r'|], System.StringSplitOptions.RemoveEmptyEntries)
         |> Array.toList
 
-    let updatePartner (index: int) (clickedWord: string) (activeField: ActiveField) (state: GTelement list) : GTelement list  =
+    let updatePartner (index: int) (clickedWord: string) (stateActiveField:option<ActiveField>) (state: GTelement list) : GTelement list  =
         state |> List.mapi ( fun i a -> 
-                    if activeField = (Some Partner1) && i = index then 
+                    if stateActiveField = Some Partner1 && i = index then 
                         {a with Interactions.Partner1 = clickedWord}
                     else {a with Interactions.Partner2 = clickedWord} 
             ) 
@@ -55,7 +55,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table) =
+    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table, stateActiveField) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -75,7 +75,7 @@ module private Helper =
                                         //prop.className 
                                         prop.onClick (fun e ->
                                             e.stopPropagation()
-                                            settable (updatePartner 0 word Partner1 table)
+                                            settable (updatePartner 0 word stateActiveField table) //settet die neue GT element list mit dem wort im jeweiligen partner
                                         ) //soll den aktuellen string nehmen
                                         prop.text word
                                         prop.className "hover:bg-orange-700"  
@@ -95,7 +95,7 @@ module private Helper =
                                     Html.span [
                                         //prop.className 
                                         prop.onClick (fun _ -> 
-                                        settable (updatePartner 0 word Partner1 table)
+                                        settable (updatePartner 0 word stateActiveField table)
 
                                         ) //soll den aktuellen string nehmen
                                         prop.text word
@@ -109,7 +109,7 @@ module private Helper =
             ]
         ]
 
-    let form(inp: string, setType, activeField: ActiveField option, setField: option<ActiveField> -> unit, settable, table) =
+    let form(inp: string, setType,stateActiveField, setField: option<ActiveField> -> unit, settable, table: list<GTelement>) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -127,9 +127,10 @@ module private Helper =
                         prop.className "dropDownElement"
                         prop.onClick (fun _ ->
                             setField (Some Partner1)
-                            
                         ) 
-                        //if activeField = Some Partner1 then prop.valueOrDefault 
+                        table |> List.mapi (fun i element ->
+                            if stateActiveField = Some Partner1 then prop.valueOrDefault element.Interactions.Partner1
+                        )
                         
                         
                     
@@ -152,7 +153,6 @@ module private Helper =
                         prop.className "dropDownElement"
                         prop.onClick (fun _ ->
                             setField (Some Partner2)
-                            
                         ) 
                         //if activeField = Some Partner2 then prop.valueOrDefault 
                         
@@ -199,7 +199,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType, activeField, setField, settable, table) =
+    let tableCellFormInput (inp: string, setType,stateActiveField, setField, settable, table) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -216,7 +216,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, activeField, setField, settable, table)
+                            form(inp, setType, stateActiveField, setField, settable, table)
                         ]
                     ]
                 ]
@@ -232,7 +232,7 @@ type GTtable =
     static member Main() =
         let (interType, setType) = React.useState("") //für dropdown interactionbar
         //let (interPartner, setPartner) = React.useState("")
-        let (activeField: (ActiveField) option, setField) = React.useState (None)
+        let (stateActiveField: (ActiveField) option, setField) = React.useState (None)
 
         let exAbstract = [{
             Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
@@ -308,8 +308,8 @@ type GTtable =
                                 Html.tr [
                                     prop.children [
                                         Html.td "1"
-                                        Helper.tableCellPaperContent (element.Content, settable, element.Title, table) 
-                                        Helper.tableCellFormInput(interType, setType, activeField, setField, settable, table)
+                                        Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField) 
+                                        Helper.tableCellFormInput(interType, setType, stateActiveField, setField, settable, table)
                                     ]
                                 ]
                             ]
