@@ -24,7 +24,7 @@ type GTelement = {
     Title: string list 
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
-    Interactions: Interaction list  
+    Interactions: Interaction  
 }
 
 module private Helper =
@@ -67,7 +67,7 @@ module private Helper =
             ]
         ]
 
-    let singleWord =                                     
+    let wordClickEvent (settable: list<GTelement> -> unit, word: string, index: int, stateActiveField, table ) =                                     
         Html.span [
             prop.onMouseDown (fun _ -> 
                 settable (updatePartner index word stateActiveField table)
@@ -78,7 +78,6 @@ module private Helper =
         ]
 
     let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table, stateActiveField, index: int) =
-        let setWord =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -94,17 +93,8 @@ module private Helper =
                         ]
                         prop.children [
                                 for word in title do
-                                    Html.span [
-                                        //prop.className 
-                                        prop.onMouseDown (fun e ->
-                                            //e.stopPropagation()
-                                            settable (updatePartner index word stateActiveField table) //settet die neue GT element list mit dem wort im jeweiligen partner
-                                        ) //soll den aktuellen string nehmen
-                                        prop.text word
-                                        prop.className "hover:bg-orange-700"  
-                                        prop.style [style.cursor.pointer; style.userSelect.none] 
-                                    ]
-                            ]
+                                    wordClickEvent (settable, word, index, stateActiveField, table)
+                        ]
                     ]
                     Daisy.collapseContent [
                         Daisy.cardBody [
@@ -115,22 +105,14 @@ module private Helper =
                             ]    
                             prop.children [
                                 for word in abst do
-                                    Html.span [
-                                        //prop.className 
-                                        prop.onMouseDown (fun _ -> 
-                                            settable (updatePartner index word stateActiveField table)
-
-                                        ) //soll den aktuellen string nehmen
-                                        prop.text word
-                                        prop.className "hover:bg-orange-700"  
-                                        prop.style [style.cursor.pointer; style.userSelect.none] 
-                                    ]
+                                    wordClickEvent (settable, word, index, stateActiveField, table)
+                            ]
                             ]
                         ]
                     ]
                 ]
             ]
-        ]
+        
 
     let form(inp: string, setType,stateActiveField: option<ActiveField>, setField: option<ActiveField> -> unit, settable, element) =
         
