@@ -47,19 +47,16 @@ body {
   border-color: #44546a;
 }
 
-.dropDownElement {
-  background-color: #8f98a6;
+.tableElement:hover {
+  background-color: #697688 ;
 }
 
-.dropDownElement:hover {
-  background-color:#697688	 ;
+.tableElementChecked {
+  background-color: #697688 ;
+  color: white; 
+  border-color: #44546a;
 }
 
-.alignment {
-    flex-direction: column
-  }
 
-.MakingFlex {
-  display: flex;  
-}
+
 
