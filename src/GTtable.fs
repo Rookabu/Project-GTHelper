@@ -17,6 +17,7 @@ type Interaction = {
     Partner1: string
     Partner2: string
     InterType: InteractionType
+    Checked: bool
 }
 
 type GTelement = {
@@ -25,6 +26,7 @@ type GTelement = {
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
     Interactions: Interaction  
+    Checked: bool
 }
 
 module private Helper =
@@ -77,13 +79,28 @@ module private Helper =
             prop.style [style.cursor.pointer; style.userSelect.none] 
         ]
 
-    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table, stateActiveField, index: int) =
+    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table:GTelement list, stateActiveField, index: int, element: GTelement) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
                 collapse.arrow
                 prop.children [
-                    Html.input [prop.type' "checkbox"]
+                    Html.input [
+                        prop.type' "checkbox" 
+                        prop.onCheckedChange (fun (isChecked: bool) ->
+                            table
+                            |> List.mapi (fun i a ->
+                                if i = index then
+                                    {a with Checked = isChecked}
+                                else 
+                                    a
+                            )
+                            |>settable
+                        )                                              
+                        prop.isChecked (
+                            element.Checked                                              
+                        )
+                    ]
                     Daisy.collapseTitle [ 
                         prop.style [
                             style.fontSize 15
@@ -114,7 +131,7 @@ module private Helper =
             ]
         
 
-    let form(inp: string, setType,stateActiveField: option<ActiveField>, setField: option<ActiveField> -> unit, settable, element) =
+    let form(inp: string, setType,setField: option<ActiveField> -> unit, element) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -190,7 +207,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellFormInput (inp: string, setType,stateActiveField, setField, settable, element) =
+    let tableCellFormInput (inp: string, setType, setField, element, settable: list<GTelement> -> unit, table, index) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -199,7 +216,22 @@ module private Helper =
                     prop.tabIndex 0
                     collapse.arrow
                     prop.children [
-                        Html.input [prop.type' "checkbox"]
+                        Html.input [
+                            prop.type' "checkbox" 
+                            prop.onCheckedChange (fun (isChecked: bool) ->
+                            table
+                            |> List.mapi (fun i a ->
+                                if i = index then
+                                    {a with Interactions = {a.Interactions with Checked = isChecked}}
+                                else 
+                                    a
+                            )
+                            |>settable
+                            )                                              
+                            prop.isChecked (
+                                element.Interactions.Checked                                              
+                            )        
+                        ]
                         Daisy.collapseTitle [ 
                             prop.style [
                                 style.fontSize 15
@@ -207,7 +239,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, stateActiveField, setField, settable, element)
+                            form(inp, setType, setField, element)
                         ]
                     ]
                 ]
@@ -239,8 +271,9 @@ type GTtable =
                 Partner1 = ""
                 Partner2 = ""
                 InterType = InteractionType.Other ""
-            }   
-                            
+                Checked = true
+            }
+            Checked = true                
             }
             {
             Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -255,7 +288,9 @@ type GTtable =
                 Partner1 = ""
                 Partner2 = ""
                 InterType = InteractionType.Other ""
+                Checked = false
             }
+            Checked = false
             }
         ]
 
@@ -319,8 +354,8 @@ type GTtable =
                                 //         Html.td "APUM9"
                                 Html.tr [
                                     Html.td "1"
-                                    Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField, i) 
-                                    Helper.tableCellFormInput(interType, setType, stateActiveField, setField, settable, element)
+                                    Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField, i, element) 
+                                    Helper.tableCellFormInput(interType, setType, setField, element, settable, table, i)
                                 ]
                                 
                             ]
