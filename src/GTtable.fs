@@ -7,11 +7,7 @@ open Feliz.DaisyUI
 type InteractionType =
     |ProteinProtein
     |ProteineGene
-    |Other of string
-
-type ActiveField = 
-    |Partner1
-    |Partner2
+    |Other
 
 type Interaction = {
     Partner1: string
@@ -25,9 +21,13 @@ type GTelement = {
     Title: string list 
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
-    Interactions: Interaction  
+    Interactions: Interaction list 
     Checked: bool
 }
+
+type ActiveField = 
+    |Partner1
+    |Partner2
 
 module private Helper =
 
@@ -52,7 +52,6 @@ module private Helper =
             else 
                 a
         ) 
-
 
     let headerRow = 
         Html.thead [                   
@@ -131,7 +130,7 @@ module private Helper =
             ]
         
 
-    let form(inp: string, setType,setField: option<ActiveField> -> unit, element) =
+    let form(table, settable, stateActiveField, setField: option<ActiveField> -> unit, element, index: int) =
         
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
@@ -146,10 +145,13 @@ module private Helper =
                         input.bordered 
                         input.sm 
                         prop.style [style.color.white; style.maxWidth 150]
-                        prop.className "dropDownElement"
                         prop.onClick (fun _ ->
                             setField (Some Partner1)
                         ) 
+                        prop.className (
+                            if stateActiveField = Some Partner1 then "tableElementChecked"
+                            elif stateActiveField = Some Partner2 then  "tableElement"
+                            else "tableElement")
                         prop.valueOrDefault element.Interactions.Partner1
                         prop.onBlur (fun _ -> setField None)
                     ]
@@ -164,20 +166,28 @@ module private Helper =
                         input.bordered
                         input.sm
                         prop.style [style.color.white; style.maxWidth 150]
-                        prop.className "dropDownElement"
                         prop.onClick (fun _ ->
-                            setField (Some Partner2) 
-                            
+                            setField (Some Partner2)
                         ) 
-
+                        prop.className (
+                            if stateActiveField = Some Partner2 then "tableElementChecked"
+                            elif stateActiveField = Some Partner1 then  "tableElement"
+                            else "tableElement")
                         prop.valueOrDefault element.Interactions.Partner2
                         prop.onBlur (fun _ -> setField None)
-
+                         
                     ]
-                    
                 ]
                 Daisy.formControl [
                     Daisy.label [prop.className "title"; prop.text"InteractionType"; prop.style [style.fontSize 15]]
+                    if element.Interactions.InterType = Other then 
+                        Daisy.input [
+                            input.bordered 
+                            input.sm 
+                            prop.style [style.color.white; style.maxWidth 135]
+                            prop.className "tableElement"
+                            prop.placeholder "What is it?"
+                    ] 
                     Daisy.dropdown [
                         Daisy.button.button [
                             button.sm
@@ -185,7 +195,11 @@ module private Helper =
                                 style.width 135
                                 style.fontSize 15  
                             ]                                            
-                            prop.text inp
+                            prop.text (
+                                if element.Interactions.InterType = ProteineGene then "Protein-Gene"
+                                elif element.Interactions.InterType = ProteinProtein then "Protein-Protein"
+                                else "Choose Type"
+                            )
                             prop.className "tableElement"
                         ]
                         Daisy.dropdownContent [
@@ -197,17 +211,61 @@ module private Helper =
                             ]
                             prop.tabIndex 0
                             prop.children [
-                                Html.li [Html.a [prop.text "Protein-Gene"; prop.onClick (fun _ -> setType "Protein-Gene"); prop.className "button"]]
-                                Html.li [Html.a [prop.text "Protein-Protein"; prop.onClick (fun _ -> setType "Protein-Protein"); prop.className "button"]]
-                                Html.li [Html.a [prop.text "Other"; prop.onClick (fun _ -> setType "Other"); prop.className "button"]]
+                                Html.li [
+                                    Html.a [
+                                        prop.text "Protein-Gene"
+                                        prop.onClick (fun _ -> 
+                                        table
+                                        |> List.mapi (fun i a ->
+                                            if i = index then
+                                                {a with Interactions = {a.Interactions with InterType = ProteineGene}}
+                                            else 
+                                                a
+                                        )
+                                        |>settable
+                                        )
+                                        prop.className "button"
+                                    ]
+                                ]
+                                Html.li [
+                                    Html.a [
+                                        prop.text "Protein-Protein"
+                                        prop.onClick (fun _ -> 
+                                        table
+                                        |> List.mapi (fun i a ->
+                                            if i = index then
+                                                {a with Interactions = {a.Interactions with InterType = ProteinProtein}}
+                                            else 
+                                                a
+                                        )
+                                        |>settable
+                                        )
+                                        prop.className "button"
+                                    ]
+                                ]
+                                Html.li [
+                                    Html.a [
+                                        prop.text "Other"
+                                        prop.onClick (fun _ -> 
+                                        table
+                                        |> List.mapi (fun i a ->
+                                            if i = index then
+                                                {a with Interactions = {a.Interactions with InterType = Other}}
+                                            else 
+                                                a
+                                        )
+                                        |>settable
+                                        )
+                                        prop.className "button"
+                                    ]
+                                ]
                             ]
                         ]
                     ]
                 ]
             ]
         ]
-
-    let tableCellFormInput (inp: string, setType, setField, element, settable: list<GTelement> -> unit, table, index) =
+    let tableCellFormInput (setField, element, settable: list<GTelement> -> unit, table, index, stateActiveField) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -222,7 +280,12 @@ module private Helper =
                             table
                             |> List.mapi (fun i a ->
                                 if i = index then
-                                    {a with Interactions = {a.Interactions with Checked = isChecked}}
+                                    let c = (a.Interactions
+                                        |> List.map (fun (b: Interaction) ->
+                                            {b with Checked = isChecked}
+                                            ) 
+                                        )
+                                    {a with Interactions = c} //auf alle updaten
                                 else 
                                     a
                             )
@@ -239,7 +302,16 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(inp, setType, setField, element)
+                            form(table, settable, stateActiveField, setField, element, index)
+                            Daisy.button.button [
+                                button.sm
+                                prop.text "add Interaction"
+                                prop.className "button"
+                                prop.style [
+                                    style.marginTop 5
+                                ]
+                                prop.onClick (fun _ -> ())
+                            ]
                         ]
                     ]
                 ]
@@ -253,8 +325,6 @@ type GTtable =
     /// </summary>
     [<ReactComponent>]
     static member Main() =
-        let (interType, setType) = React.useState("") //für dropdown interactionbar
-        //let (interPartner, setPartner) = React.useState("")
         let (stateActiveField: (ActiveField) option, setField) = React.useState (None)
 
         let exAbstract = [
@@ -267,12 +337,12 @@ type GTtable =
                 A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
                 Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
                 indicating that RDO5 functions by suppressing APUM transcript levels."
-            Interactions = {
+            Interactions = [{
                 Partner1 = ""
                 Partner2 = ""
-                InterType = InteractionType.Other ""
+                InterType = InteractionType.ProteineGene 
                 Checked = true
-            }
+            }]
             Checked = true                
             }
             {
@@ -284,12 +354,12 @@ type GTtable =
                 The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
                 promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
                 This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-            Interactions = {
+            Interactions = [{
                 Partner1 = ""
                 Partner2 = ""
-                InterType = InteractionType.Other ""
+                InterType = InteractionType.ProteineGene 
                 Checked = false
-            }
+            }]
             Checked = false
             }
         ]
@@ -355,7 +425,7 @@ type GTtable =
                                 Html.tr [
                                     Html.td "1"
                                     Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField, i, element) 
-                                    Helper.tableCellFormInput(interType, setType, setField, element, settable, table, i)
+                                    Helper.tableCellFormInput(setField, element, settable, table, i, stateActiveField)
                                 ]
                                 
                             ]
