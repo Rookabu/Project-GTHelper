@@ -7,13 +7,12 @@ open Feliz.DaisyUI
 type InteractionType =
     |ProteinProtein
     |ProteineGene
-    |Other
+    |Other of string
 
 type Interaction = {
     Partner1: string
     Partner2: string
-    InterType: InteractionType
-    Checked: bool
+    InteractionType: InteractionType
 }
 
 type GTelement = {
@@ -22,7 +21,6 @@ type GTelement = {
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
     Interactions: Interaction list 
-    Checked: bool
 }
 
 type ActiveField = 
@@ -39,15 +37,20 @@ module private Helper =
     let log x = Browser.Dom.console.log x 
 
     let updatePartner (index: int) (clickedWord: string) (stateActiveField:option<ActiveField>) (state: GTelement list) : GTelement list  =
-        state 
+        state
+    
         |> List.mapi ( fun i a -> 
             if i = index then
                 match stateActiveField with
-                |Some Partner1 -> {a with Interactions = {a.Interactions with Partner1 = clickedWord}}
-                |Some Partner2 -> {a with Interactions = {a.Interactions with Partner2 = clickedWord}}
+                |Some Partner1 -> {a with Interactions = (
+                                                    a.Interactions |> List.map (fun (b: Interaction) ->
+                                                        {b with Partner1 = clickedWord}))}
+                |Some Partner2 -> {a with Interactions = (
+                                                    a.Interactions |> List.map (fun (b: Interaction) ->
+                                                        {b with Partner2 = clickedWord}))}
                 |None -> 
-                    if a.Interactions.Partner1 = "" then {a with Interactions = {a.Interactions with Partner1 = clickedWord}} 
-                    elif a.Interactions.Partner2 = "" then {a with Interactions = {a.Interactions with Partner2 = clickedWord}}  
+                    if (a.Interactions |> List.map (fun (b:Interaction) -> b.Partner1)) = [""] then {a with Interactions = (a.Interactions |> List.map (fun (b: Interaction) ->{b with Partner1 = clickedWord}))} 
+                    elif (a.Interactions |> List.map (fun (b:Interaction) -> b.Partner2)) = [""] then {a with Interactions = (a.Interactions |> List.map (fun (b: Interaction) ->{b with Partner2 = clickedWord}))}    
                     else a
             else 
                 a
@@ -68,10 +71,11 @@ module private Helper =
             ]
         ]
 
-    let wordClickEvent (settable: list<GTelement> -> unit, word: string, index: int, stateActiveField, table ) =                                     
+    let wordClickEvent (settable: list<GTelement> -> unit, word: string, index: int, stateActiveField, table) =                                     
         Html.span [
             prop.onMouseDown (fun _ -> 
                 settable (updatePartner index word stateActiveField table)
+       
             ) 
             prop.text word
             prop.className "hover:bg-orange-700"  
@@ -128,7 +132,6 @@ module private Helper =
                     ]
                 ]
             ]
-        
 
     let form(table, settable, stateActiveField, setField: option<ActiveField> -> unit, element, index: int) =
         
@@ -152,7 +155,7 @@ module private Helper =
                             if stateActiveField = Some Partner1 then "tableElementChecked"
                             elif stateActiveField = Some Partner2 then  "tableElement"
                             else "tableElement")
-                        prop.valueOrDefault element.Interactions.Partner1
+                        prop.valueOrDefault (element.Interactions |> List.map (fun (b:Interaction) -> b.Partner1))
                         prop.onBlur (fun _ -> setField None)
                     ]
                 ]
@@ -173,14 +176,14 @@ module private Helper =
                             if stateActiveField = Some Partner2 then "tableElementChecked"
                             elif stateActiveField = Some Partner1 then  "tableElement"
                             else "tableElement")
-                        prop.valueOrDefault element.Interactions.Partner2
+                        prop.valueOrDefault (element.Interactions |> List.map (fun (b:Interaction) -> b.Partner2))
                         prop.onBlur (fun _ -> setField None)
                          
                     ]
                 ]
                 Daisy.formControl [
                     Daisy.label [prop.className "title"; prop.text"InteractionType"; prop.style [style.fontSize 15]]
-                    if element.Interactions.InterType = Other then 
+                    if (element.Interactions |> List.map (fun b -> b.InteractionType)) = [Other ""] then 
                         Daisy.input [
                             input.bordered 
                             input.sm 
@@ -196,8 +199,8 @@ module private Helper =
                                 style.fontSize 15  
                             ]                                            
                             prop.text (
-                                if element.Interactions.InterType = ProteineGene then "Protein-Gene"
-                                elif element.Interactions.InterType = ProteinProtein then "Protein-Protein"
+                                if (element.Interactions |> List.map (fun b -> b.InteractionType)) = [ProteineGene] then "Protein-Gene"
+                                elif (element.Interactions |> List.map (fun b -> b.InteractionType)) = [ProteinProtein] then "Protein-Protein"
                                 else "Choose Type"
                             )
                             prop.className "tableElement"
@@ -218,10 +221,13 @@ module private Helper =
                                         table
                                         |> List.mapi (fun i a ->
                                             if i = index then
-                                                {a with Interactions = {a.Interactions with InterType = ProteineGene}}
+                                                {a with Interactions = (
+                                                    a.Interactions |> List.map (fun (b: Interaction) ->
+                                                        {b with InteractionType = ProteineGene}))}
                                             else 
                                                 a
                                         )
+
                                         |>settable
                                         )
                                         prop.className "button"
@@ -234,7 +240,9 @@ module private Helper =
                                         table
                                         |> List.mapi (fun i a ->
                                             if i = index then
-                                                {a with Interactions = {a.Interactions with InterType = ProteinProtein}}
+                                                {a with Interactions = (
+                                                    a.Interactions |> List.map (fun (b: Interaction) ->
+                                                        {b with InteractionType = ProteinProtein}))}
                                             else 
                                                 a
                                         )
@@ -250,7 +258,9 @@ module private Helper =
                                         table
                                         |> List.mapi (fun i a ->
                                             if i = index then
-                                                {a with Interactions = {a.Interactions with InterType = Other}}
+                                                {a with Interactions = (
+                                                    a.Interactions |> List.map (fun (b: Interaction) ->
+                                                        {b with InteractionType = Other ""}))}
                                             else 
                                                 a
                                         )
@@ -266,6 +276,15 @@ module private Helper =
             ]
         ]
     let tableCellFormInput (setField, element, settable: list<GTelement> -> unit, table, index, stateActiveField) =
+
+        let (input1: string , setInput1) = React.useState ("")
+        let (input2: string, setInput2) = React.useState ("")
+        let (inputType: InteractionType, setInputType) = React.useState (Other "")
+        let reset () = 
+            setInput1 ""
+            setInput2 ""
+            setInputType (Other "")
+
         Html.td [
             prop.className "flex"
             prop.children [
@@ -280,19 +299,16 @@ module private Helper =
                             table
                             |> List.mapi (fun i a ->
                                 if i = index then
-                                    let c = (a.Interactions
-                                        |> List.map (fun (b: Interaction) ->
-                                            {b with Checked = isChecked}
-                                            ) 
-                                        )
-                                    {a with Interactions = c} //auf alle updaten
+                                    {a with Interactions = (
+                                        a.Interactions |> List.map (fun (b: Interaction) ->
+                                            {b with Checked = isChecked}))} //auf alle updaten
                                 else 
                                     a
                             )
                             |>settable
                             )                                              
                             prop.isChecked (
-                                element.Interactions.Checked                                              
+                                element.Interactions[0].Checked                                
                             )        
                         ]
                         Daisy.collapseTitle [ 
@@ -310,13 +326,55 @@ module private Helper =
                                 prop.style [
                                     style.marginTop 5
                                 ]
-                                prop.onClick (fun _ -> ())
+                                
+                                prop.onClick (fun _ -> (
+                                    let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType ; Checked = false}
+                                    ()
+                                    //Hänge neue Interaktion an Element.interactions an.
+                                    //Update bestehendes Element in table. 
+                                    //settable auf geupdateten table.
+                                    //Nach dem klick sind die Felder wieder leer
+                                    reset ()
+                                ))
+                            ]
+                            Daisy.table [
+                                Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
+                                Html.tbody [
+                                    for interaction in element.Interactions do  
+                                        Html.tr [
+                                            Html.td [
+                                                prop.text (interaction.Partner1)
+                                            ] 
+                                            Html.td [
+                                                prop.text (interaction.Partner2)
+                                            ]
+                                            Html.td [
+                                                prop.text (
+                                                    if interaction.InteractionType = ProteinProtein then "Protein-Protein"
+                                                    elif interaction.InteractionType = ProteineGene then "Protein-Gene"
+                                                    else "user input" //noch an input binden
+                                                )
+                                            ]
+                                            Html.td [
+                                                Daisy.button.button [
+                                                    prop.text "X"
+                                                    button.xs
+                                                    prop.onClick (fun _ -> ()                                            
+                                                        // miniTable |> List.mapi (fun indexi el -> ( index <> indexi, el))
+                                                        // |> List.filter fst |> List.map snd |> setMiniTable 
+                                                    )
+                                                ]
+                                            ]
+                                        ] 
+                                    ]
+                                ]
                             ]
                         ]
+
                     ]
                 ]
             ]
-        ]
+        
 
 type GTtable =
 
@@ -340,10 +398,8 @@ type GTtable =
             Interactions = [{
                 Partner1 = ""
                 Partner2 = ""
-                InterType = InteractionType.ProteineGene 
-                Checked = true
-            }]
-            Checked = true                
+                InteractionType = InteractionType.Other "" 
+            }]              
             }
             {
             Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -357,15 +413,15 @@ type GTtable =
             Interactions = [{
                 Partner1 = ""
                 Partner2 = ""
-                InterType = InteractionType.ProteineGene 
-                Checked = false
+                InteractionType = InteractionType.Other "" 
             }]
-            Checked = false
             }
         ]
 
 
         let (table, settable) = React.useState (exAbstract)
+        
+        
 
         Html.div [
             prop.className "childstyle"
@@ -398,7 +454,7 @@ type GTtable =
                         button.md
                         prop.className "button"
                         prop.onClick (fun _ ->())
-                        prop.text "Upload abstract"
+                        prop.text "Upload abstracts"
                     ]
                     
                     Daisy.button.button [
