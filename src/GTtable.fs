@@ -45,7 +45,6 @@ module private Helper =
 
     let updatePartner (index: int) (clickedWord: string) (stateActiveField:option<ActiveField>) (state: GTelement list) : GTelement list  =
         state
-    
         |> List.mapi ( fun i a -> 
             if i = index then
                 match stateActiveField with
@@ -191,7 +190,7 @@ module private Helper =
             ]
         ]
 
-    let DropDownElement (title: string, InteractionName, table, settable, index) =
+    let DropDownElement (title: string, interactionName, table, settable, index) =
         Html.li [
             Html.a [
                 prop.text title
@@ -201,7 +200,7 @@ module private Helper =
                     if i = index then
                         {a with Interactions = (
                             a.Interactions |> List.map (fun (b: Interaction) ->
-                                {b with InteractionType = InteractionName}))}
+                                {b with InteractionType = interactionName}))}
                     else 
                         a
                 )
@@ -315,13 +314,20 @@ module private Helper =
                                 ]
                                 prop.onClick (fun _ -> (
                                     let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
-                                    
+                                    let newInteractionAdd = newInteraction::element.Interactions 
+                                    //{recordType with SubRecordTypeField1 = {recordType.SubRecordTypeField1 with AnotherField = newValue}}
+                                    table
+                                    |> List.mapi (fun i a ->
+                                        if i = index then {element with Interactions = newInteractionAdd} 
+                                        else a
+                                        )
+                                    |> settable
+                                    reset ()
+                                ))
                                     //Hänge neue Interaktion an Element.interactions an. //über "::"
                                     //Update bestehendes Element in table. //record type update
                                     //settable auf geupdateten table. 
-                                    //Nach dem klick sind die Felder wieder leer //reset (unten)
-                                    reset ()
-                                ))
+                                    //Nach dem klick sind die Felder wieder leer //reset 
                             ]
                             minitable(element)
                         ]
