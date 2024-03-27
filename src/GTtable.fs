@@ -225,7 +225,7 @@ module private Helper =
                             prop.children [
                                 DropDownElement (ProteineGene, setInputType)
                                 DropDownElement (ProteinProtein, setInputType)
-                                //DropDownElement (Other "", setInputType)
+                                DropDownElement (Other "", setInputType)
                             ]
                         ]
                     ]
@@ -288,7 +288,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement) =
+    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement, setTable) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -313,6 +313,13 @@ type GTtable =
             let newInteractions = element.Interactions |> List.removeAt index
             let newElement = {element with Interactions = newInteractions}
             updateElement newElement 
+        let megaSet (nextTable: GTelement list) =
+            let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
+            Browser.Dom.console.log (JSONString) 
+            Browser.WebStorage.localStorage.setItem("GTlist" JSONString) //local storage wird gesettet
+            setTable nextTable
+
+        
 
         Html.tr [
             prop.children [
@@ -355,8 +362,16 @@ type GTtable =
                 }]
             }
         ]
+        let isLocalStorageClear () =
+            match Browser.WebStorage.localStorage.getItem("GTlist") with
+            | null -> true // Local storage is clear if the item doesn't exist
+            | _ -> false
 
-        let (table, setTable) = React.useState (exAbstract)
+        let initialwert =
+            if isLocalStorageClear () then exAbstract
+            else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem "GTlist")  
+
+        let (table, setTable) = React.useState (initialwert)
 
         Html.div [
             prop.className "childstyle"
@@ -420,7 +435,7 @@ type GTtable =
                                             a
                                     )
                                     |> setTable
-                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement)
+                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, setTable)
                             ]
                     ]
                 ]
