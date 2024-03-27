@@ -27,6 +27,13 @@ type ActiveField =
     |Partner1
     |Partner2
 
+module List =
+  let rec removeAt index list =
+      match index, list with
+      | _, [] -> failwith "Index out of bounds"
+      | 0, _ :: tail -> tail
+      | _, head :: tail -> head :: removeAt (index - 1) tail
+
 module private Helper =
 
     let splitTextIntoWords (text: string) =
@@ -49,8 +56,10 @@ module private Helper =
                                                     a.Interactions |> List.map (fun (b: Interaction) ->
                                                         {b with Partner2 = clickedWord}))}
                 |None -> 
-                    if (a.Interactions |> List.map (fun (b:Interaction) -> b.Partner1)) = [""] then {a with Interactions = (a.Interactions |> List.map (fun (b: Interaction) ->{b with Partner1 = clickedWord}))} 
-                    elif (a.Interactions |> List.map (fun (b:Interaction) -> b.Partner2)) = [""] then {a with Interactions = (a.Interactions |> List.map (fun (b: Interaction) ->{b with Partner2 = clickedWord}))}    
+                    if (a.Interactions |> List.map (fun (b:Interaction) -> b.Partner1)) = 
+                        [""] then {a with Interactions = (a.Interactions |> List.map (fun (b: Interaction) ->{b with Partner1 = clickedWord}))} 
+                    elif (a.Interactions |> List.map (fun (b:Interaction) -> b.Partner2)) = 
+                        [""] then {a with Interactions = (a.Interactions |> List.map (fun (b: Interaction) ->{b with Partner2 = clickedWord}))}    
                     else a
             else 
                 a
@@ -71,15 +80,50 @@ module private Helper =
             ]
         ]
 
-    let wordClickEvent (settable: list<GTelement> -> unit, word: string, index: int, stateActiveField, table) =                                     
-        Html.span [
-            prop.onMouseDown (fun _ -> 
-                settable (updatePartner index word stateActiveField table)
-       
-            ) 
-            prop.text word
-            prop.className "hover:bg-orange-700"  
-            prop.style [style.cursor.pointer; style.userSelect.none] 
+    let minitable(element) =
+        Daisy.table [
+            Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
+            Html.tbody [
+                for interaction in element.Interactions do  
+                    Html.tr [
+                        Html.td [
+                            prop.text (interaction.Partner1)
+                        ] 
+                        Html.td [
+                            prop.text (interaction.Partner2)
+                        ]
+                        Html.td [
+                            prop.text (
+                                if interaction.InteractionType = ProteinProtein then "Protein-Protein"
+                                elif interaction.InteractionType = ProteineGene then "Protein-Gene"
+                                else "user input" //noch an input binden
+                            )
+                        ]
+                        Html.td [
+                            Daisy.button.button [
+                                prop.text "X"
+                                button.xs
+                                prop.className "button"
+                                prop.onClick (fun _ -> ()
+                                    // List.removeAt index element.Interactions 
+                                )
+                            ]
+                        ]
+                    ] 
+            ]
+        ]    
+
+    let clickableWords (text, settable, index, stateActiveField, table) =
+        prop.children [
+            for word in text do
+                Html.span [
+                    prop.onMouseDown (fun _ -> 
+                        settable (updatePartner index word stateActiveField table)
+                    ) 
+                    prop.text word
+                    prop.className "hover:bg-orange-700"  
+                    prop.style [style.cursor.pointer; style.userSelect.none] 
+                ]
         ]
 
     let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table:GTelement list, stateActiveField, index: int, element: GTelement) =
@@ -90,19 +134,19 @@ module private Helper =
                 prop.children [
                     Html.input [
                         prop.type' "checkbox" 
-                        prop.onCheckedChange (fun (isChecked: bool) ->
-                            table
-                            |> List.mapi (fun i a ->
-                                if i = index then
-                                    {a with Checked = isChecked}
-                                else 
-                                    a
-                            )
-                            |>settable
-                        )                                              
-                        prop.isChecked (
-                            element.Checked                                              
-                        )
+                        // prop.onCheckedChange (fun (isChecked: bool) ->
+                        //     table
+                        //     |> List.mapi (fun i a ->
+                        //         if i = index then
+                        //             {a with Checked = isChecked}
+                        //         else 
+                        //             a
+                        //     )
+                        //     |>settable
+                        // )                                              
+                        // prop.isChecked (
+                        //     element.Checked                                              
+                        // )
                     ]
                     Daisy.collapseTitle [ 
                         prop.style [
@@ -111,10 +155,7 @@ module private Helper =
                             style.gap (length.rem 0.5)
                             style.pointerEvents.unset
                         ]
-                        prop.children [
-                                for word in title do
-                                    wordClickEvent (settable, word, index, stateActiveField, table)
-                        ]
+                        clickableWords (title, settable, index, stateActiveField, table)
                     ]
                     Daisy.collapseContent [
                         Daisy.cardBody [
@@ -123,66 +164,64 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 15
                             ]    
-                            prop.children [
-                                for word in abst do
-                                    wordClickEvent (settable, word, index, stateActiveField, table)
-                            ]
+                            clickableWords (abst, settable, index, stateActiveField, table)
                             ]
                         ]
                     ]
                 ]
             ]
 
-    let form(table, settable, stateActiveField, setField: option<ActiveField> -> unit, element, index: int) =
-        
+    let labelAndInputField (title: string, activeField: ActiveField, (partnerGetter: Interaction -> string), setField, element) =
+        Daisy.formControl [
+            Daisy.label [
+                prop.className "title" 
+                prop.text title
+                prop.style [style.fontSize 15]
+            ]
+            Daisy.input [
+                input.bordered 
+                input.sm 
+                prop.style [style.color.white; style.maxWidth 150]
+                prop.onClick (fun _ ->
+                    setField (Some activeField)
+                ) 
+                prop.className "tableElement" 
+                prop.valueOrDefault (element.Interactions |> List.map (partnerGetter))
+                prop.onBlur (fun _ -> setField None)
+            ]
+        ]
+
+    let DropDownElement (title: string, InteractionName, table, settable, index) =
+        Html.li [
+            Html.a [
+                prop.text title
+                prop.onClick (fun _ -> 
+                table
+                |> List.mapi (fun i a ->
+                    if i = index then
+                        {a with Interactions = (
+                            a.Interactions |> List.map (fun (b: Interaction) ->
+                                {b with InteractionType = InteractionName}))}
+                    else 
+                        a
+                )
+                |>settable
+                )
+                prop.className "button"
+            ]
+        ]
+
+    let form(table, settable, setField: option<ActiveField> -> unit, element, index: int) =
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
+                labelAndInputField ("Partner1", Partner1, (fun (b:Interaction)-> b.Partner1), setField, element)
+                labelAndInputField ("Partner2", Partner2, (fun (b:Interaction)-> b.Partner2), setField, element)
                 Daisy.formControl [
                     Daisy.label [
                         prop.className "title" 
-                        prop.text "Partner 1"
-                        prop.style [style.fontSize 15]
-                    ]
-                    Daisy.input [
-                        input.bordered 
-                        input.sm 
-                        prop.style [style.color.white; style.maxWidth 150]
-                        prop.onClick (fun _ ->
-                            setField (Some Partner1)
-                        ) 
-                        prop.className (
-                            if stateActiveField = Some Partner1 then "tableElementChecked"
-                            elif stateActiveField = Some Partner2 then  "tableElement"
-                            else "tableElement")
-                        prop.valueOrDefault (element.Interactions |> List.map (fun (b:Interaction) -> b.Partner1))
-                        prop.onBlur (fun _ -> setField None)
-                    ]
-                ]
-                Daisy.formControl [
-                    Daisy.label [
-                        prop.className "title"
-                        prop.text "Partner 2"
-                        prop.style [style.fontSize 15]
-                    ]
-                    Daisy.input [
-                        input.bordered
-                        input.sm
-                        prop.style [style.color.white; style.maxWidth 150]
-                        prop.onClick (fun _ ->
-                            setField (Some Partner2)
-                        ) 
-                        prop.className (
-                            if stateActiveField = Some Partner2 then "tableElementChecked"
-                            elif stateActiveField = Some Partner1 then  "tableElement"
-                            else "tableElement")
-                        prop.valueOrDefault (element.Interactions |> List.map (fun (b:Interaction) -> b.Partner2))
-                        prop.onBlur (fun _ -> setField None)
-                         
-                    ]
-                ]
-                Daisy.formControl [
-                    Daisy.label [prop.className "title"; prop.text"InteractionType"; prop.style [style.fontSize 15]]
+                        prop.text"InteractionType"
+                        prop.style [style.fontSize 15]]
                     if (element.Interactions |> List.map (fun b -> b.InteractionType)) = [Other ""] then 
                         Daisy.input [
                             input.bordered 
@@ -214,69 +253,16 @@ module private Helper =
                             ]
                             prop.tabIndex 0
                             prop.children [
-                                Html.li [
-                                    Html.a [
-                                        prop.text "Protein-Gene"
-                                        prop.onClick (fun _ -> 
-                                        table
-                                        |> List.mapi (fun i a ->
-                                            if i = index then
-                                                {a with Interactions = (
-                                                    a.Interactions |> List.map (fun (b: Interaction) ->
-                                                        {b with InteractionType = ProteineGene}))}
-                                            else 
-                                                a
-                                        )
-
-                                        |>settable
-                                        )
-                                        prop.className "button"
-                                    ]
-                                ]
-                                Html.li [
-                                    Html.a [
-                                        prop.text "Protein-Protein"
-                                        prop.onClick (fun _ -> 
-                                        table
-                                        |> List.mapi (fun i a ->
-                                            if i = index then
-                                                {a with Interactions = (
-                                                    a.Interactions |> List.map (fun (b: Interaction) ->
-                                                        {b with InteractionType = ProteinProtein}))}
-                                            else 
-                                                a
-                                        )
-                                        |>settable
-                                        )
-                                        prop.className "button"
-                                    ]
-                                ]
-                                Html.li [
-                                    Html.a [
-                                        prop.text "Other"
-                                        prop.onClick (fun _ -> 
-                                        table
-                                        |> List.mapi (fun i a ->
-                                            if i = index then
-                                                {a with Interactions = (
-                                                    a.Interactions |> List.map (fun (b: Interaction) ->
-                                                        {b with InteractionType = Other ""}))}
-                                            else 
-                                                a
-                                        )
-                                        |>settable
-                                        )
-                                        prop.className "button"
-                                    ]
-                                ]
+                                DropDownElement ("Proteine-Gene", ProteineGene, table, settable, index)
+                                DropDownElement ("Protein-Protein", ProteinProtein, table, settable, index)
+                                DropDownElement ("Other", Other "", table, settable, index)
                             ]
                         ]
                     ]
                 ]
             ]
         ]
-    let tableCellFormInput (setField, element, settable: list<GTelement> -> unit, table, index, stateActiveField) =
-
+    let tableCellInteractions (setField, element, settable: list<GTelement> -> unit, table, index, stateActiveField) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (Other "")
@@ -295,21 +281,22 @@ module private Helper =
                     prop.children [
                         Html.input [
                             prop.type' "checkbox" 
-                            prop.onCheckedChange (fun (isChecked: bool) ->
-                            table
-                            |> List.mapi (fun i a ->
-                                if i = index then
-                                    {a with Interactions = (
-                                        a.Interactions |> List.map (fun (b: Interaction) ->
-                                            {b with Checked = isChecked}))} //auf alle updaten
-                                else 
-                                    a
-                            )
-                            |>settable
-                            )                                              
-                            prop.isChecked (
-                                element.Interactions[0].Checked                                
-                            )        
+                            // prop.onCheckedChange (fun (isChecked: bool) ->
+                            // table
+                            // |> List.mapi (fun i a ->
+                            //     if i = index then
+                            //         {a with Interactions = (
+                            //             a.Interactions |> List.map (fun (b: Interaction) ->
+                            //                 {b with Checked = isChecked}))} //auf alle updaten
+                            //     else 
+                            //         a
+                            // )
+                            // |>settable
+                            // )                                              
+                            // prop.isChecked (
+                            //     if element.Interactions[0] then true
+                            //     else false                           
+                            // )        
                         ]
                         Daisy.collapseTitle [ 
                             prop.style [
@@ -318,7 +305,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(table, settable, stateActiveField, setField, element, index)
+                            form(table, settable, setField, element, index)
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -326,61 +313,24 @@ module private Helper =
                                 prop.style [
                                     style.marginTop 5
                                 ]
-                                
                                 prop.onClick (fun _ -> (
-                                    let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType ; Checked = false}
-                                    ()
-                                    //Hänge neue Interaktion an Element.interactions an.
-                                    //Update bestehendes Element in table. 
-                                    //settable auf geupdateten table.
-                                    //Nach dem klick sind die Felder wieder leer
+                                    let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
+                                    
+                                    //Hänge neue Interaktion an Element.interactions an. //über "::"
+                                    //Update bestehendes Element in table. //record type update
+                                    //settable auf geupdateten table. 
+                                    //Nach dem klick sind die Felder wieder leer //reset (unten)
                                     reset ()
                                 ))
                             ]
-                            Daisy.table [
-                                Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
-                                Html.tbody [
-                                    for interaction in element.Interactions do  
-                                        Html.tr [
-                                            Html.td [
-                                                prop.text (interaction.Partner1)
-                                            ] 
-                                            Html.td [
-                                                prop.text (interaction.Partner2)
-                                            ]
-                                            Html.td [
-                                                prop.text (
-                                                    if interaction.InteractionType = ProteinProtein then "Protein-Protein"
-                                                    elif interaction.InteractionType = ProteineGene then "Protein-Gene"
-                                                    else "user input" //noch an input binden
-                                                )
-                                            ]
-                                            Html.td [
-                                                Daisy.button.button [
-                                                    prop.text "X"
-                                                    button.xs
-                                                    prop.onClick (fun _ -> ()                                            
-                                                        // miniTable |> List.mapi (fun indexi el -> ( index <> indexi, el))
-                                                        // |> List.filter fst |> List.map snd |> setMiniTable 
-                                                    )
-                                                ]
-                                            ]
-                                        ] 
-                                    ]
-                                ]
-                            ]
+                            minitable(element)
                         ]
-
                     ]
                 ]
             ]
-        
+        ]
 
 type GTtable =
-
-    /// <summary>
-    /// A stateful React component that maintains a counter
-    /// </summary>
     [<ReactComponent>]
     static member Main() =
         let (stateActiveField: (ActiveField) option, setField) = React.useState (None)
@@ -481,7 +431,7 @@ type GTtable =
                                 Html.tr [
                                     Html.td "1"
                                     Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField, i, element) 
-                                    Helper.tableCellFormInput(setField, element, settable, table, i, stateActiveField)
+                                    Helper.tableCellInteractions(setField, element, settable, table, i, stateActiveField)
                                 ]
                                 
                             ]
@@ -490,7 +440,6 @@ type GTtable =
             ]
         ]
 
-//Todo 
                    
                 
         
