@@ -50,7 +50,7 @@ module private Helper =
                 match stateActiveField with
                 |Some Partner1 -> {a with Interactions = (
                                                     a.Interactions |> List.map (fun (b: Interaction) ->
-                                                        {b with Partner1 = clickedWord}))}
+                                                        {b with Partner1 = clickedWord}))} 
                 |Some Partner2 -> {a with Interactions = (
                                                     a.Interactions |> List.map (fun (b: Interaction) ->
                                                         {b with Partner2 = clickedWord}))}
@@ -112,12 +112,13 @@ module private Helper =
             ]
         ]    
 
-    let clickableWords (text, settable, index, stateActiveField, table) =
+    let clickableWords (text, stateActiveField) =
         prop.children [
-            for word in text do
+            for word: string in text do
                 Html.span [
                     prop.onMouseDown (fun _ -> 
-                        settable (updatePartner index word stateActiveField table)
+                        ()
+                        //settable (updatePartner index word stateActiveField table)
                     ) 
                     prop.text word
                     prop.className "hover:bg-orange-700"  
@@ -125,7 +126,7 @@ module private Helper =
                 ]
         ]
 
-    let tableCellPaperContent (abst: string list, settable: list<GTelement> -> unit, title: string list, table:GTelement list, stateActiveField, index: int, element: GTelement) =
+    let tableCellPaperContent (abst: string list, title: string list, stateActiveField) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -154,7 +155,7 @@ module private Helper =
                             style.gap (length.rem 0.5)
                             style.pointerEvents.unset
                         ]
-                        clickableWords (title, settable, index, stateActiveField, table)
+                        clickableWords (title, stateActiveField)
                     ]
                     Daisy.collapseContent [
                         Daisy.cardBody [
@@ -163,7 +164,7 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 15
                             ]    
-                            clickableWords (abst, settable, index, stateActiveField, table)
+                            clickableWords (abst, stateActiveField)
                             ]
                         ]
                     ]
@@ -171,6 +172,7 @@ module private Helper =
             ]
 
     let labelAndInputField (title: string, activeField: ActiveField, (partnerGetter: Interaction -> string), setField, element) =
+        let textfeld = (element.Interactions |> List.map (partnerGetter))
         Daisy.formControl [
             Daisy.label [
                 prop.className "title" 
@@ -185,7 +187,7 @@ module private Helper =
                     setField (Some activeField)
                 ) 
                 prop.className "tableElement" 
-                prop.valueOrDefault (element.Interactions |> List.map (partnerGetter))
+                prop.valueOrDefault textfeld.[0]
                 prop.onBlur (fun _ -> setField None)
             ]
         ]
@@ -338,6 +340,13 @@ module private Helper =
 
 type GTtable =
     [<ReactComponent>]
+    static member PaperElement (index: int, element: GTelement, settable, stateActiveField, setField) =
+        Html.tr [
+            Html.td (index + 1)
+            Helper.tableCellPaperContent (element.Content, element.Title, stateActiveField) 
+            Helper.tableCellInteractions (setField, element, settable, table, i, stateActiveField)
+        ]
+    [<ReactComponent>]
     static member Main() =
         let (stateActiveField: (ActiveField) option, setField) = React.useState (None)
 
@@ -434,11 +443,7 @@ type GTtable =
                                 let element = List.item i table
                                 //         Html.td "RDO5"
                                 //         Html.td "APUM9"
-                                Html.tr [
-                                    Html.td "1"
-                                    Helper.tableCellPaperContent (element.Content, settable, element.Title, table, stateActiveField, i, element) 
-                                    Helper.tableCellInteractions(setField, element, settable, table, i, stateActiveField)
-                                ]
+                                
                                 
                             ]
                     ]
