@@ -14,7 +14,7 @@ type InteractionType =
         match this with
         | ProteineGene -> "Protein-Gene"
         | ProteinProtein -> "Protein-Protein"
-        | Other s -> s
+        | Other s -> "Other" 
 
 
 type Interaction = {
@@ -66,7 +66,7 @@ module private Helper =
             ]
         ]
 
-    let minitable(interactions: Interaction list, removeInteraction: int -> unit) =
+    let minitable(interactions: Interaction list, removeInteraction: int -> unit, userInput: string) =
         Daisy.table [
             Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
             Html.tbody [
@@ -83,7 +83,7 @@ module private Helper =
                             prop.text (
                                 if interaction.InteractionType = ProteinProtein then "Protein-Protein"
                                 elif interaction.InteractionType = ProteineGene then "Protein-Gene"
-                                else "user input" //noch an input binden a.Interactions |> List.removeAt index 
+                                else userInput //noch an input binden 
                             )
                         ]
                         Html.td [
@@ -186,7 +186,7 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType) =
+    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType, setUserInput) =
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -197,14 +197,17 @@ module private Helper =
                         prop.className "title" 
                         prop.text"InteractionType"
                         prop.style [style.fontSize 15]]
-                    //if (element.Interactions |> List.map (fun b -> b.InteractionType)) = [Other ""] then 
-                    //    Daisy.input [
-                    //        input.bordered 
-                    //        input.sm 
-                    //        prop.style [style.color.white; style.maxWidth 135]
-                    //        prop.className "tableElement"
-                    //        prop.placeholder "What is it?"
-                    //] 
+                    if inputType = Other "" then 
+                       Daisy.input [
+                           input.bordered 
+                           input.sm 
+                           prop.style [style.color.white; style.maxWidth 135]
+                           prop.className "tableElement"
+                           prop.placeholder "What is it?"
+                           prop.onChange (fun (s:string) ->
+                                s |> setUserInput
+                           )
+                    ] 
                     Daisy.dropdown [
                         Daisy.button.button [
                             button.sm
@@ -234,7 +237,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction) =
+    let tableCellInteractions (interactions, input1, input2, inputType: InteractionType, userInput, setInputType, setField, addInteraction, removeInteraction, setUserInput) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -269,7 +272,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(setField, input1, input2, inputType, setInputType)
+                            form(setField, input1, input2, inputType, setInputType, setUserInput)
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -279,7 +282,7 @@ module private Helper =
                                 ]
                                 prop.onClick (fun _ -> addInteraction())
                             ]
-                            minitable(interactions, removeInteraction)
+                            minitable(interactions, removeInteraction, userInput)
                         ]
                     ]
                 ]
@@ -289,10 +292,11 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement,  table: GTelement list, setLocalStorage: GTelement list -> unit) =
+    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
+        let (userInput, setUserInput) = React.useState ("")
         let reset () = 
             setInput1 ""
             setInput2 ""
@@ -323,7 +327,7 @@ type GTtable =
             prop.children [
                 Html.td (index + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction)
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, userInput, setInputType, setActiveField, addInteraction, removeInteraction, setUserInput)
             ]
             prop.key index
         ]
@@ -443,7 +447,7 @@ type GTtable =
                                     |> setTable
                                     table |> setLocalStorage
                                     
-                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, table, setLocalStorage)
+                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement)
                             ]
                     ]
                 ]
