@@ -14,6 +14,7 @@
     <None Include="styling.css" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Fable.SimpleJson" Version="3.24.0" />
     <PackageReference Include="Feliz" Version="2.7.0" />
     <PackageReference Include="Feliz.Router" Version="4.0.0" />
     <PackageReference Include="Feliz.DaisyUI" Version="4.2.0" />
