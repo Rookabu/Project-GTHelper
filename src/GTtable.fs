@@ -289,7 +289,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement) =
+    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement,  table: GTelement list, setLocalStorage: GTelement list -> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -297,6 +297,7 @@ type GTtable =
             setInput1 ""
             setInput2 ""
             setInputType (Other "")
+            
         let setNewClickedWord (word: string) =
             match activeField with
             |Some Partner1 -> setInput1 word
@@ -305,15 +306,18 @@ type GTtable =
                 if input1 = "" then setInput1 word 
                 elif input2 = "" then setInput2 word
                 else () // do nothing
+          
         let addInteraction () : unit =
             let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
             let newElement = {element with Interactions = newInteraction::element.Interactions}
             updateElement newElement
             reset()
+   
         let removeInteraction (index): unit =
             let newInteractions = element.Interactions |> List.removeAt index
             let newElement = {element with Interactions = newInteractions}
             updateElement newElement 
+ 
 
         Html.tr [
             prop.children [
@@ -358,8 +362,6 @@ type GTtable =
         ]
 
 
-        
-
         let isLocalStorageClear () =
             match Browser.WebStorage.localStorage.getItem("GTlist") with
             | null -> true // Local storage is clear if the item doesn't exist
@@ -371,13 +373,11 @@ type GTtable =
 
         let (table, setTable) = React.useState (initialwert)
 
-        let setTableAndLocalStorage (nextTable: GTelement list) =
+        let setLocalStorage (nextTable: GTelement list) =
             let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
             Browser.Dom.console.log (JSONString) 
             Browser.WebStorage.localStorage.setItem("GTlist" , JSONString) //local storage wird gesettet
-            setTable nextTable
-
-        
+            
 
         Html.div [
             prop.className "childstyle"
@@ -440,8 +440,10 @@ type GTtable =
                                         else 
                                             a
                                     )
-                                    |> setTableAndLocalStorage
-                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement)
+                                    |> setTable
+                                    table |> setLocalStorage
+                                    
+                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, table, setLocalStorage)
                             ]
                     ]
                 ]
