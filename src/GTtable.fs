@@ -83,7 +83,7 @@ module private Helper =
                             prop.text (
                                 if interaction.InteractionType = ProteinProtein then "Protein-Protein"
                                 elif interaction.InteractionType = ProteineGene then "Protein-Gene"
-                                else userInput //noch an input binden 
+                                else userInput 
                             )
                         ]
                         Html.td [
@@ -300,7 +300,7 @@ type GTtable =
         let reset () = 
             setInput1 ""
             setInput2 ""
-            setInputType (Other "")
+            setInputType (ProteinProtein)
             
         let setNewClickedWord (word: string) =
             match activeField with
@@ -446,7 +446,6 @@ type GTtable =
                                     )
                                     |> setTable
                                     table |> setLocalStorage
-                                    
                                 GTtable.PaperElement(i, element, activeField, setActiveField, updateElement)
                             ]
                     ]
