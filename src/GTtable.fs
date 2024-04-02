@@ -10,6 +10,7 @@ type InteractionType =
     |ProteineGene
     |Other of string
 
+
     member this.ToStringRdb() =
         match this with
         | ProteineGene -> "Protein-Gene"
@@ -66,7 +67,8 @@ module private Helper =
             ]
         ]
 
-    let minitable(interactions: Interaction list, removeInteraction: int -> unit, userInput: string) =
+    let minitable(interactions: Interaction list, removeInteraction: int -> unit) =
+       
         Daisy.table [
             Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
             Html.tbody [
@@ -81,9 +83,10 @@ module private Helper =
                         ]
                         Html.td [
                             prop.text (
-                                if interaction.InteractionType = ProteinProtein then "Protein-Protein"
-                                elif interaction.InteractionType = ProteineGene then "Protein-Gene"
-                                else userInput 
+                                match interaction.InteractionType with
+                                |ProteinProtein -> "Protein-Protein"
+                                |ProteineGene -> "Protein-Gene"
+                                |Other s -> s 
                             )
                         ]
                         Html.td [
@@ -186,7 +189,7 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType, setUserInput) =
+    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType) =
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -197,7 +200,8 @@ module private Helper =
                         prop.className "title" 
                         prop.text"InteractionType"
                         prop.style [style.fontSize 15]]
-                    if inputType = Other "" then 
+                    match inputType with
+                    |Other _ ->
                        Daisy.input [
                            input.bordered 
                            input.sm 
@@ -205,9 +209,10 @@ module private Helper =
                            prop.className "tableElement"
                            prop.placeholder "What is it?"
                            prop.onChange (fun (s:string) ->
-                                s |> setUserInput
+                                setInputType (Other s)
                            )
-                    ] 
+                        ] 
+                    |_ -> Html.none
                     Daisy.dropdown [
                         Daisy.button.button [
                             button.sm
@@ -229,7 +234,7 @@ module private Helper =
                             prop.children [
                                 DropDownElement (ProteineGene, setInputType)
                                 DropDownElement (ProteinProtein, setInputType)
-                                DropDownElement (Other "", setInputType)
+                                DropDownElement (Other "" , setInputType)
                             ]
                         ]
                     ]
@@ -237,7 +242,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions, input1, input2, inputType: InteractionType, userInput, setInputType, setField, addInteraction, removeInteraction, setUserInput) =
+    let tableCellInteractions (interactions, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -272,7 +277,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(setField, input1, input2, inputType, setInputType, setUserInput)
+                            form(setField, input1, input2, inputType, setInputType)
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -282,7 +287,7 @@ module private Helper =
                                 ]
                                 prop.onClick (fun _ -> addInteraction())
                             ]
-                            minitable(interactions, removeInteraction, userInput)
+                            minitable(interactions, removeInteraction)
                         ]
                     ]
                 ]
@@ -296,7 +301,9 @@ type GTtable =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
-        let (userInput, setUserInput) = React.useState ("")
+        //let userInputChange (s:string) = Other s 
+        //let (userInput, setUserInput) = React.useState ("")
+
         let reset () = 
             setInput1 ""
             setInput2 ""
@@ -327,7 +334,7 @@ type GTtable =
             prop.children [
                 Html.td (index + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, userInput, setInputType, setActiveField, addInteraction, removeInteraction, setUserInput)
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction)
             ]
             prop.key index
         ]
