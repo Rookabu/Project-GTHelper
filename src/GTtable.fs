@@ -212,7 +212,7 @@ module private Helper =
                                 setInputType (Other s)
                            )
                         ] 
-                    |_ -> Html.none
+                    |_ -> ()
                     Daisy.dropdown [
                         Daisy.button.button [
                             button.sm
@@ -234,7 +234,7 @@ module private Helper =
                             prop.children [
                                 DropDownElement (ProteineGene, setInputType)
                                 DropDownElement (ProteinProtein, setInputType)
-                                DropDownElement (Other "" , setInputType)
+                                DropDownElement (Other "", setInputType)
                             ]
                         ]
                     ]
@@ -353,7 +353,11 @@ type GTtable =
                     A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
                     Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
                     indicating that RDO5 functions by suppressing APUM transcript levels."
-                Interactions = [] //warum leere liste?
+                Interactions = [{
+                    Partner1 = ""
+                    Partner2 = ""
+                    InteractionType = InteractionType.Other "" 
+                }] 
             }
             {
                 Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -376,7 +380,7 @@ type GTtable =
         let isLocalStorageClear () =
             match Browser.WebStorage.localStorage.getItem("GTlist") with
             | null -> true // Local storage is clear if the item doesn't exist
-            | _ -> false
+            | _ -> false //if false then something exists and the else case gets started
 
         let initialwert =
             if isLocalStorageClear () then exAbstract
@@ -453,6 +457,7 @@ type GTtable =
                                     )
                                     |> setTable
                                     table |> setLocalStorage
+                                    log table
                                 GTtable.PaperElement(i, element, activeField, setActiveField, updateElement)
                             ]
                     ]
