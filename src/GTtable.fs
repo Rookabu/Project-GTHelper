@@ -67,39 +67,45 @@ module private Helper =
             ]
         ]
 
-    let minitable(interactions: Interaction list, removeInteraction: int -> unit) =
-       
-        Daisy.table [
-            Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
-            Html.tbody [
+    let minitable(interactions: Interaction list, removeInteraction: int -> unit, table: GTelement list, setLocalStorage: GTelement list -> unit) =
+        match interactions with
+        | [] -> Html.none
+        | _ ->
+            Daisy.table [
+                Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
                 for i in 0 .. (interactions.Length - 1) do  
                     let interaction = List.item i interactions
-                    Html.tr [
-                        Html.td [
-                            prop.text (interaction.Partner1)
-                        ] 
-                        Html.td [
-                            prop.text (interaction.Partner2)
-                        ]
-                        Html.td [
-                            prop.text (
-                                match interaction.InteractionType with
-                                |ProteinProtein -> "Protein-Protein"
-                                |ProteineGene -> "Protein-Gene"
-                                |Other s -> s 
-                            )
-                        ]
-                        Html.td [
-                            Daisy.button.button [
-                                prop.text "X"
-                                button.xs
-                                prop.className "button"
-                                prop.onClick (fun _ -> removeInteraction i)
+                    Html.tbody [
+                        Html.tr [
+                            Html.td [
+                                prop.text (interaction.Partner1)
+                            ] 
+                            Html.td [
+                                prop.text (interaction.Partner2)
                             ]
-                        ]
-                    ] 
-            ]
-        ]    
+                            Html.td [
+                                prop.text (
+                                    match interaction.InteractionType with
+                                    |ProteinProtein -> "Protein-Protein"
+                                    |ProteineGene -> "Protein-Gene"
+                                    |Other s -> s 
+                                )
+                            ]
+                            Html.td [
+                                Daisy.button.button [
+                                    prop.text "X"
+                                    button.xs
+                                    prop.className "button"
+                                    prop.onClick (fun _ ->
+                                        removeInteraction i
+                                        table |> setLocalStorage
+                                        log "deleted interaction and safed table"
+                                    )
+                                ]
+                            ]
+                        ] 
+                    ]
+            ]    
 
     let clickableWords (text, setNewClickedWord) =
         prop.children [
@@ -112,7 +118,7 @@ module private Helper =
                 ]
         ]
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit) =
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
@@ -120,19 +126,14 @@ module private Helper =
                 prop.children [
                     Html.input [
                         prop.type' "checkbox" 
-                        // prop.onCheckedChange (fun (isChecked: bool) ->
-                        //     table
-                        //     |> List.mapi (fun i a ->
-                        //         if i = index then
-                        //             {a with Checked = isChecked}
-                        //         else 
-                        //             a
-                        //     )
-                        //     |>settable
-                        // )                                              
-                        // prop.isChecked (
-                        //     element.Checked                                              
-                        // )
+                        prop.onCheckedChange (fun (isChecked: bool) ->
+                            if isChecked = true then setCheckState true
+                            else setCheckState false
+                        )                                              
+                        prop.isChecked (
+                            if i = 0 then checkState  
+                            else false                                               
+                        )
                     ]
                     Daisy.collapseTitle [ 
                         prop.style [
@@ -212,7 +213,7 @@ module private Helper =
                                 setInputType (Other s)
                            )
                         ] 
-                    |_ -> ()
+                    |_ -> Html.none
                     Daisy.dropdown [
                         Daisy.button.button [
                             button.sm
@@ -242,7 +243,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -251,24 +252,17 @@ module private Helper =
                     prop.tabIndex 0
                     collapse.arrow
                     prop.children [
+                    for e in 0 .. (interactions.Length - 1)  do
                         Html.input [
                             prop.type' "checkbox" 
-                            // prop.onCheckedChange (fun (isChecked: bool) ->
-                            // table
-                            // |> List.mapi (fun i a ->
-                            //     if i = index then
-                            //         {a with Interactions = (
-                            //             a.Interactions |> List.map (fun (b: Interaction) ->
-                            //                 {b with Checked = isChecked}))} //auf alle updaten
-                            //     else 
-                            //         a
-                            // )
-                            // |>settable
-                            // )                                              
-                            // prop.isChecked (
-                            //     if element.Interactions[0] then true
-                            //     else false                           
-                            // )        
+                            prop.onCheckedChange (fun (isChecked: bool) ->
+                                if isChecked = true then setCheckState true
+                                else setCheckState false
+                            )                                              
+                            prop.isChecked (
+                                if e = 0 then checkState  
+                                else false                                               
+                            )        
                         ]
                         Daisy.collapseTitle [ 
                             prop.style [
@@ -285,9 +279,13 @@ module private Helper =
                                 prop.style [
                                     style.marginTop 5
                                 ]
-                                prop.onClick (fun _ -> addInteraction())
+                                prop.onClick (fun _ ->
+                                    addInteraction()
+                                    table |> setLocalStorage
+                                    log "added Interaction and safed table"
+                                )
                             ]
-                            minitable(interactions, removeInteraction)
+                            minitable(interactions, removeInteraction, table, setLocalStorage)
                         ]
                     ]
                 ]
@@ -297,10 +295,11 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement) =
+    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement, table, setLocalStorage, i) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
+        let (checkState: bool, setCheckState) = React.useState (true)
         //let userInputChange (s:string) = Other s 
         //let (userInput, setUserInput) = React.useState ("")
 
@@ -333,8 +332,8 @@ type GTtable =
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction)
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i) 
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState)
             ]
             prop.key index
         ]
@@ -353,11 +352,7 @@ type GTtable =
                     A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
                     Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
                     indicating that RDO5 functions by suppressing APUM transcript levels."
-                Interactions = [{
-                    Partner1 = ""
-                    Partner2 = ""
-                    InteractionType = InteractionType.Other "" 
-                }] 
+                Interactions = []
             }
             {
                 Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -368,30 +363,26 @@ type GTtable =
                     The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
                     promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
                     This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-                Interactions = [{
-                    Partner1 = ""
-                    Partner2 = ""
-                    InteractionType = InteractionType.Other "" 
-                }]
+                Interactions = []
             }
         ]
 
 
         let isLocalStorageClear () =
-            match Browser.WebStorage.localStorage.getItem("GTlist") with
+            match (Browser.WebStorage.localStorage.getItem "GTlist") with
             | null -> true // Local storage is clear if the item doesn't exist
             | _ -> false //if false then something exists and the else case gets started
 
         let initialwert =
-            if isLocalStorageClear () then exAbstract
+            if isLocalStorageClear () = true then exAbstract
             else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem "GTlist")  
 
         let (table, setTable) = React.useState (initialwert)
 
         let setLocalStorage (nextTable: GTelement list) =
             let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
-            Browser.Dom.console.log (JSONString) 
-            Browser.WebStorage.localStorage.setItem("GTlist" , JSONString) //local storage wird gesettet
+            //Browser.Dom.console.log (JSONString) 
+            Browser.WebStorage.localStorage.setItem("GTlist",JSONString) //local storage wird gesettet
             
 
         Html.div [
@@ -456,9 +447,8 @@ type GTtable =
                                             a
                                     )
                                     |> setTable
-                                    table |> setLocalStorage
-                                    log table
-                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement)
+                                    log "setted table"
+                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, table, setLocalStorage, i)
                             ]
                     ]
                 ]
