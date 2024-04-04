@@ -118,23 +118,31 @@ module private Helper =
                 ]
         ]
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int) =
+    let checkHandle (checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
+        Html.input [
+            prop.type' "checkbox" 
+            prop.onCheckedChange (fun (isChecked: bool) ->
+                if isChecked = true then setCheckState true
+                else setCheckState false
+
+                if isChecked = true && i = 0 then setCheckState1st true
+                else setCheckState1st false
+            )                                              
+            prop.isChecked (
+                if i = 0 then checkState1st
+                else checkState                                  
+            )
+        ]
+    
+
+
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
                 collapse.arrow
                 prop.children [
-                    Html.input [
-                        prop.type' "checkbox" 
-                        // prop.onCheckedChange (fun (isChecked: bool) ->
-                        //     if isChecked = true then setCheckState true
-                        //     else setCheckState false
-                        // )                                              
-                        // prop.isChecked (
-                        //     if i = 0 then checkState  
-                        //     else false                                               
-                        // )
-                    ]
+                    checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st)
                     Daisy.collapseTitle [ 
                         prop.style [
                             style.fontSize 15
@@ -243,7 +251,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -252,18 +260,7 @@ module private Helper =
                     prop.tabIndex 0
                     collapse.arrow
                     prop.children [
-                    //for e in 0 .. (interactions.Length - 1)  do
-                        Html.input [
-                            prop.type' "checkbox" 
-                            // prop.onCheckedChange (fun (isChecked: bool) ->
-                            //     if isChecked = true then setCheckState true
-                            //     else setCheckState false
-                            // )                                              
-                            // prop.isChecked (
-                            //     if e = 0 then checkState  
-                            //     else false                                               
-                            // )        
-                        ]
+                        checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st)
                         Daisy.collapseTitle [ 
                             prop.style [
                                 style.fontSize 15
@@ -299,9 +296,8 @@ type GTtable =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
-        let (checkState: bool, setCheckState) = React.useState (true)
-        //let userInputChange (s:string) = Other s 
-        //let (userInput, setUserInput) = React.useState ("")
+        let (checkState: bool, setCheckState) = React.useState (false)
+        let (checkState1st: bool, setCheckState1st) = React.useState (true)
 
         let reset () = 
             setInput1 ""
@@ -332,8 +328,8 @@ type GTtable =
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState)
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i, checkState1st, setCheckState1st) 
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState, i, checkState1st, setCheckState1st)
             ]
             prop.key index
         ]
@@ -363,11 +359,7 @@ type GTtable =
                     The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
                     promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
                     This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-                Interactions = [{
-                    Partner1 = ""
-                    Partner2 = ""
-                    InteractionType = InteractionType.Other "" 
-                }] 
+                Interactions = [] 
             }
         ]
 
