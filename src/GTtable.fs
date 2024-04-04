@@ -67,7 +67,7 @@ module private Helper =
             ]
         ]
 
-    let minitable(interactions: Interaction list, removeInteraction: int -> unit, table: GTelement list, setLocalStorage: GTelement list -> unit) =
+    let minitable(interactions: Interaction list, removeInteraction: int -> unit) =
         match interactions with
         | [] -> Html.none
         | _ ->
@@ -98,8 +98,6 @@ module private Helper =
                                     prop.className "button"
                                     prop.onClick (fun _ ->
                                         removeInteraction i
-                                        table |> setLocalStorage
-                                        log "deleted interaction and safed table"
                                     )
                                 ]
                             ]
@@ -279,11 +277,9 @@ module private Helper =
                                 ]
                                 prop.onClick (fun _ ->
                                     addInteraction()
-                                    table |> setLocalStorage
-                                    log "added Interaction and safed table"
                                 )
                             ]
-                            minitable(interactions, removeInteraction, table, setLocalStorage)
+                            minitable(interactions, removeInteraction)
                         ]
                     ]
                 ]
@@ -444,7 +440,8 @@ type GTtable =
                                             a
                                     )
                                     |> setTable
-                                    log "setted table"
+                                    table |> setLocalStorage
+                                    log "safed table"
                                 GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, table, setLocalStorage, i)
                             ]
                     ]
