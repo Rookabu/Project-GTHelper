@@ -140,7 +140,7 @@ module private Helper =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
-                collapse.arrow
+                
                 prop.children [
                     checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st)
                     Daisy.collapseTitle [ 
@@ -193,6 +193,7 @@ module private Helper =
                 prop.text (inputType.ToStringRdb())
                 prop.onClick (fun _ -> 
                     setInputType inputType
+
                 )
                 prop.className "button"
             ]
