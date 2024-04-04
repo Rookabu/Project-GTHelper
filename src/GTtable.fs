@@ -126,14 +126,14 @@ module private Helper =
                 prop.children [
                     Html.input [
                         prop.type' "checkbox" 
-                        prop.onCheckedChange (fun (isChecked: bool) ->
-                            if isChecked = true then setCheckState true
-                            else setCheckState false
-                        )                                              
-                        prop.isChecked (
-                            if i = 0 then checkState  
-                            else false                                               
-                        )
+                        // prop.onCheckedChange (fun (isChecked: bool) ->
+                        //     if isChecked = true then setCheckState true
+                        //     else setCheckState false
+                        // )                                              
+                        // prop.isChecked (
+                        //     if i = 0 then checkState  
+                        //     else false                                               
+                        // )
                     ]
                     Daisy.collapseTitle [ 
                         prop.style [
@@ -252,17 +252,17 @@ module private Helper =
                     prop.tabIndex 0
                     collapse.arrow
                     prop.children [
-                    for e in 0 .. (interactions.Length - 1)  do
+                    //for e in 0 .. (interactions.Length - 1)  do
                         Html.input [
                             prop.type' "checkbox" 
-                            prop.onCheckedChange (fun (isChecked: bool) ->
-                                if isChecked = true then setCheckState true
-                                else setCheckState false
-                            )                                              
-                            prop.isChecked (
-                                if e = 0 then checkState  
-                                else false                                               
-                            )        
+                            // prop.onCheckedChange (fun (isChecked: bool) ->
+                            //     if isChecked = true then setCheckState true
+                            //     else setCheckState false
+                            // )                                              
+                            // prop.isChecked (
+                            //     if e = 0 then checkState  
+                            //     else false                                               
+                            // )        
                         ]
                         Daisy.collapseTitle [ 
                             prop.style [
@@ -352,7 +352,7 @@ type GTtable =
                     A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
                     Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
                     indicating that RDO5 functions by suppressing APUM transcript levels."
-                Interactions = []
+                Interactions = [] 
             }
             {
                 Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -363,7 +363,11 @@ type GTtable =
                     The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
                     promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
                     This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-                Interactions = []
+                Interactions = [{
+                    Partner1 = ""
+                    Partner2 = ""
+                    InteractionType = InteractionType.Other "" 
+                }] 
             }
         ]
 
