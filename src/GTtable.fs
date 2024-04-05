@@ -184,6 +184,8 @@ module private Helper =
                 prop.onClick (fun _ ->
                     setField (Some activeField)
                 ) 
+                prop.onChange (fun _ -> ())
+            
                 prop.className "tableElement" 
                 prop.valueOrDefault partnerStrValue
                 prop.onBlur (fun _ -> setField None)
@@ -207,7 +209,6 @@ module private Helper =
         ]
 
     let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType) =
-    
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -299,7 +300,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, updateElement, setActiveField, i, table, setLocalStorage, setTable) =
+    static member PaperElement (index: int, element: GTelement, activeField, updateElement, setActiveField, i, table, setLocalStorage) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -454,7 +455,7 @@ type GTtable =
                                         t |> setTable
                                         t |> setLocalStorage
                                     log "safed" 
-                                GTtable.PaperElement(i, element, activeField,updateElement, setActiveField, i, table, setLocalStorage, setTable)
+                                GTtable.PaperElement(i, element, activeField,updateElement, setActiveField, i, table, setLocalStorage)
                             ]
                     ]
                 ]
