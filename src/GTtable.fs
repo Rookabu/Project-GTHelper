@@ -4,6 +4,7 @@ namespace Components
 open Feliz
 open Feliz.DaisyUI
 open Fable.SimpleJson
+open Fable.Core.JsInterop
 
 type InteractionType =
     |ProteinProtein
@@ -186,18 +187,23 @@ module private Helper =
         ]
 
     let DropDownElement (inputType: InteractionType, setInputType) =
+        let blurActiveElement() =
+            let e = Browser.Dom.document.activeElement
+            if e |> isNull |> not then e?blur()
+           
         Html.li [
             Html.a [
                 prop.text (inputType.ToStringRdb())
                 prop.onClick (fun _ -> 
                     setInputType inputType
-
+                    blurActiveElement()
                 )
                 prop.className "button"
             ]
         ]
 
     let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType) =
+    
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -250,7 +256,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -289,12 +295,13 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement, table, setLocalStorage, i) =
+    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement, i) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (false)
         let (checkState1st: bool, setCheckState1st) = React.useState (true)
+        //React.useElementRef : unit -> IRefValue<HTMLElement option>
 
         let reset () = 
             setInput1 ""
@@ -326,7 +333,7 @@ type GTtable =
             prop.children [
                 Html.td (index + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i, checkState1st, setCheckState1st) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, table, setLocalStorage, checkState, setCheckState, i, checkState1st, setCheckState1st)
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st)
             ]
             prop.key index
         ]
@@ -442,7 +449,7 @@ type GTtable =
                                     |> setTable
                                     table |> setLocalStorage
                                     log "safed table"
-                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, table, setLocalStorage, i)
+                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, i)
                             ]
                     ]
                 ]
