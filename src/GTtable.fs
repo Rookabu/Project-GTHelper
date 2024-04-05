@@ -117,7 +117,7 @@ module private Helper =
                 ]
         ]
 
-    let checkHandle (checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
+    let checkHandle (checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table: GTelement list, setLocalStorage) =
         Html.input [
             prop.type' "checkbox" 
             prop.onCheckedChange (fun (isChecked: bool) ->
@@ -129,19 +129,23 @@ module private Helper =
             )                                              
             prop.isChecked (
                 if i = 0 then checkState1st
-                else checkState                                  
+                else checkState                
             )
+            // prop.onClick (fun _ ->
+            //     table |> setLocalStorage
+            //     log "safed checked abstract"
+            // )
         ]
     
 
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage) =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
                 
                 prop.children [
-                    checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st)
+                    checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage)
                     Daisy.collapseTitle [ 
                         prop.style [
                             style.fontSize 15
@@ -256,7 +260,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -265,7 +269,7 @@ module private Helper =
                     prop.tabIndex 0
                     collapse.arrow
                     prop.children [
-                        checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st)
+                        checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage)
                         Daisy.collapseTitle [ 
                             prop.style [
                                 style.fontSize 15
@@ -295,14 +299,13 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, setActiveField, updateElement, i) =
+    static member PaperElement (index: int, element: GTelement, activeField, updateElement, setActiveField, i, table, setLocalStorage, setTable) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (false)
         let (checkState1st: bool, setCheckState1st) = React.useState (true)
-        //React.useElementRef : unit -> IRefValue<HTMLElement option>
-
+    
         let reset () = 
             setInput1 ""
             setInput2 ""
@@ -316,27 +319,30 @@ type GTtable =
                 if input1 = "" then setInput1 word 
                 elif input2 = "" then setInput2 word
                 else () // do nothing
-          
+
         let addInteraction () : unit =
             let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
             let newElement = {element with Interactions = newInteraction::element.Interactions}
             updateElement newElement
             reset()
+            
    
         let removeInteraction (index): unit =
             let newInteractions = element.Interactions |> List.removeAt index
             let newElement = {element with Interactions = newInteractions}
             updateElement newElement 
- 
+      
 
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i, checkState1st, setCheckState1st) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st)
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage) 
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage)
+                
             ]
             prop.key index
         ]
+        
 
     [<ReactComponent>]
     static member Main() =
@@ -384,10 +390,8 @@ type GTtable =
             //Browser.Dom.console.log (JSONString) 
             Browser.WebStorage.localStorage.setItem("GTlist",JSONString) //local storage wird gesettet
             
-
         Html.div [
             prop.className "childstyle"
-
             prop.children [
                 Daisy.card [
                     prop.style [
@@ -438,18 +442,19 @@ type GTtable =
                         Html.tbody [
                             for i in 0 .. (table.Length - 1)  do //für jedes Element in table wird folgendes gemacht:
                                 let element = List.item i table
-                                let updateElement (element: GTelement) =
+                                let updateElement (element': GTelement) =
                                     table
                                     |> List.mapi (fun indx a ->
                                         if indx = i then 
-                                            element
+                                            element'
                                         else 
                                             a
                                     )
-                                    |> setTable
-                                    table |> setLocalStorage
-                                    log "safed table"
-                                GTtable.PaperElement(i, element, activeField, setActiveField, updateElement, i)
+                                    |> fun t ->
+                                        t |> setTable
+                                        t |> setLocalStorage
+                                    log "safed" 
+                                GTtable.PaperElement(i, element, activeField,updateElement, setActiveField, i, table, setLocalStorage, setTable)
                             ]
                     ]
                 ]
