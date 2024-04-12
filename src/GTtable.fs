@@ -6,6 +6,7 @@ open Feliz.DaisyUI
 open Fable.SimpleJson
 open Fable.Core.JsInterop
 
+
 type InteractionType =
     |ProteinProtein
     |ProteineGene
@@ -131,10 +132,6 @@ module private Helper =
                 if i = 0 then checkState1st
                 else checkState                
             )
-            // prop.onClick (fun _ ->
-            //     table |> setLocalStorage
-            //     log "safed checked abstract"
-            // )
         ]
     
 
@@ -169,8 +166,7 @@ module private Helper =
             ]
         ]
 
-    let labelAndInputField (title: string, partnerStrValue: string, activeField: ActiveField, setField) =
-        //let textfeld = (element.Interactions |> List.map (partnerGetter))
+    let labelAndInputField (title: string, partnerStrValue: string, activeField: ActiveField, setField, setInput1, setInput2) =
         Daisy.formControl [
             Daisy.label [
                 prop.className "title" 
@@ -184,7 +180,9 @@ module private Helper =
                 prop.onClick (fun _ ->
                     setField (Some activeField)
                 ) 
-                prop.onChange (fun _ -> ())
+                prop.onChange (fun (x:string) -> 
+                if activeField = Partner1 then setInput1 x
+                elif activeField = Partner2 then setInput2 x)
             
                 prop.className "tableElement" 
                 prop.valueOrDefault partnerStrValue
@@ -208,12 +206,17 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType) =
+    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType, setInput1, setInput2, inputRef: IRefValue<option<obj>>) =
+        let focusTextInput() =
+                match inputRef.current with
+                | None -> ()
+                | Some element ->
+                    element?focus()
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
-                labelAndInputField ("Partner 1", input1, ActiveField.Partner1, setField)
-                labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField)
+                labelAndInputField ("Partner 1", input1, ActiveField.Partner1, setField, setInput1, setInput2)
+                labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField, setInput1, setInput2 )
                 Daisy.formControl [
                     Daisy.label [
                         prop.className "title" 
@@ -230,6 +233,7 @@ module private Helper =
                            prop.onChange (fun (s:string) ->
                                 setInputType (Other s)
                            )
+                           prop.ref inputRef
                         ] 
                     |_ -> Html.none
                     Daisy.dropdown [
@@ -261,7 +265,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage, setInput1, setInput2, inputRef) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -278,7 +282,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(setField, input1, input2, inputType, setInputType)
+                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, inputRef)
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -306,7 +310,8 @@ type GTtable =
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (false)
         let (checkState1st: bool, setCheckState1st) = React.useState (true)
-    
+        let inputRef = React.useRef(None)
+
         let reset () = 
             setInput1 ""
             setInput2 ""
@@ -338,7 +343,7 @@ type GTtable =
             prop.children [
                 Html.td (index + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage)
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage, setInput1, setInput2, inputRef)
                 
             ]
             prop.key index
