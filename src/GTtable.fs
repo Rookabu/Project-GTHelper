@@ -194,24 +194,21 @@ module private Helper =
         let blurActiveElement() =
             let e = Browser.Dom.document.activeElement
             if e |> isNull |> not then e?blur()
-           
+   
         Html.li [
             Html.a [
                 prop.text (inputType.ToStringRdb())
                 prop.onClick (fun _ -> 
                     setInputType inputType
                     blurActiveElement()
+
                 )
                 prop.className "button"
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType, setInput1, setInput2, inputRef: IRefValue<option<obj>>) =
-        let focusTextInput() =
-                match inputRef.current with
-                | None -> ()
-                | Some element ->
-                    element?focus()
+    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType, setInput1, setInput2) =
+        
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -233,7 +230,9 @@ module private Helper =
                            prop.onChange (fun (s:string) ->
                                 setInputType (Other s)
                            )
-                           prop.ref inputRef
+                       
+                           prop.autoFocus (true)
+                           
                         ] 
                     |_ -> Html.none
                     Daisy.dropdown [
@@ -259,13 +258,14 @@ module private Helper =
                                 DropDownElement (ProteinProtein, setInputType)
                                 DropDownElement (Other "", setInputType)
                             ]
+                            
                         ]
                     ]
                 ]
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage, setInput1, setInput2, inputRef) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage, setInput1, setInput2) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -282,7 +282,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, inputRef)
+                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2)
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -310,7 +310,7 @@ type GTtable =
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (false)
         let (checkState1st: bool, setCheckState1st) = React.useState (true)
-        let inputRef = React.useRef(None)
+        //let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let reset () = 
             setInput1 ""
@@ -343,7 +343,7 @@ type GTtable =
             prop.children [
                 Html.td (index + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage, setInput1, setInput2, inputRef)
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage, setInput1, setInput2)
                 
             ]
             prop.key index
