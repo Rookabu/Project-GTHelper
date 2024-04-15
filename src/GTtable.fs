@@ -140,17 +140,18 @@ module private Helper =
         Html.td [
             Daisy.collapse [
                 prop.tabIndex 0
-                
                 prop.children [
                     checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage)
                     Daisy.collapseTitle [ 
-                        prop.style [
-                            style.fontSize 15
-                            style.display.flex
-                            style.gap (length.rem 0.5)
-                            style.pointerEvents.unset
+                        Daisy.cardTitle [
+                            prop.style [
+                                style.fontSize 15
+                                style.display.flex
+                                style.gap (length.rem 0.5)
+                                style.pointerEvents.unset
+                            ]
+                            clickableWords (title, setNewClickedWord)
                         ]
-                        clickableWords (title, setNewClickedWord)
                     ]
                     Daisy.collapseContent [
                         Daisy.cardBody [
@@ -158,7 +159,7 @@ module private Helper =
                                 style.flexDirection.row
                                 style.flexWrap.wrap
                                 style.fontSize 15
-                            ]    
+                            ] 
                             clickableWords (abst, setNewClickedWord)
                         ]
                     ]
@@ -183,7 +184,6 @@ module private Helper =
                 prop.onChange (fun (x:string) -> 
                 if activeField = Partner1 then setInput1 x
                 elif activeField = Partner2 then setInput2 x)
-            
                 prop.className "tableElement" 
                 prop.valueOrDefault partnerStrValue
                 prop.onBlur (fun _ -> setField None)
@@ -230,9 +230,7 @@ module private Helper =
                            prop.onChange (fun (s:string) ->
                                 setInputType (Other s)
                            )
-                       
                            prop.autoFocus (true)
-                           
                         ] 
                     |_ -> Html.none
                     Daisy.dropdown [
