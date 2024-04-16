@@ -70,9 +70,9 @@ module private Helper =
         ]
 
     let minitable(interactions: Interaction list, removeInteraction: int -> unit) =
-        match interactions with
-        | [] -> Html.none
-        | _ ->
+        // match interactions with
+        // | [] -> Html.none
+        // | _ ->
             Daisy.table [
                 Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
                 for i in 0 .. (interactions.Length - 1) do  
@@ -137,9 +137,14 @@ module private Helper =
     let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage) =
         Html.td [
             Daisy.collapse [
-                prop.tabIndex 0
                 prop.children [
-                    checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage)
+                    Html.input [
+                        prop.type' "checkbox"                          
+                        prop.isChecked (
+                            if i = 0 then checkState1st
+                            else checkState                
+                        )
+                    ]
                     Daisy.collapseTitle [ 
                         Daisy.cardTitle [
                             prop.style [
@@ -183,9 +188,12 @@ module private Helper =
                     if activeField = Partner1 then setInput1 x
                     elif activeField = Partner2 then setInput2 x
                 )
-                prop.className "tableElement"
                 prop.valueOrDefault partnerStrValue
                 prop.onBlur (fun _ -> setField None)
+                prop.className "tableElement"
+
+                if partnerStrValue = "" then prop.className "tableElementChecked"
+                else prop.className "tableElement"
             ]
         ]
 
@@ -200,19 +208,17 @@ module private Helper =
                 prop.onClick (fun _ -> 
                     setInputType inputType
                     blurActiveElement()
-
                 )
                 prop.className "button"
             ]
         ]
 
     let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType, setInput1, setInput2) =
-        
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
                 labelAndInputField ("Partner 1", input1, ActiveField.Partner1, setField, setInput1, setInput2)
-                labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField, setInput1, setInput2 )
+                labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField, setInput1, setInput2)
                 Daisy.formControl [
                     Daisy.label [
                         prop.className "title" 
@@ -324,6 +330,7 @@ type GTtable =
                 if input1 = "" then setInput1 word 
                 elif input2 = "" then setInput2 word
                 else () // do nothing
+            
 
         let addInteraction () : unit =
             let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
