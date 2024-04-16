@@ -18,11 +18,25 @@ body {
 .button {
     background-color:#ed7d31;
     color: white;
+    border-color: #ed7d31 ;
+}
+
+.button:disabled {
+  background-color:#fad8c1;
+  color: white;
+  border-color: #fad8c1;
+}
+
+.buttonNoClick:hover {
+  background-color:#fad8c1;
+  color: white;
+  border-color: #fad8c1;
 }
 
 
 .button:hover {
-    background-color: #8e4b1d 
+    background-color: #8e4b1d; 
+    border-color: #8e4b1d 
 }
 
 

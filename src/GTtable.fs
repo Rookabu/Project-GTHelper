@@ -133,8 +133,6 @@ module private Helper =
                 else checkState                
             )
         ]
-    
-
 
     let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage) =
         Html.td [
@@ -182,9 +180,10 @@ module private Helper =
                     setField (Some activeField)
                 ) 
                 prop.onChange (fun (x:string) -> 
-                if activeField = Partner1 then setInput1 x
-                elif activeField = Partner2 then setInput2 x)
-                prop.className "tableElement" 
+                    if activeField = Partner1 then setInput1 x
+                    elif activeField = Partner2 then setInput2 x
+                )
+                prop.className "tableElement"
                 prop.valueOrDefault partnerStrValue
                 prop.onBlur (fun _ -> setField None)
             ]
@@ -256,7 +255,6 @@ module private Helper =
                                 DropDownElement (ProteinProtein, setInputType)
                                 DropDownElement (Other "", setInputType)
                             ]
-                            
                         ]
                     ]
                 ]
@@ -284,7 +282,10 @@ module private Helper =
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
-                                prop.className "button"
+
+                                if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button"
+                                else prop.className "button"
+
                                 prop.style [
                                     style.marginTop 5
                                 ]
