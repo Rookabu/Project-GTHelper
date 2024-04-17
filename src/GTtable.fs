@@ -12,7 +12,6 @@ type InteractionType =
     |ProteineGene
     |Other of string
 
-
     member this.ToStringRdb() =
         match this with
         | ProteineGene -> "Protein-Gene"
@@ -107,11 +106,14 @@ module private Helper =
                     ]
             ]    
 
-    let clickableWords (text, setNewClickedWord) =
+    let clickableWords (text, setNewClickedWord, activeField: option<ActiveField> ) =
         prop.children [
             for word: string in text do
                 Html.span [
-                    prop.onMouseDown (fun _ -> setNewClickedWord word) // wo wird das wort an interaction gebunden?
+                    prop.onClick (fun _ -> 
+                        setNewClickedWord word 
+                        log activeField.ToString
+                    ) // wo wird das wort an interaction gebunden?
                     prop.text word
                     prop.className "hover:bg-orange-700"  
                     prop.style [style.cursor.pointer; style.userSelect.none] 
@@ -127,8 +129,7 @@ module private Helper =
             prop.isChecked (checkState)
         ]
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool) =
-        log checkState
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, activeField) =
         Html.td [
             Daisy.collapse [
                 // prop.isChecked (checkState)
@@ -142,7 +143,7 @@ module private Helper =
                                 style.gap (length.rem 0.5)
                                 style.pointerEvents.unset
                             ]
-                            if checkState then clickableWords (title, setNewClickedWord)
+                            if checkState then clickableWords (title, setNewClickedWord, activeField)
                             else
                                 prop.children [
                                     for word: string in title do
@@ -162,14 +163,14 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 15
                             ] 
-                            clickableWords (abst, setNewClickedWord)
+                            clickableWords (abst, setNewClickedWord, activeField)
                         ]
                     ]
                 ]
             ]
         ]
 
-    let labelAndInputField (title: string, partnerStrValue: string, activeField: ActiveField, setField, setInput1, setInput2) =
+    let labelAndInputField (title: string, partnerStrValue: string, activeField: ActiveField option, setField, setInput1, setInput2) =
         Daisy.formControl [
             Daisy.label [
                 prop.className "title" 
@@ -184,14 +185,14 @@ module private Helper =
                     setField (Some activeField)
                 ) 
                 prop.onChange (fun (x:string) -> 
-                    if activeField = Partner1 then setInput1 x
-                    elif activeField = Partner2 then setInput2 x
+                    if activeField = Some Partner1 then setInput1 x
+                    elif activeField = Some Partner2 then setInput2 x
                 )
                 prop.valueOrDefault partnerStrValue
-                prop.onBlur (fun _ -> setField None)
+                //prop.onBlur (fun _ -> setField None)
                 prop.className "tableElement"
 
-                if partnerStrValue = "" then prop.className "tableElementChecked"
+                if activeField = activeField then prop.className "tableElementChecked"
                 else prop.className "tableElement"
             ]
         ]
@@ -212,63 +213,54 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1, setInput2) =
+    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1, setInput2, activeField: option<ActiveField> ) =
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
-                // Daisy.formControl [
-                //     Daisy.label [
-                //         prop.className "title" 
-                //         prop.text "Partner 1"
-                //         prop.style [style.fontSize 15]
-                //     ]
-                //     Daisy.input [
-                //         input.bordered 
-                //         input.sm 
-                //         prop.style [style.color.white; style.maxWidth 150]
-                //         prop.onClick (fun _ ->
-                //             setField (Some ActiveField.Partner1)
-                //         ) 
-                //         prop.onChange (fun (x:string) -> 
-                //             if ActiveField.Partner1 = Partner1 then setInput1 x
-                //             elif ActiveField.Partner1 = Partner2 then setInput2 x
-                //         )
-                //         prop.valueOrDefault input1
-                //         prop.onBlur (fun _ -> setField None)
-                //         prop.className "tableElement"
+                Daisy.formControl [
+                    Daisy.label [
+                        prop.className "title" 
+                        prop.text "Partner 1"
+                        prop.style [style.fontSize 15]
+                    ]
+                    Daisy.input [
+                        input.bordered 
+                        input.sm 
+                        prop.style [style.color.white; style.maxWidth 150]
+                        prop.onClick (fun _ -> setField (Some Partner1)) 
+                        prop.onChange (fun (x:string) -> 
+                            if activeField = Some Partner1 then setInput1 x 
+                        )
+                        prop.valueOrDefault input1
+                        //prop.onBlur (fun _ -> setField None)
+                        
+                        if activeField = Some Partner1 then prop.className "tableElementChecked"
+                        else prop.className "tableElement"
+                    ]
+                ]
+                Daisy.formControl [
+                    Daisy.label [
+                        prop.className "title" 
+                        prop.text "Partner 2"
+                        prop.style [style.fontSize 15]
+                    ]
+                    Daisy.input [
+                        input.bordered 
+                        input.sm 
+                        prop.style [style.color.white; style.maxWidth 150]
+                        prop.onClick (fun _ ->setField (Some Partner2)) 
+                        prop.onChange (fun (x:string) -> 
+                            if activeField = Some Partner2 then setInput2 x
+                        )
+                        prop.valueOrDefault input2
+                        //prop.onBlur (fun _ -> setField None)
+                        if activeField = Some Partner2  then prop.className "tableElementChecked"
+                        else prop.className "tableElement"
+                    ]
+                ]
 
-                //         if input1 = "" then prop.className "tableElementChecked"
-                //         else prop.className "tableElement"
-                //     ]
-                // ]
-                // Daisy.formControl [
-                //     Daisy.label [
-                //         prop.className "title" 
-                //         prop.text "Partner 2"
-                //         prop.style [style.fontSize 15]
-                //     ]
-                //     Daisy.input [
-                //         input.bordered 
-                //         input.sm 
-                //         prop.style [style.color.white; style.maxWidth 150]
-                //         prop.onClick (fun _ ->
-                //             setField (Some ActiveField.Partner2)
-                //         ) 
-                //         prop.onChange (fun (x:string) -> 
-                //             if ActiveField.Partner2 = Partner1 then setInput1 x
-                //             elif ActiveField.Partner2 = Partner2 then setInput2 x
-                //         )
-                //         prop.valueOrDefault input2
-                //         prop.onBlur (fun _ -> setField None)
-                //         prop.className "tableElement"
-
-                //         if input2 = "" then prop.className "tableElementChecked"
-                //         else prop.className "tableElement"
-                //     ]
-                // ]
-
-                labelAndInputField ("Partner 1", input1, ActiveField.Partner1, setField, setInput1, setInput2)
-                labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField, setInput1, setInput2)
+                // labelAndInputField ("Partner 1", input1, ActiveField.Partner1, setField, setInput1, setInput2)
+                // labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField, setInput1, setInput2)
                 Daisy.formControl [
                     Daisy.label [
                         prop.className "title" 
@@ -317,7 +309,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, table, setLocalStorage, setInput1, setInput2) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField) =
         Html.td [
             prop.className "flex"
             prop.children [
@@ -333,7 +325,7 @@ module private Helper =
                             prop.text "Interactions"
                         ]
                         Daisy.collapseContent [
-                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2)
+                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField)
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -358,27 +350,29 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, updateElement, setActiveField, i, table, setLocalStorage) =
+    static member PaperElement (index: int, element: GTelement, activeField, updateElement, setActiveField: option<ActiveField> -> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
-        let (checkState: bool, setCheckState) = React.useState (if i = 0 then true else false)
-        // let (checkState1st: bool, setCheckState1st) = React.useState (true)
+        let (checkState: bool, setCheckState) = React.useState (if index = 0 then true else false)
         //let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let reset () = 
             setInput1 ""
             setInput2 ""
+            setActiveField (Some Partner1)
             setInputType (ProteinProtein)
             
         let setNewClickedWord (word: string) =
             match activeField with
-            |Some Partner1 -> setInput1 word
-            |Some Partner2 -> setInput2 word
+            |Some Partner1 -> setInput1 word; setActiveField (if input2 = "" then Some Partner2 else None)
+            |Some Partner2 -> setInput2 word; setActiveField (if input1 = "" then Some Partner1 else None)
             |None -> 
-                if input1 = "" then setInput1 word 
+                if input1 = "" then setInput1 word
                 elif input2 = "" then setInput2 word
                 else () // do nothing
+                
+           
             
 
         let addInteraction () : unit =
@@ -397,8 +391,8 @@ type GTtable =
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, table, setLocalStorage, setInput1, setInput2)
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, activeField) 
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
                 
             ]
             prop.key index
@@ -407,7 +401,7 @@ type GTtable =
 
     [<ReactComponent>]
     static member Main() =
-        let (activeField: ActiveField option, setActiveField) = React.useState (None)
+        let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
 
         let exAbstract = [
             {
@@ -515,7 +509,7 @@ type GTtable =
                                         t |> setTable
                                         t |> setLocalStorage
                                     log "safed" 
-                                GTtable.PaperElement(i, element, activeField,updateElement, setActiveField, i, table, setLocalStorage)
+                                GTtable.PaperElement(i, element, activeField,updateElement, setActiveField)
                             ]
                     ]
                 ]
