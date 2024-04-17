@@ -169,7 +169,7 @@ module private Helper =
             ]
         ]
 
-    let addingWords (oldInput: string) (newInput: string)=
+    let addingWords (oldInput: string, newInput: string)=
         match oldInput with
         |"" -> prop.valueOrDefault newInput
         |_ -> prop.valueOrDefault (oldInput + " " + newInput) 
@@ -190,7 +190,12 @@ module private Helper =
                 prop.onChange (fun (x:string) -> 
                     if activeFieldOption = Some activeField then setInput x
                 )
+                let inputText = () //der bereits existierende text im input Feld
+                    
+                    
+                    
                 prop.valueOrDefault partnerStrValue //use addingWords
+                addingWords (inputText, partnerStrValue)
                 prop.className "tableElement"
 
                 if activeFieldOption = Some activeField then prop.className "tableElementChecked"
