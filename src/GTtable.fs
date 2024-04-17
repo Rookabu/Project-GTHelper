@@ -189,7 +189,6 @@ module private Helper =
                     elif activeField = Some Partner2 then setInput2 x
                 )
                 prop.valueOrDefault partnerStrValue
-                //prop.onBlur (fun _ -> setField None)
                 prop.className "tableElement"
 
                 if activeField = activeField then prop.className "tableElementChecked"
@@ -232,8 +231,6 @@ module private Helper =
                             if activeField = Some Partner1 then setInput1 x 
                         )
                         prop.valueOrDefault input1
-                        //prop.onBlur (fun _ -> setField None)
-                        
                         if activeField = Some Partner1 then prop.className "tableElementChecked"
                         else prop.className "tableElement"
                     ]
@@ -253,9 +250,9 @@ module private Helper =
                             if activeField = Some Partner2 then setInput2 x
                         )
                         prop.valueOrDefault input2
-                        //prop.onBlur (fun _ -> setField None)
                         if activeField = Some Partner2  then prop.className "tableElementChecked"
                         else prop.className "tableElement"
+                        
                     ]
                 ]
 
@@ -329,10 +326,8 @@ module private Helper =
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
-
                                 if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button"
                                 else prop.className "button"
-
                                 prop.style [
                                     style.marginTop 5
                                 ]
@@ -350,11 +345,12 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, activeField, updateElement, setActiveField: option<ActiveField> -> unit) =
+    static member PaperElement (index: int, element: GTelement, updateElement) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (if index = 0 then true else false)
+        let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
         //let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let reset () = 
@@ -401,7 +397,7 @@ type GTtable =
 
     [<ReactComponent>]
     static member Main() =
-        let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
+        
 
         let exAbstract = [
             {
@@ -509,7 +505,7 @@ type GTtable =
                                         t |> setTable
                                         t |> setLocalStorage
                                     log "safed" 
-                                GTtable.PaperElement(i, element, activeField,updateElement, setActiveField)
+                                GTtable.PaperElement(i, element,updateElement)
                             ]
                     ]
                 ]
