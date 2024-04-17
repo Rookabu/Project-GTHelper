@@ -118,33 +118,22 @@ module private Helper =
                 ]
         ]
 
-    let checkHandle (checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table: GTelement list, setLocalStorage) =
+    let checkHandle (checkState: bool, setCheckState: bool -> unit) =
         Html.input [
             prop.type' "checkbox" 
             prop.onCheckedChange (fun (isChecked: bool) ->
-                if isChecked = true then setCheckState true
-                else setCheckState false
-
-                if isChecked = true && i = 0 then setCheckState1st true
-                else setCheckState1st false
+                setCheckState isChecked
             )                                              
-            prop.isChecked (
-                if i = 0 then checkState1st
-                else checkState                
-            )
+            prop.isChecked (checkState)
         ]
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, setCheckState: bool -> unit, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage) =
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool) =
+        log checkState
         Html.td [
             Daisy.collapse [
+                // prop.isChecked (checkState)
+                prop.className [if checkState then "collapse-open" else "collapse-close"]
                 prop.children [
-                    Html.input [
-                        prop.type' "checkbox"                          
-                        prop.isChecked (
-                            if i = 0 then checkState1st
-                            else checkState                
-                        )
-                    ]
                     Daisy.collapseTitle [ 
                         Daisy.cardTitle [
                             prop.style [
@@ -153,7 +142,17 @@ module private Helper =
                                 style.gap (length.rem 0.5)
                                 style.pointerEvents.unset
                             ]
-                            clickableWords (title, setNewClickedWord)
+                            if checkState then clickableWords (title, setNewClickedWord)
+                            else
+                                prop.children [
+                                    for word: string in title do
+                                        Html.span [
+                                            // prop.onMouseDown (fun _ -> setNewClickedWord word) // wo wird das wort an interaction gebunden?
+                                            prop.text word
+                                            // prop.className "hover:bg-orange-700"  
+                                            prop.style [style.cursor.pointer; style.userSelect.none] 
+                                        ]
+                                ] 
                         ]
                     ]
                     Daisy.collapseContent [
@@ -213,16 +212,67 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1, input2, inputType: InteractionType, setInputType, setInput1, setInput2) =
+    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1, setInput2) =
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
+                // Daisy.formControl [
+                //     Daisy.label [
+                //         prop.className "title" 
+                //         prop.text "Partner 1"
+                //         prop.style [style.fontSize 15]
+                //     ]
+                //     Daisy.input [
+                //         input.bordered 
+                //         input.sm 
+                //         prop.style [style.color.white; style.maxWidth 150]
+                //         prop.onClick (fun _ ->
+                //             setField (Some ActiveField.Partner1)
+                //         ) 
+                //         prop.onChange (fun (x:string) -> 
+                //             if ActiveField.Partner1 = Partner1 then setInput1 x
+                //             elif ActiveField.Partner1 = Partner2 then setInput2 x
+                //         )
+                //         prop.valueOrDefault input1
+                //         prop.onBlur (fun _ -> setField None)
+                //         prop.className "tableElement"
+
+                //         if input1 = "" then prop.className "tableElementChecked"
+                //         else prop.className "tableElement"
+                //     ]
+                // ]
+                // Daisy.formControl [
+                //     Daisy.label [
+                //         prop.className "title" 
+                //         prop.text "Partner 2"
+                //         prop.style [style.fontSize 15]
+                //     ]
+                //     Daisy.input [
+                //         input.bordered 
+                //         input.sm 
+                //         prop.style [style.color.white; style.maxWidth 150]
+                //         prop.onClick (fun _ ->
+                //             setField (Some ActiveField.Partner2)
+                //         ) 
+                //         prop.onChange (fun (x:string) -> 
+                //             if ActiveField.Partner2 = Partner1 then setInput1 x
+                //             elif ActiveField.Partner2 = Partner2 then setInput2 x
+                //         )
+                //         prop.valueOrDefault input2
+                //         prop.onBlur (fun _ -> setField None)
+                //         prop.className "tableElement"
+
+                //         if input2 = "" then prop.className "tableElementChecked"
+                //         else prop.className "tableElement"
+                //     ]
+                // ]
+
                 labelAndInputField ("Partner 1", input1, ActiveField.Partner1, setField, setInput1, setInput2)
                 labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField, setInput1, setInput2)
                 Daisy.formControl [
                     Daisy.label [
                         prop.className "title" 
-                        prop.text"InteractionType"
+                        prop.text "InteractionType"
                         prop.style [style.fontSize 15]]
                     match inputType with
                     |Other _ ->
@@ -267,16 +317,15 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, checkState1st: bool, setCheckState1st: bool -> unit, table, setLocalStorage, setInput1, setInput2) =
+    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, i: int, table, setLocalStorage, setInput1, setInput2) =
         Html.td [
             prop.className "flex"
             prop.children [
                 Daisy.collapse [
                     prop.style [style.overflow.visible]
-                    prop.tabIndex 0
                     collapse.arrow
                     prop.children [
-                        checkHandle (checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage)
+                        checkHandle (checkState, setCheckState)
                         Daisy.collapseTitle [ 
                             prop.style [
                                 style.fontSize 15
@@ -313,8 +362,8 @@ type GTtable =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
-        let (checkState: bool, setCheckState) = React.useState (false)
-        let (checkState1st: bool, setCheckState1st) = React.useState (true)
+        let (checkState: bool, setCheckState) = React.useState (if i = 0 then true else false)
+        // let (checkState1st: bool, setCheckState1st) = React.useState (true)
         //let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let reset () = 
@@ -348,8 +397,8 @@ type GTtable =
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, checkState1st, setCheckState1st, table, setLocalStorage, setInput1, setInput2)
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState) 
+                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, i, table, setLocalStorage, setInput1, setInput2)
                 
             ]
             prop.key index
