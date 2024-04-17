@@ -106,13 +106,12 @@ module private Helper =
                     ]
             ]    
 
-    let clickableWords (text, setNewClickedWord, activeField: option<ActiveField> ) =
+    let clickableWords (text, setNewClickedWord) =
         prop.children [
             for word: string in text do
                 Html.span [
                     prop.onClick (fun _ -> 
                         setNewClickedWord word 
-                        log activeField.ToString
                     ) // wo wird das wort an interaction gebunden?
                     prop.text word
                     prop.className "hover:bg-orange-700"  
@@ -143,7 +142,7 @@ module private Helper =
                                 style.gap (length.rem 0.5)
                                 style.pointerEvents.unset
                             ]
-                            if checkState then clickableWords (title, setNewClickedWord, activeField)
+                            if checkState then clickableWords (title, setNewClickedWord)
                             else
                                 prop.children [
                                     for word: string in title do
@@ -163,14 +162,18 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 15
                             ] 
-                            clickableWords (abst, setNewClickedWord, activeField)
+                            clickableWords (abst, setNewClickedWord)
                         ]
                     ]
                 ]
             ]
         ]
 
-    let labelAndInputField (title: string, partnerStrValue: string, activeField: ActiveField option, setField, setInput1, setInput2) =
+    let addingWords (oldInput: string) (newInput: string)=
+        match oldInput with
+        |"" -> prop.valueOrDefault newInput
+        |_ -> prop.valueOrDefault (oldInput + " " + newInput) 
+    let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
         Daisy.formControl [
             Daisy.label [
                 prop.className "title" 
@@ -185,13 +188,12 @@ module private Helper =
                     setField (Some activeField)
                 ) 
                 prop.onChange (fun (x:string) -> 
-                    if activeField = Some Partner1 then setInput1 x
-                    elif activeField = Some Partner2 then setInput2 x
+                    if activeFieldOption = Some activeField then setInput x
                 )
-                prop.valueOrDefault partnerStrValue
+                prop.valueOrDefault partnerStrValue //use addingWords
                 prop.className "tableElement"
 
-                if activeField = activeField then prop.className "tableElementChecked"
+                if activeFieldOption = Some activeField then prop.className "tableElementChecked"
                 else prop.className "tableElement"
             ]
         ]
@@ -212,52 +214,12 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1, setInput2, activeField: option<ActiveField> ) =
+    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1: string -> unit, setInput2: string -> unit, activeField: option<ActiveField> ) =
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
-                Daisy.formControl [
-                    Daisy.label [
-                        prop.className "title" 
-                        prop.text "Partner 1"
-                        prop.style [style.fontSize 15]
-                    ]
-                    Daisy.input [
-                        input.bordered 
-                        input.sm 
-                        prop.style [style.color.white; style.maxWidth 150]
-                        prop.onClick (fun _ -> setField (Some Partner1)) 
-                        prop.onChange (fun (x:string) -> 
-                            if activeField = Some Partner1 then setInput1 x 
-                        )
-                        prop.valueOrDefault input1
-                        if activeField = Some Partner1 then prop.className "tableElementChecked"
-                        else prop.className "tableElement"
-                    ]
-                ]
-                Daisy.formControl [
-                    Daisy.label [
-                        prop.className "title" 
-                        prop.text "Partner 2"
-                        prop.style [style.fontSize 15]
-                    ]
-                    Daisy.input [
-                        input.bordered 
-                        input.sm 
-                        prop.style [style.color.white; style.maxWidth 150]
-                        prop.onClick (fun _ ->setField (Some Partner2)) 
-                        prop.onChange (fun (x:string) -> 
-                            if activeField = Some Partner2 then setInput2 x
-                        )
-                        prop.valueOrDefault input2
-                        if activeField = Some Partner2  then prop.className "tableElementChecked"
-                        else prop.className "tableElement"
-                        
-                    ]
-                ]
-
-                // labelAndInputField ("Partner 1", input1, ActiveField.Partner1, setField, setInput1, setInput2)
-                // labelAndInputField ("Partner 2", input2, ActiveField.Partner2, setField, setInput1, setInput2)
+                labelAndInputField ("Partner 1", input1, activeField, Partner1, setField, setInput1)
+                labelAndInputField ("Partner 2", input2, activeField, Partner2, setField, setInput2)
                 Daisy.formControl [
                     Daisy.label [
                         prop.className "title" 
