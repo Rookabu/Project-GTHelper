@@ -184,7 +184,7 @@ module private Helper =
     let addingWords (oldInput: string , newInput: string)=
         match oldInput with
         |"" -> newInput
-        |_ -> newInput + " " + oldInput  
+        |_ -> oldInput + " " + newInput  
         
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
         Daisy.formControl [
@@ -203,7 +203,7 @@ module private Helper =
                 prop.onChange (fun (x:string) -> 
                     if activeFieldOption = Some activeField then setInput x
                 )
-                let oldInput = ["test"] //der bereits existierende text im input Feld
+                let oldInput = "test" //der bereits existierende text im input Feld
 
                 prop.valueOrDefault (addingWords (oldInput, partnerStrValue))
                 //prop.valueOrDefault partnerStrValue //use addingWords
