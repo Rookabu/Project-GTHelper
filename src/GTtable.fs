@@ -181,8 +181,10 @@ module private Helper =
             ]
         ]
 
-    let addingWords (oldInput: string list , newInput: string)=
-        " " + newInput :: oldInput
+    let addingWords (oldInput: string , newInput: string)=
+        match oldInput with
+        |"" -> newInput
+        |_ -> newInput + " " + oldInput  
         
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
         Daisy.formControl [
@@ -204,7 +206,7 @@ module private Helper =
                 let oldInput = ["test"] //der bereits existierende text im input Feld
 
                 prop.valueOrDefault (addingWords (oldInput, partnerStrValue))
-                prop.valueOrDefault partnerStrValue //use addingWords
+                //prop.valueOrDefault partnerStrValue //use addingWords
                 
                 prop.className "tableElement"
 
