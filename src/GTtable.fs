@@ -100,21 +100,33 @@ module private Helper =
                                     prop.onClick (fun _ ->
                                         removeInteraction i
                                     )
+                                    
                                 ]
                             ]
                         ] 
                     ]
             ]    
 
-    let clickableWords (text, setNewClickedWord) =
+    let clickableWords (text, setNewClickedWord, clickedItems, setClickedItems: string list -> unit, setLocalStorage: string ->list<string> -> unit) =
+
+        let addingItems (word: string) (list: string list) =
+            if list |> List.contains word then list //does nothing if the word is already in the list
+            else word :: clickedItems   //adds the new word to the list 
+
         prop.children [
             for word: string in text do
                 Html.span [
                     prop.onClick (fun _ -> 
                         setNewClickedWord word 
-                    ) // wo wird das wort an interaction gebunden?
+                        let nextItemlist = 
+                            clickedItems 
+                            |> addingItems word 
+                        setClickedItems nextItemlist     
+                        setLocalStorage "checkedWords" nextItemlist   
+                    )
                     prop.text word
-                    prop.className "hover:bg-orange-700"  
+                    prop.className "hover:bg-orange-700"
+                    if clickedItems |> List.contains word then prop.className "clickedText" //if word is in the List, then it changes its color
                     prop.style [style.cursor.pointer; style.userSelect.none] 
                 ]
         ]
@@ -128,7 +140,7 @@ module private Helper =
             prop.isChecked (checkState)
         ]
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, activeField) =
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, clickedItems, setClickedItems, setLocalStorage) =
         Html.td [
             Daisy.collapse [
                 // prop.isChecked (checkState)
@@ -142,7 +154,7 @@ module private Helper =
                                 style.gap (length.rem 0.5)
                                 style.pointerEvents.unset
                             ]
-                            if checkState then clickableWords (title, setNewClickedWord)
+                            if checkState then clickableWords (title, setNewClickedWord, clickedItems, setClickedItems, setLocalStorage)
                             else
                                 prop.children [
                                     for word: string in title do
@@ -162,17 +174,16 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 15
                             ] 
-                            clickableWords (abst, setNewClickedWord)
+                            clickableWords (abst, setNewClickedWord, clickedItems, setClickedItems, setLocalStorage)
                         ]
                     ]
                 ]
             ]
         ]
 
-    let addingWords (oldInput: string, newInput: string)=
-        match oldInput with
-        |"" -> prop.valueOrDefault newInput
-        |_ -> prop.valueOrDefault (oldInput + " " + newInput) 
+    let addingWords (oldInput: string list , newInput: string)=
+        " " + newInput :: oldInput
+        
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
         Daisy.formControl [
             Daisy.label [
@@ -184,18 +195,17 @@ module private Helper =
                 input.bordered 
                 input.sm 
                 prop.style [style.color.white; style.maxWidth 150]
-                prop.onClick (fun _ ->
+                prop.onMouseDown (fun _ ->
                     setField (Some activeField)
                 ) 
                 prop.onChange (fun (x:string) -> 
                     if activeFieldOption = Some activeField then setInput x
                 )
-                let inputText = () //der bereits existierende text im input Feld
-                    
-                    
-                    
+                let oldInput = ["test"] //der bereits existierende text im input Feld
+
+                prop.valueOrDefault (addingWords (oldInput, partnerStrValue))
                 prop.valueOrDefault partnerStrValue //use addingWords
-                addingWords (inputText, partnerStrValue)
+                
                 prop.className "tableElement"
 
                 if activeFieldOption = Some activeField then prop.className "tableElementChecked"
@@ -312,12 +322,18 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, updateElement) =
+    static member PaperElement (index: int, element: GTelement, updateElement, isLocalStorageClear, setLocalStorage) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (if index = 0 then true else false)
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
+
+        let initialCheckedWords (key: string) =
+            if isLocalStorageClear key () = true then []
+            else Json.parseAs<string list> (Browser.WebStorage.localStorage.getItem key)
+
+        let (clickedItems: string list, setClickedItems) = React.useState (initialCheckedWords "checkedWords")
         //let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let reset () = 
@@ -354,7 +370,7 @@ type GTtable =
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, activeField) 
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, clickedItems, setClickedItems, setLocalStorage) 
                 Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
                 
             ]
@@ -392,21 +408,21 @@ type GTtable =
         ]
 
 
-        let isLocalStorageClear () =
-            match (Browser.WebStorage.localStorage.getItem "GTlist") with
+        let isLocalStorageClear (key:string) () =
+            match (Browser.WebStorage.localStorage.getItem key) with
             | null -> true // Local storage is clear if the item doesn't exist
             | _ -> false //if false then something exists and the else case gets started
 
-        let initialwert =
-            if isLocalStorageClear () = true then exAbstract
-            else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem "GTlist")  
+        let initialTable (key: string) =
+            if isLocalStorageClear key () = true then exAbstract
+            else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem key)  
 
-        let (table, setTable) = React.useState (initialwert)
+        let (table, setTable) = React.useState (initialTable "GTlist")
 
-        let setLocalStorage (nextTable: GTelement list) =
+        let setLocalStorage (key: string)(nextTable: 'a list) =
             let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
             //Browser.Dom.console.log (JSONString) 
-            Browser.WebStorage.localStorage.setItem("GTlist",JSONString) //local storage wird gesettet
+            Browser.WebStorage.localStorage.setItem(key,JSONString) //local storage wird gesettet
             
         Html.div [
             prop.className "childstyle"
@@ -470,9 +486,9 @@ type GTtable =
                                     )
                                     |> fun t ->
                                         t |> setTable
-                                        t |> setLocalStorage
+                                        t |> setLocalStorage "GTlist"
                                     log "safed" 
-                                GTtable.PaperElement(i, element,updateElement)
+                                GTtable.PaperElement(i, element, updateElement, isLocalStorageClear, setLocalStorage)
                             ]
                     ]
                 ]
