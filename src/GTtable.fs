@@ -448,18 +448,22 @@ type GTtable =
                     style.paddingLeft 100
                     style.paddingRight 100
                   ]
+                  
                   prop.children [
-                    Daisy.button.button [
-                        button.md
-                        prop.className "button"
-                        prop.onClick (fun _ ->())
-                        prop.text "Upload abstracts"
+                    Daisy.formControl [
+                        Daisy.button.button [
+                            button.md
+                            prop.className "button"
+                            prop.onClick (fun _ -> 
+                                fileGetter()
+                            )
+                            
+                            prop.text "Upload abstracts"
+                        ]
                     ]
-                    
                     Daisy.button.button [
                         button.md
                         prop.className "button"
-                        //prop.className 
                         prop.onClick (fun _ ->())
                         prop.text "Download table"
                     ]
