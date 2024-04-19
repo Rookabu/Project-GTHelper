@@ -132,12 +132,14 @@ module private Helper =
             prop.isChecked (checkState)
         ]
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, interactionWordList, activeWordList) =
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, interactionWordList, activeWordList, setCheckState) =
         Html.td [
             Daisy.collapse [
                 // prop.isChecked (checkState)
-                prop.className [if checkState then "collapse-open" else "collapse-close"]
+                
+                prop.className [if checkState then "collapse-open"]
                 prop.children [
+                    if checkState = false then checkHandle (checkState, setCheckState) 
                     Daisy.collapseTitle [ 
                         Daisy.cardTitle [
                             prop.style [
@@ -369,7 +371,7 @@ type GTtable =
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList) 
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
                 Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
                 
             ]
