@@ -107,26 +107,18 @@ module private Helper =
                     ]
             ]    
 
-    let clickableWords (text, setNewClickedWord, clickedItems, setClickedItems: string list -> unit, setLocalStorage: string ->list<string> -> unit) =
-
-        let addingItems (word: string) (list: string list) =
-            if list |> List.contains word then list //does nothing if the word is already in the list
-            else word :: clickedItems   //adds the new word to the list 
+    let clickableWords (text, setNewClickedWord, interactionWordList: string list, activeWordList: string[]) =
 
         prop.children [
             for word: string in text do
                 Html.span [
                     prop.onClick (fun _ -> 
                         setNewClickedWord word 
-                        let nextItemlist = 
-                            clickedItems 
-                            |> addingItems word 
-                        setClickedItems nextItemlist     
-                        setLocalStorage "checkedWords" nextItemlist   
                     )
                     prop.text word
                     prop.className "hover:bg-orange-700"
-                    if clickedItems |> List.contains word then prop.className "clickedText" //if word is in the List, then it changes its color
+                    if interactionWordList |> List.contains word then prop.className "clickedText"
+                    if activeWordList |> Array.contains word then prop.className "clickedTextActive" //if word is in the List, then it changes its color
                     prop.style [style.cursor.pointer; style.userSelect.none] 
                 ]
         ]
@@ -140,7 +132,7 @@ module private Helper =
             prop.isChecked (checkState)
         ]
 
-    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, clickedItems, setClickedItems, setLocalStorage) =
+    let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, interactionWordList, activeWordList) =
         Html.td [
             Daisy.collapse [
                 // prop.isChecked (checkState)
@@ -154,7 +146,7 @@ module private Helper =
                                 style.gap (length.rem 0.5)
                                 style.pointerEvents.unset
                             ]
-                            if checkState then clickableWords (title, setNewClickedWord, clickedItems, setClickedItems, setLocalStorage)
+                            if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
                             else
                                 prop.children [
                                     for word: string in title do
@@ -174,18 +166,14 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 15
                             ] 
-                            clickableWords (abst, setNewClickedWord, clickedItems, setClickedItems, setLocalStorage)
+                            clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
                         ]
                     ]
                 ]
             ]
         ]
 
-    let addingWords (oldInput: string , newInput: string)=
-        match oldInput with
-        |"" -> newInput
-        |_ -> oldInput + " " + newInput  
-        
+
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
         Daisy.formControl [
             Daisy.label [
@@ -193,6 +181,7 @@ module private Helper =
                 prop.text title
                 prop.style [style.fontSize 15]
             ]
+
             Daisy.input [
                 input.bordered 
                 input.sm 
@@ -203,9 +192,7 @@ module private Helper =
                 prop.onChange (fun (x:string) -> 
                     if activeFieldOption = Some activeField then setInput x
                 )
-                let oldInput = "test" //der bereits existierende text im input Feld
-
-                prop.valueOrDefault (addingWords (oldInput, partnerStrValue))
+                prop.valueOrDefault (partnerStrValue)
                 //prop.valueOrDefault partnerStrValue //use addingWords
                 
                 prop.className "tableElement"
@@ -331,30 +318,40 @@ type GTtable =
         let (checkState: bool, setCheckState) = React.useState (if index = 0 then true else false)
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
 
-        let initialCheckedWords (key: string) =
-            if isLocalStorageClear key () = true then []
-            else Json.parseAs<string list> (Browser.WebStorage.localStorage.getItem key)
+        let interactionWordList: string list = [
+            for interactions in element.Interactions do
+                yield! interactions.Partner1.Split([|' '|])
+                yield! interactions.Partner2.Split([|' '|])
+        ] 
 
-        let (clickedItems: string list, setClickedItems) = React.useState (initialCheckedWords "checkedWords")
+        let activeWordList: string array = 
+            input1.Split([|' '|])|> Array.append (input2.Split([|' '|])) //merged input 1 und input 2, welches gesplitet wurden nach whitespace
+            //input 1/2 sind nur die aktuellen angeklcikten wörter, nach add interaction sind diese wieder ein leerer String
+                 
         //let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
-
         let reset () = 
             setInput1 ""
             setInput2 ""
             setActiveField (Some Partner1)
-            setInputType (ProteinProtein)
+            setInputType (ProteinProtein)//input liste muss auch resettet werden
             
         let setNewClickedWord (word: string) =
             match activeField with
-            |Some Partner1 -> setInput1 word; setActiveField (if input2 = "" then Some Partner2 else None)
-            |Some Partner2 -> setInput2 word; setActiveField (if input1 = "" then Some Partner1 else None)
+            |Some Partner1 -> 
+                // let inputlist: string list = []
+                // let listexample = inputlist@List.singleton word
+                // let listexamplePropValue = inputlist |> String.concat " "
+                let newInput = if input1 = "" then word else input1 + " " + word
+                setInput1 newInput
+                setActiveField (if input2 = "" then Some Partner2 else None)
+            |Some Partner2 -> 
+                let newInput = if input2 = "" then word else input2 + " " + word
+                setInput2 newInput 
+                setActiveField (if input1 = "" then Some Partner1 else None)
             |None -> 
                 if input1 = "" then setInput1 word
                 elif input2 = "" then setInput2 word
                 else () // do nothing
-                
-           
-            
 
         let addInteraction () : unit =
             let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
@@ -372,7 +369,7 @@ type GTtable =
         Html.tr [
             prop.children [
                 Html.td (index + 1)
-                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, clickedItems, setClickedItems, setLocalStorage) 
+                Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList) 
                 Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
                 
             ]
@@ -383,7 +380,6 @@ type GTtable =
     [<ReactComponent>]
     static member Main() =
         
-
         let exAbstract = [
             {
                 Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
@@ -408,7 +404,6 @@ type GTtable =
                 Interactions = [] 
             }
         ]
-
 
         let isLocalStorageClear (key:string) () =
             match (Browser.WebStorage.localStorage.getItem key) with

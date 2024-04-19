@@ -39,6 +39,12 @@ body {
   color: #ed7d31 
 }
 
+.clickedTextActive {
+  color: #9bc67e 
+}
+
+
+
 .clickedText:hover {
   color: white;
   background-color: #8e4b1d; 
