@@ -5,7 +5,7 @@ open Feliz
 open Feliz.DaisyUI
 open Fable.SimpleJson
 open Fable.Core.JsInterop
-
+open Browser
 
 type InteractionType =
     |ProteinProtein
@@ -319,7 +319,7 @@ type GTtable =
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (if index = 0 then true else false)
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
-
+        
         let interactionWordList: string list = [
             for interactions in element.Interactions do
                 yield! interactions.Partner1.Split([|' '|])
@@ -330,7 +330,6 @@ type GTtable =
             input1.Split([|' '|])|> Array.append (input2.Split([|' '|])) //merged input 1 und input 2, welches gesplitet wurden nach whitespace
             //input 1/2 sind nur die aktuellen angeklcikten wörter, nach add interaction sind diese wieder ein leerer String
                  
-        //let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
         let reset () = 
             setInput1 ""
             setInput2 ""
@@ -361,7 +360,6 @@ type GTtable =
             updateElement newElement
             reset()
             
-   
         let removeInteraction (index): unit =
             let newInteractions = element.Interactions |> List.removeAt index
             let newElement = {element with Interactions = newInteractions}
@@ -381,7 +379,9 @@ type GTtable =
 
     [<ReactComponent>]
     static member Main() =
-        
+        let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
+        let (fileContent, setFileContent) = React.useState ""
+
         let exAbstract = [
             {
                 Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
@@ -422,7 +422,36 @@ type GTtable =
             let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
             //Browser.Dom.console.log (JSONString) 
             Browser.WebStorage.localStorage.setItem(key,JSONString) //local storage wird gesettet
+
+        let focusFileGetter() =
+            match inputRef.current with
+            | None -> ()
+            | Some element ->
+                element?click()
+
+        let content(fileContent:string)= 
+            fileContent.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries)
+            |> Array.mapi (fun i x -> if i % 2 = 1 then Some(x) else None) //every second string is the content
+            |> Array.choose id
+            |> Array.toList
+            |> log
             
+        let title(fileContent:string) = 
+            fileContent.Split([|"\n";"\n\n"|], System.StringSplitOptions.RemoveEmptyEntries)
+            |> Array.mapi (fun i x -> if i % 2 = 1 then None else Some(x)) //every 1st and third string is the title
+            |> Array.choose id
+            |> Array.toList
+            |> log
+            
+
+        // let abstracts = [
+        //     {
+        //         Title = title fileContent
+        //         Content = content fileContent
+        //         Interactions = [] 
+        //     }
+        // ]
+
         Html.div [
             prop.className "childstyle"
             prop.children [
@@ -448,18 +477,33 @@ type GTtable =
                     style.paddingLeft 100
                     style.paddingRight 100
                   ]
-                  
                   prop.children [
                     Daisy.formControl [
                         Daisy.button.button [
                             button.md
                             prop.className "button"
-                            prop.onClick (fun _ -> 
-                                fileGetter()
+                            prop.onClick (fun _ ->
+                                focusFileGetter()
                             )
-                            
                             prop.text "Upload abstracts"
                         ]
+                        Daisy.input [
+                            prop.type' "file"
+                            prop.ref inputRef
+                            file.ghost
+                            prop.hidden true
+                            prop.accept ".txt, .csv, .tsv"
+                            prop.onChange (fun (file: Browser.Types.File) ->
+                                let reader = FileReader.Create() //creates a file reader
+                                reader.onload <- fun e -> 
+                                    let allContent:string = e.target?result //reads the file after a load and prints it as a string
+                                    log allContent
+                                    content allContent 
+                                file.slice()
+                                |> reader.readAsText //reads the file as a text
+                                //setTable abstracts
+                            )
+                        ] 
                     ]
                     Daisy.button.button [
                         button.md
@@ -469,6 +513,7 @@ type GTtable =
                     ]
                   ]
                 ]
+                
                 Daisy.table [
                     prop.style [
                         style.fontSize 16
