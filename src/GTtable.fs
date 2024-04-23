@@ -380,7 +380,6 @@ type GTtable =
     [<ReactComponent>]
     static member Main() =
         let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
-        let (fileContent, setFileContent) = React.useState ""
 
         let exAbstract = [
             {
@@ -420,7 +419,6 @@ type GTtable =
 
         let setLocalStorage (key: string)(nextTable: 'a list) =
             let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
-            //Browser.Dom.console.log (JSONString) 
             Browser.WebStorage.localStorage.setItem(key,JSONString) //local storage wird gesettet
 
         let focusFileGetter() =
@@ -429,28 +427,35 @@ type GTtable =
             | Some element ->
                 element?click()
 
-        let content(fileContent:string)= 
-            fileContent.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries)
-            |> Array.mapi (fun i x -> if i % 2 = 1 then Some(x) else None) //every second string is the content
+        let mergePairs (words: string array) =
+            words
+            |> Array.mapi (fun i x -> 
+                if i % 2 = 0 && i + 1 < Array.length words then //wenn es das 1 und 3. word ist aber immernoch kleiner wie die aktuelle länge dann merge das word mit dem nächsten
+                    Some (x + "\n" + words.[i + 1])
+                else None
+            )
             |> Array.choose id
-            |> Array.toList
-            |> log
-            
-        let title(fileContent:string) = 
-            fileContent.Split([|"\n";"\n\n"|], System.StringSplitOptions.RemoveEmptyEntries)
-            |> Array.mapi (fun i x -> if i % 2 = 1 then None else Some(x)) //every 1st and third string is the title
-            |> Array.choose id
-            |> Array.toList
-            |> log
-            
 
-        // let abstracts = [
-        //     {
-        //         Title = title fileContent
-        //         Content = content fileContent
-        //         Interactions = [] 
-        //     }
-        // ]
+        let parsePaperText (txt: string) =
+            let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries) 
+            log publications//split paper from each other
+            let pubmergPairs = publications |> mergePairs
+            log pubmergPairs
+            pubmergPairs
+            |> Array.map (fun (pub: string) ->
+            let split = pub.Split ("\n") //split = array of content and title
+            //split from each string in the array between one paragraph
+            // if split.Length <> 2 then failwith "Unknown format for publication."
+            let title, content = split[0], split[1] //0 is title, 1 is content
+            let titleWords = Helper.splitTextIntoWords title
+            let contentWords = Helper.splitTextIntoWords content 
+            {
+                Title = titleWords
+                Content = contentWords
+                Interactions = []
+            }
+            )
+            |> Array.toList
 
         Html.div [
             prop.className "childstyle"
@@ -497,11 +502,11 @@ type GTtable =
                                 let reader = FileReader.Create() //creates a file reader
                                 reader.onload <- fun e -> 
                                     let allContent:string = e.target?result //reads the file after a load and prints it as a string
-                                    log allContent
-                                    content allContent 
+                                    let newAbstract = parsePaperText allContent
+                                    setTable newAbstract
+                                    setLocalStorage "GTlist" newAbstract 
                                 file.slice()
                                 |> reader.readAsText //reads the file as a text
-                                //setTable abstracts
                             )
                         ] 
                     ]
