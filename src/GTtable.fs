@@ -58,7 +58,7 @@ module private Helper =
             Html.tr [
                 prop.className "title"
                 prop.style [
-                    style.fontSize 15
+                    style.fontSize 16
                 ]
                 prop.children [
                     Html.th "Nr."
@@ -143,7 +143,7 @@ module private Helper =
                     Daisy.collapseTitle [ 
                         Daisy.cardTitle [
                             prop.style [
-                                style.fontSize 15
+                                style.fontSize 16
                                 style.display.flex
                                 style.gap (length.rem 0.5)
                                 style.pointerEvents.unset
@@ -166,7 +166,7 @@ module private Helper =
                             prop.style [
                                 style.flexDirection.row
                                 style.flexWrap.wrap
-                                style.fontSize 15
+                                style.fontSize 16
                             ] 
                             clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
                         ]
@@ -181,7 +181,7 @@ module private Helper =
             Daisy.label [
                 prop.className "title" 
                 prop.text title
-                prop.style [style.fontSize 15]
+                prop.style [style.fontSize 16]
             ]
 
             Daisy.input [
@@ -230,7 +230,7 @@ module private Helper =
                     Daisy.label [
                         prop.className "title" 
                         prop.text "InteractionType"
-                        prop.style [style.fontSize 15]]
+                        prop.style [style.fontSize 16]]
                     match inputType with
                     |Other _ ->
                        Daisy.input [
@@ -250,7 +250,7 @@ module private Helper =
                             button.sm
                             prop.style [
                                 style.width 135
-                                style.fontSize 15  
+                                style.fontSize 16  
                             ]                                            
                             prop.text (inputType.ToStringRdb())
                             prop.className "tableElement"
@@ -259,7 +259,7 @@ module private Helper =
                             prop.className "p-1 shadow menu sm-base-150"
                             prop.style [
                                 style.width 140
-                                style.fontSize 15
+                                style.fontSize 16
                                 style.zIndex 2
                             ]
                             prop.tabIndex 0
@@ -285,7 +285,7 @@ module private Helper =
                         checkHandle (checkState, setCheckState)
                         Daisy.collapseTitle [ 
                             prop.style [
-                                style.fontSize 15
+                                style.fontSize 16
                             ]  
                             prop.text "Interactions"
                         ]
@@ -313,7 +313,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, updateElement, isLocalStorageClear, setLocalStorage) =
+    static member PaperElement (index: int, element: GTelement, updateElement) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -339,9 +339,6 @@ type GTtable =
         let setNewClickedWord (word: string) =
             match activeField with
             |Some Partner1 -> 
-                // let inputlist: string list = []
-                // let listexample = inputlist@List.singleton word
-                // let listexamplePropValue = inputlist |> String.concat " "
                 let newInput = if input1 = "" then word else input1 + " " + word
                 setInput1 newInput
                 setActiveField (if input2 = "" then Some Partner2 else None)
@@ -462,7 +459,7 @@ type GTtable =
             prop.children [
                 Daisy.card [
                     prop.style [
-                        style.fontSize 15
+                        style.fontSize 16
                         style.maxWidth 700
                         style.textAlign.justify
                     ] 
@@ -498,7 +495,7 @@ type GTtable =
                             file.ghost
                             prop.hidden true
                             prop.accept ".txt, .csv, .tsv"
-                            prop.onChange (fun (file: Browser.Types.File) ->
+                            prop.onChange (fun (file: Types.File) ->
                                 let reader = FileReader.Create() //creates a file reader
                                 reader.onload <- fun e -> 
                                     let allContent:string = e.target?result //reads the file after a load and prints it as a string
@@ -520,10 +517,10 @@ type GTtable =
                 ]
                 
                 Daisy.table [
-                    prop.style [
-                        style.fontSize 16
-                        style.maxWidth 1500
-                    ]
+                    // prop.style [
+                    //     style.fontSize 16
+                    //     style.maxWidth 80
+                    // ]
                     prop.children [
                         Helper.headerRow
                         Html.tbody [
@@ -541,7 +538,7 @@ type GTtable =
                                         t |> setTable
                                         t |> setLocalStorage "GTlist"
                                     log "safed" 
-                                GTtable.PaperElement(i, element, updateElement, isLocalStorageClear, setLocalStorage)
+                                GTtable.PaperElement(i, element, updateElement)
                             ]
                     ]
                 ]

@@ -43,8 +43,6 @@ body {
   color: #9bc67e 
 }
 
-
-
 .clickedText:hover {
   color: white;
   background-color: #8e4b1d; 
@@ -59,7 +57,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem
+    gap: 2rem;
+    font-size: 16
 }
 
 .tableElement {
