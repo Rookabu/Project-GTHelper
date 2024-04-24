@@ -68,14 +68,14 @@ module private Helper =
             ]
         ]
 
-    let minitable(interactions: Interaction list, removeInteraction: int -> unit) =
-        // match interactions with
-        // | [] -> Html.none
-        // | _ ->
+    let minitable(interactionState: Interaction list, removeInteraction: int -> unit) =
+        match interactionState with
+        | [] -> Html.none
+        | _ ->
             Daisy.table [
                 Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
-                for i in 0 .. (interactions.Length - 1) do  
-                    let interaction = List.item i interactions
+                for i in 0 .. (interactionState.Length - 1) do  
+                    let interaction = List.item i interactionState
                     Html.tbody [
                         Html.tr [
                             Html.td [
@@ -108,7 +108,6 @@ module private Helper =
             ]    
 
     let clickableWords (text, setNewClickedWord, interactionWordList: string list, activeWordList: string[]) =
-
         prop.children [
             for word: string in text do
                 Html.span [
@@ -152,9 +151,7 @@ module private Helper =
                                 prop.children [
                                     for word: string in title do
                                         Html.span [
-                                            // prop.onMouseDown (fun _ -> setNewClickedWord word) // wo wird das wort an interaction gebunden?
-                                            prop.text word
-                                            // prop.className "hover:bg-orange-700"  
+                                            prop.text word  
                                             prop.style [style.cursor.pointer; style.userSelect.none] 
                                         ]
                                 ] 
@@ -273,12 +270,21 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactions: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField) =
+    let tableCellInteractions (interactionState: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField) =
+        // Daisy.indicator [
+        //     Daisy.indicatorItem [
+        //         prop.className "badge badge-secondary"
+        //         prop.text "New"
+        //     ]
+        //     Html.div [
+        //         prop.className "grid w-32 h-32 bg-base-300 place-items-center"
+        //         prop.text "Content"
+        //     ]
+        // ]
         Html.td [
             prop.className "flex"
             prop.children [
                 Daisy.collapse [
-                    prop.style [style.overflow.visible]
                     collapse.arrow
                     prop.children [
                         checkHandle (checkState, setCheckState)
@@ -302,7 +308,7 @@ module private Helper =
                                     addInteraction()
                                 )
                             ]
-                            minitable(interactions, removeInteraction)
+                            minitable(interactionState, removeInteraction)
                         ]
                     ]
                 ]
@@ -312,7 +318,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, updateElement) =
+    static member PaperElement (index: int, element: GTelement, setInteractionState: list<Interaction> -> unit, interactionState: list<Interaction>, setLocalStorage, updateElement) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -320,7 +326,7 @@ type GTtable =
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
         
         let interactionWordList: string list = [
-            for interactions in element.Interactions do
+            for interactions in interactionState do
                 yield! interactions.Partner1.Split([|' '|])
                 yield! interactions.Partner2.Split([|' '|])
         ] 
@@ -350,23 +356,24 @@ type GTtable =
                 elif input2 = "" then setInput2 word
                 else () // do nothing
 
+            
         let addInteraction () : unit =
             let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
-            let newElement = {element with Interactions = newInteraction::element.Interactions}
-            updateElement newElement
+            let newTableState = {element with Interactions = newInteraction::element.Interactions}
+            updateElement newTableState //should get an interaction 
             reset()
             
         let removeInteraction (index): unit =
-            let newInteractions = element.Interactions |> List.removeAt index
-            let newElement = {element with Interactions = newInteractions}
-            updateElement newElement 
+            let newInteractions = interactionState |> List.removeAt index
+            updateElement newInteractions
+ 
       
 
         Html.tr [
             prop.children [
                 Html.td (index + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
-                Helper.tableCellInteractions (element.Interactions, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
+                Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
                 
             ]
             prop.key index
@@ -376,6 +383,17 @@ type GTtable =
     [<ReactComponent>]
     static member Main() =
         let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
+
+        let isLocalStorageClear (key:string) () =
+            match (Browser.WebStorage.localStorage.getItem key) with
+            | null -> true // Local storage is clear if the item doesn't exist
+            | _ -> false //if false then something exists and the else case gets started
+
+        let initialInteraction (key: string) =
+            if isLocalStorageClear key () = true then []
+            else Json.parseAs<Interaction list> (Browser.WebStorage.localStorage.getItem key)  
+
+        let (interactionState: Interaction list, setInteractionState) = React.useState (initialInteraction "Interaction")
 
         let exAbstract = [
             {
@@ -387,7 +405,7 @@ type GTtable =
                     A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
                     Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
                     indicating that RDO5 functions by suppressing APUM transcript levels."
-                Interactions = [] 
+                Interactions = interactionState
             }
             {
                 Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -398,18 +416,15 @@ type GTtable =
                     The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
                     promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
                     This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-                Interactions = [] 
+                Interactions = interactionState
             }
         ]
 
-        let isLocalStorageClear (key:string) () =
-            match (Browser.WebStorage.localStorage.getItem key) with
-            | null -> true // Local storage is clear if the item doesn't exist
-            | _ -> false //if false then something exists and the else case gets started
 
         let initialTable (key: string) =
             if isLocalStorageClear key () = true then exAbstract
             else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem key)  
+
 
         let (table, setTable) = React.useState (initialTable "GTlist")
 
@@ -441,14 +456,13 @@ type GTtable =
             |> Array.map (fun (pub: string) ->
             let split = pub.Split ("\n") //split = array of content and title
             //split from each string in the array between one paragraph
-            // if split.Length <> 2 then failwith "Unknown format for publication."
             let title, content = split[0], split[1] //0 is title, 1 is content
             let titleWords = Helper.splitTextIntoWords title
             let contentWords = Helper.splitTextIntoWords content 
             {
                 Title = titleWords
                 Content = contentWords
-                Interactions = []
+                Interactions = interactionState
             }
             )
             |> Array.toList
@@ -523,8 +537,8 @@ type GTtable =
                         Html.tbody [
                             for i in 0 .. (table.Length - 1)  do //für jedes Element in table wird folgendes gemacht:
                                 let element = List.item i table
-                                let updateElement (element': GTelement) =
-                                    table
+                                let updateElement (element': Interaction) =
+                                    interactionState
                                     |> List.mapi (fun indx a ->
                                         if indx = i then 
                                             element'
@@ -532,10 +546,10 @@ type GTtable =
                                             a
                                     )
                                     |> fun t ->
-                                        t |> setTable
-                                        t |> setLocalStorage "GTlist"
-                                    log "safed" 
-                                GTtable.PaperElement(i, element, updateElement)
+                                        t |> setInteractionState
+                                        t |> setLocalStorage "Interaction"
+                                    log "safed"  
+                                GTtable.PaperElement(i, element, setInteractionState, interactionState, setLocalStorage, updateElement)
                             ]
                     ]
                 ]
