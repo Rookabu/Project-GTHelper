@@ -136,20 +136,19 @@ module private Helper =
         Html.td [
             Daisy.collapse [
                 // prop.isChecked (checkState)
-                
                 prop.className [if checkState then "collapse-open"]
                 prop.children [
                     if checkState = false then checkHandle (checkState, setCheckState) 
                     Daisy.collapseTitle [ 
                         Daisy.cardTitle [
                             prop.style [
+                                style.width 900
                                 style.fontSize 16
-                                style.display.flex
-                                style.gap (length.rem 0.5)
                                 style.pointerEvents.unset
+                                style.flexWrap.wrap
                             ]
                             if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
-                            else
+                            else //checkSate = false
                                 prop.children [
                                     for word: string in title do
                                         Html.span [
@@ -459,7 +458,6 @@ type GTtable =
             prop.children [
                 Daisy.card [
                     prop.style [
-                        style.fontSize 16
                         style.maxWidth 700
                         style.textAlign.justify
                     ] 
@@ -517,10 +515,9 @@ type GTtable =
                 ]
                 
                 Daisy.table [
-                    // prop.style [
-                    //     style.fontSize 16
-                    //     style.maxWidth 80
-                    // ]
+                    prop.style [
+                        style.maxWidth 1
+                    ]
                     prop.children [
                         Helper.headerRow
                         Html.tbody [
