@@ -558,7 +558,7 @@ type GTtable =
                                 //             t |> setLocalStorage "Interaction"
                                 //         log "safed"   
                                 let updateElement (elementList: Interaction list) (index: int)  =
-                                    interactionState
+                                    elementList
                                     |> List.mapi (fun indx a ->
                                         if indx = index then elementList.Item index 
                                         else a
