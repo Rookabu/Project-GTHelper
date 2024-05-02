@@ -10,15 +10,15 @@ let addInteraction (newInteraction: interaction, pubIndex: int, state:Map<int, i
         match valueOption with
         | Some list -> Some (newInteraction::extractedList)   //if option is some then replace nextlist
         | None -> None 
-    if state.IsEmpty = true then state.Add (pubIndex, [newInteraction]) //if empty then add list
-    else state.Change (pubIndex, change) //if not empty then change
+    if state.IsEmpty = true then state.Add (pubIndex, [newInteraction]) //if empty then add list with the given pubIndex
+    else state.Change (pubIndex, change) //if not empty then change the given list and add the new interaction to the list
    
 open Expecto //patronum
 
 let tests = testList "main" [
     testCase "emptyState" (fun _ -> 
         let state: Map<int, interaction list> = Map.empty
-        printfn "%A" state
+        printfn "KABOOM %A" state
         let interaction: interaction = "13"
         let pubIndex = 2
         let actual = addInteraction (interaction, pubIndex, state)
