@@ -68,14 +68,14 @@ module private Helper =
             ]
         ]
 
-    let minitable(interactionState: Interaction list, removeInteraction: int -> unit) =
-        match interactionState with
+    let minitable(interactionState: Map<int, Interaction list>, removeInteraction: int -> unit, index:int) =
+        match (Map.find index interactionState) with
         | [] -> Html.none
         | _ ->
             Daisy.table [
                 Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
-                for i in 0 .. (interactionState.Length - 1) do  
-                    let interaction = List.item i interactionState
+                for i in 0 .. ((Map.find index interactionState).Length - 1) do  
+                    let interaction = List.item i (Map.find index interactionState)
                     Html.tbody [
                         Html.tr [
                             Html.td [
@@ -270,7 +270,7 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactionState: Interaction list, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction,index, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField) =
+    let tableCellInteractions (interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, index, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField) =
         // Daisy.indicator [
         //     Daisy.indicatorItem [
         //         prop.className "badge badge-secondary"
@@ -308,7 +308,7 @@ module private Helper =
                                     addInteraction index
                                 )
                             ]
-                            minitable(interactionState, removeInteraction)
+                            minitable(interactionState, removeInteraction, index)
                         ]
                     ]
                 ]
@@ -318,7 +318,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, interactionState: list<Interaction>, updateElement: Interaction list -> int -> unit) =
+    static member PaperElement (index: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: Interaction list -> int -> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -326,7 +326,7 @@ type GTtable =
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
         
         let interactionWordList: string list = [
-            for interactions in interactionState do
+            for interactions in (Map.find index interactionState) do
                 yield! interactions.Partner1.Split([|' '|])
                 yield! interactions.Partner2.Split([|' '|])
         ] 
@@ -358,12 +358,12 @@ type GTtable =
 
         let addInteraction (index) : unit =
             let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
-            let newInteractionState = newInteraction::interactionState
+            let newInteractionState = newInteraction::(Map.find index interactionState)
             updateElement newInteractionState index //should get an interaction, not a list
             reset()
             
         let removeInteraction (index): unit =
-            let newInteractions = interactionState |> List.removeAt index
+            let newInteractions = (Map.find index interactionState) |> List.removeAt index
             updateElement newInteractions index
  
         Html.tr [
@@ -378,7 +378,7 @@ type GTtable =
         
 
     [<ReactComponent>]
-    static member Main() =
+    static member Main(index: int) =
         let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let isLocalStorageClear (key:string) () =
@@ -387,10 +387,10 @@ type GTtable =
             | _ -> false //if false then something exists and the else case gets started
 
         let initialInteraction (key: string) =
-            if isLocalStorageClear key () = true then []
-            else Json.parseAs<Interaction list> (Browser.WebStorage.localStorage.getItem key)  
+            if isLocalStorageClear key () = true then Map.empty
+            else Json.parseAs<Map<int, Interaction list>> (Browser.WebStorage.localStorage.getItem key)  
 
-        let (interactionState: Interaction list, setInteractionState) = React.useState (initialInteraction "Interaction")
+        let (interactionState: Map<int, Interaction list>, setInteractionState) = React.useState (initialInteraction "Interaction")
 
         let exAbstract = [
             {
@@ -402,7 +402,7 @@ type GTtable =
                     A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
                     Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
                     indicating that RDO5 functions by suppressing APUM transcript levels."
-                Interactions = interactionState
+                Interactions = Map.find index interactionState
             }
             {
                 Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -413,7 +413,7 @@ type GTtable =
                     The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
                     promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
                     This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-                Interactions = interactionState
+                Interactions = Map.find index interactionState
             }
         ]
 
@@ -458,7 +458,7 @@ type GTtable =
             {
                 Title = titleWords
                 Content = contentWords
-                Interactions = interactionState
+                Interactions = Map.find index interactionState
             }
             )
             |> Array.toList
