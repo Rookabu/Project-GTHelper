@@ -559,7 +559,7 @@ type GTtable =
                                 //         log "safed"   
                                 let updateElement (elementList: Interaction list) (index: int)  =
                                     elementList
-                                    |> List.mapi (fun indx a ->
+                                    |> List.mapi (fun indx a -> // a = interaction
                                         if indx = index then elementList.Item index 
                                         else a
                                     )
