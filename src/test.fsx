@@ -6,20 +6,19 @@ let setState: Map<int, interaction list> -> unit = fun _ -> ()
 
 let addInteraction (newInteraction: interaction, pubIndex: int, state:Map<int, interaction list>) =
     let extractedList = Map.find pubIndex state //aktuelle liste am index
-    let nextList = newInteraction :: extractedList
     let change (valueOption:option<interaction list>) =
         match valueOption with
-        | Some extractedList -> Some nextList //if option is some then replace nextlist
-        | None -> None //if empty then also nextlist
-    if state.IsEmpty = true then state.Add (pubIndex, nextList) 
-    else state.Change (pubIndex, change) //if not empty
-
-    
-open Expecto
+        | Some list -> Some (newInteraction::list)   //if option is some then replace nextlist
+        | None -> None 
+    if state.IsEmpty = true then state.Add (pubIndex, [newInteraction]) //if empty then add list
+    else state.Change (pubIndex, change) //if not empty then change
+   
+open Expecto //patronum
 
 let tests = testList "main" [
     testCase "emptyState" (fun _ -> 
-        let state: Map<int, interaction list>  = Map.empty
+        let state: Map<int, interaction list> = Map.empty
+        printfn "%A" state
         let interaction: interaction = "13"
         let pubIndex = 2
         let actual = addInteraction (interaction, pubIndex, state)
