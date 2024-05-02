@@ -8,7 +8,7 @@ let addInteraction (newInteraction: interaction, pubIndex: int, state:Map<int, i
     let extractedList = Map.find pubIndex state //aktuelle liste am index
     let change (valueOption:option<interaction list>) =
         match valueOption with
-        | Some list -> Some (newInteraction::list)   //if option is some then replace nextlist
+        | Some list -> Some (newInteraction::extractedList)   //if option is some then replace nextlist
         | None -> None 
     if state.IsEmpty = true then state.Add (pubIndex, [newInteraction]) //if empty then add list
     else state.Change (pubIndex, change) //if not empty then change
@@ -25,14 +25,14 @@ let tests = testList "main" [
         let expected = Map<int, interaction list> ([pubIndex,["13"]])
         Expect.equal actual expected "fail"
         )
-    // testCase "notEmptyState" (fun _ -> 
-    //     let pubIndex = 2
-    //     let state = Map<int, interaction list>  ([pubIndex,["13"]])
-    //     let interaction: interaction = "14"
-    //     let actual = addInteraction (interaction, pubIndex, state)
-    //     let expected = Map<int, interaction list> ([pubIndex,["14";"13"]])
-    //     Expect.equal actual expected "fail"
-    //     )
+    testCase "notEmptyState" (fun _ -> 
+        let pubIndex = 2
+        let state = Map<int, interaction list>  ([pubIndex,["13"]])
+        let interaction: interaction = "14"
+        let actual = addInteraction (interaction, pubIndex, state)
+        let expected = Map<int, interaction list> ([pubIndex,["14";"13"]])
+        Expect.equal actual expected "fail"
+        )
 ]
 
 runTestsWithCLIArgs [] [||] tests
