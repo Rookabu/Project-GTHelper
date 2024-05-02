@@ -1,9 +1,10 @@
 ﻿module GTHelper
 open Expecto
-type interaction = obj
 
 [<EntryPoint>]
 let main argv =
+
+    type interaction = obj
 
     let addInteraction (newInteraction: interaction, pubIndex: int, state:Map<int, interaction list>) =
         let change (valueOption:option<interaction list>) =
@@ -14,8 +15,6 @@ let main argv =
         // |> fun t ->
         //     t |> setState
         //if not empty then change the given list and add the new interaction to the list
-    
-    open Expecto //patronum
 
     let tests = testList "main" [
         testCase "emptyState" (fun _ -> 
