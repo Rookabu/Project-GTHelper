@@ -1,22 +1,42 @@
+#r "nuget: Expecto, 10.2.1"
+
 type interaction = obj
-let state: Map<int, interaction list>  = Map.empty
-let setState: Map<int, interaction list> -> unit
+let state: Map<int, interaction list>  = Map.empty //key= number of publication 
+let setState: Map<int, interaction list> -> unit = fun _ -> ()
 
+let addInteraction (newInteraction: interaction, pubIndex: int, state:Map<int, interaction list>) =
+    let extractedList = Map.find pubIndex state //aktuelle liste am index
+    let nextList = newInteraction :: extractedList
+    let change (valueOption:option<interaction list>) =
+        match valueOption with
+        | Some extractedList -> Some nextList //if option is some then replace nextlist
+        | None -> None //if empty then also nextlist
+    if state.IsEmpty = true then state.Add (pubIndex, nextList) 
+    else state.Change (pubIndex, change) //if not empty
 
-let addInteraction (newInteraction: interaction, pubIndex: int) =
-    let sampleInterlist: interaction list = []
-    let newInteractionList = newInteraction :: sampleInterlist   
-    let change pubIndex =
-        match pubIndex with
-        | Some s -> Some (newInteractionList)
-        | None -> None
-    if state.IsEmpty = true then state.Add (pubIndex, newInteractionList) 
-    else state.Change (pubIndex, change) 
-    |> fun t ->
-        t |> setState
+    
+open Expecto
 
+let tests = testList "main" [
+    testCase "emptyState" (fun _ -> 
+        let state: Map<int, interaction list>  = Map.empty
+        let interaction: interaction = "13"
+        let pubIndex = 2
+        let actual = addInteraction (interaction, pubIndex, state)
+        let expected = Map<int, interaction list> ([pubIndex,["13"]])
+        Expect.equal actual expected "fail"
+        )
+    // testCase "notEmptyState" (fun _ -> 
+    //     let pubIndex = 2
+    //     let state = Map<int, interaction list>  ([pubIndex,["13"]])
+    //     let interaction: interaction = "14"
+    //     let actual = addInteraction (interaction, pubIndex, state)
+    //     let expected = Map<int, interaction list> ([pubIndex,["14";"13"]])
+    //     Expect.equal actual expected "fail"
+    //     )
+]
 
-
+runTestsWithCLIArgs [] [||] tests
 
 //1. überprüfe ob dieser index bereits interactions hat 
 //2a. Falls Ja: bestehende Interaction bekommen, neue Interaction an bestehende interactions dranhängen
