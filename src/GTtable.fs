@@ -169,7 +169,6 @@ module private Helper =
             ]
         ]
 
-
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
         Daisy.formControl [
             Daisy.label [
@@ -177,7 +176,6 @@ module private Helper =
                 prop.text title
                 prop.style [style.fontSize 16]
             ]
-
             Daisy.input [
                 input.bordered 
                 input.sm 
@@ -355,22 +353,28 @@ type GTtable =
             |Some Partner1 -> 
                 let newInput = if input1 = "" then word else input1 + " " + word
                 setInput1 newInput
+                log "setted input 1"
                 setActiveField (if input2 = "" then Some Partner2 else None)
             |Some Partner2 -> 
                 let newInput = if input2 = "" then word else input2 + " " + word
                 setInput2 newInput 
+                log "setted input 2"
                 setActiveField (if input1 = "" then Some Partner1 else None)
             |None -> 
                 if input1 = "" then setInput1 word
                 elif input2 = "" then setInput2 word
                 else () // do nothing
 
-        let addInteraction (newInteraction: Interaction, pubIndex: int, state:Map<int, Interaction list>) =
-            match state.TryFind pubIndex with
-            | Some list -> (newInteraction::list) //if the option is this list then add the interaction to this list
-            | None -> [newInteraction]  //if empty, than  just the new interaction
-            |> updateElement pubIndex 
-            reset()
+        let addInteraction (newInteraction: Interaction, pubIndex: int, state: Map<int, Interaction list>) =
+            // let nextList =
+            //     match state.TryFind pubIndex with //try to find a list at the index
+            //     | Some list -> (newInteraction::list)//if the option is a list then add the interaction to this list
+            //     | None -> [newInteraction]  //if empty/None, then just the new interaction
+            // nextList 
+            // |> updateElement pubIndex 
+            // reset()
+            if state.IsEmpty = true then state.Add (pubIndex, [newInteraction])
+            else newInteraction::state.Item
 
         let removeInteraction (pubIndex: int, state:Map<int, Interaction list>, listIndx: int) =
             match state.TryFind pubIndex with
@@ -385,7 +389,6 @@ type GTtable =
                 Html.td (pubIndex + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
                 Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
-                
             ]
             prop.key pubIndex
         ]
@@ -574,13 +577,14 @@ type GTtable =
                                 let updateElement(index: int) (interList: Interaction list) =
                                     interactionState
                                     |> Map.map (fun ix list ->
-                                        if ix = index then interList
+                                        if index = ix then interList //if the index matches, then use interlist, else just use the already existing list
                                         else list
                                     )
                                     |> fun t ->
                                         t |> setInteractionState
                                         t |> setLocalStorageInteraction "Interaction"
-                                    log "safed"
+                                    log "safed Interactions"
+                                    log interactionState
                                 GTtable.PaperElement(i, element, interactionState, updateElement)
                         ]
                     ]
