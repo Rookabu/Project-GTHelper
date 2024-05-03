@@ -30,7 +30,6 @@ type GTelement = {
     Title: string list 
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
-    Interactions: Interaction list 
 }
 
 type ActiveField = 
@@ -68,14 +67,14 @@ module private Helper =
             ]
         ]
 
-    let minitable(interactionState: Map<int, Interaction list>, removeInteraction: int -> unit, index:int) =
-        match (Map.find index interactionState) with
+    let minitable(interactionState: Map<int, Interaction list>, interactionList: Interaction list, removeInteraction: int * Map<int,list<Interaction>> * int -> unit, pubIndex: int) =
+        match interactionList with
         | [] -> Html.none
         | _ ->
             Daisy.table [
                 Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
-                for i in 0 .. ((Map.find index interactionState).Length - 1) do  
-                    let interaction = List.item i (Map.find index interactionState)
+                for i in 0 .. interactionList.Length - 1 do  
+                    let interaction = List.item i interactionList
                     Html.tbody [
                         Html.tr [
                             Html.td [
@@ -98,9 +97,8 @@ module private Helper =
                                     button.xs
                                     prop.className "button"
                                     prop.onClick (fun _ ->
-                                        removeInteraction i
-                                    )
-                                    
+                                        removeInteraction (pubIndex, interactionState, i)
+                                    )                                    
                                 ]
                             ]
                         ] 
@@ -256,7 +254,7 @@ module private Helper =
                             prop.style [
                                 style.width 140
                                 style.fontSize 16
-                                style.zIndex 2
+                                style.zIndex 1000
                             ]
                             prop.tabIndex 0
                             prop.children [
@@ -270,7 +268,10 @@ module private Helper =
             ]
         ]
 
-    let tableCellInteractions (interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, addInteraction, index, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField) =
+    let tableCellInteractions (
+        interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, 
+        addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField
+        ) =
         // Daisy.indicator [
         //     Daisy.indicatorItem [
         //         prop.className "badge badge-secondary"
@@ -305,10 +306,15 @@ module private Helper =
                                     style.marginTop 5
                                 ]
                                 prop.onClick (fun _ ->
-                                    addInteraction index
+                                    let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
+                                    addInteraction (newInteraction, pubIndex, interactionState) 
                                 )
                             ]
-                            minitable(interactionState, removeInteraction, index)
+                            let interactionList = 
+                                match Map.tryFind pubIndex interactionState with
+                                |Some list -> list
+                                |None -> [] 
+                            minitable(interactionState, interactionList, removeInteraction, pubIndex)
                         ]
                     ]
                 ]
@@ -318,17 +324,20 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (index: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: Interaction list -> int -> unit) =
+    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
-        let (checkState: bool, setCheckState) = React.useState (if index = 0 then true else false)
+        let (checkState: bool, setCheckState) = React.useState (if pubIndex = 0 then true else false)
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
         
         let interactionWordList: string list = [
-            for interactions in (Map.find index interactionState) do
-                yield! interactions.Partner1.Split([|' '|])
-                yield! interactions.Partner2.Split([|' '|])
+            match (Map.tryFind pubIndex interactionState) with
+            |Some interactions ->
+                for interaction in interactions do
+                    yield! interaction.Partner1.Split([|' '|])
+                    yield! interaction.Partner2.Split([|' '|])
+            |None -> ()
         ] 
 
         let activeWordList: string array = 
@@ -356,29 +365,33 @@ type GTtable =
                 elif input2 = "" then setInput2 word
                 else () // do nothing
 
-        let addInteraction (index) : unit =
-            let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
-            let newInteractionState = newInteraction::(Map.find index interactionState)
-            updateElement newInteractionState index //should get an interaction, not a list
+        let addInteraction (newInteraction: Interaction, pubIndex: int, state:Map<int, Interaction list>) =
+            match state.TryFind pubIndex with
+            | Some list -> (newInteraction::list) //if the option is this list then add the interaction to this list
+            | None -> [newInteraction]  //if empty, than  just the new interaction
+            |> updateElement pubIndex 
             reset()
-            
-        let removeInteraction (index): unit =
-            let newInteractions = (Map.find index interactionState) |> List.removeAt index
-            updateElement newInteractions index
- 
+
+        let removeInteraction (pubIndex: int, state:Map<int, Interaction list>, listIndx: int) =
+            match state.TryFind pubIndex with
+            | Some list -> Some (list |> List.removeAt listIndx) //if the option is this list then remove this Interaction
+            | None -> None //if not, do nothing 
+            |> function 
+                | Some updatedList -> updateElement pubIndex updatedList 
+                | None -> ()
+
         Html.tr [
             prop.children [
-                Html.td (index + 1)
+                Html.td (pubIndex + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
-                Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, index, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
+                Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
                 
             ]
-            prop.key index
+            prop.key pubIndex
         ]
         
-
     [<ReactComponent>]
-    static member Main(index: int) =
+    static member Main() =
         let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let isLocalStorageClear (key:string) () =
@@ -402,7 +415,6 @@ type GTtable =
                     A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
                     Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
                     indicating that RDO5 functions by suppressing APUM transcript levels."
-                Interactions = Map.find index interactionState
             }
             {
                 Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
@@ -413,13 +425,11 @@ type GTtable =
                     The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
                     promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
                     This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-                Interactions = Map.find index interactionState
             }
         ]
 
-
         let initialTable (key: string) =
-            if isLocalStorageClear key () = true then exAbstract
+            if isLocalStorageClear key () = true then exAbstract 
             else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem key)  
 
         let (table, setTable) = React.useState (initialTable "GTlist")
@@ -427,6 +437,11 @@ type GTtable =
         let setLocalStorage (key: string)(nextTable: 'a list) =
             let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
             Browser.WebStorage.localStorage.setItem(key,JSONString) //local storage wird gesettet
+
+        let setLocalStorageInteraction (key: string)(nextInter: Map<int, Interaction list>) =
+            let JSONString = Json.stringify nextInter //tabelle wird zu einem string convertiert
+            Browser.WebStorage.localStorage.setItem(key, JSONString)
+        
 
         let focusFileGetter() =
             match inputRef.current with
@@ -458,7 +473,6 @@ type GTtable =
             {
                 Title = titleWords
                 Content = contentWords
-                Interactions = Map.find index interactionState
             }
             )
             |> Array.toList
@@ -557,15 +571,15 @@ type GTtable =
                                 //             t |> setInteractionState
                                 //             t |> setLocalStorage "Interaction"
                                 //         log "safed"   
-                                let updateElement (elementList: Interaction list) (index: int)  =
-                                    elementList
-                                    |> List.mapi (fun indx a -> // a = interaction
-                                        if indx = index then elementList.Item index 
-                                        else a
+                                let updateElement(index: int) (interList: Interaction list) =
+                                    interactionState
+                                    |> Map.map (fun ix list ->
+                                        if ix = index then interList
+                                        else list
                                     )
                                     |> fun t ->
                                         t |> setInteractionState
-                                        t |> setLocalStorage "Interaction"
+                                        t |> setLocalStorageInteraction "Interaction"
                                     log "safed"
                                 GTtable.PaperElement(i, element, interactionState, updateElement)
                         ]
