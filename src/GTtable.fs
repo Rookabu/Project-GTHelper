@@ -280,10 +280,14 @@ module private Helper =
                     prop.children [
                         checkHandle (checkState, setCheckState)
                         Daisy.collapseTitle [ 
-                            prop.style [
+                            Daisy.badge [
+                                badge.lg
+                                prop.style [
                                 style.fontSize 16
-                            ]  
-                            prop.text 0 //replace with counter
+                                ] 
+                                badge.info
+                                prop.text 0
+                            ] //replace with counter
                         ]
                         Daisy.collapseContent [
                             form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField)
