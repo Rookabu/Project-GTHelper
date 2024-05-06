@@ -315,7 +315,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit, setInteractionState:Map<int,list<Interaction>>-> unit) =
+    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -546,7 +546,7 @@ type GTtable =
                                         t |> setInteractionState
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
-                                GTtable.PaperElement(i, element, interactionState, updateElement, setInteractionState)
+                                GTtable.PaperElement(i, element, interactionState, updateElement)
                         ]
                     ]
                 ]
