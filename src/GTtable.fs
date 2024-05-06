@@ -322,7 +322,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit) =
+    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit, setInteractionState:Map<int,list<Interaction>>-> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -366,16 +366,15 @@ type GTtable =
                 else () // do nothing
 
         let addInteraction (newInteraction: Interaction, pubIndex: int, state: Map<int, Interaction list>) =
-            log (state.TryFind pubIndex)
+            log state
             let nextList =
                 match state.TryFind pubIndex with //try to find a list at the index
                 | Some list -> (newInteraction::list)//if the option is a list then add the interaction to this list
                 | None -> [newInteraction]  //if empty/None, then just the new interaction
             nextList 
             |> updateElement pubIndex 
-            reset()
+            reset()   
             
-
         let removeInteraction (pubIndex: int, state:Map<int, Interaction list>, listIndx: int) =
             match state.TryFind pubIndex with
             | Some list -> Some (list |> List.removeAt listIndx) //if the option is this list then remove this Interaction
@@ -547,42 +546,14 @@ type GTtable =
                         Helper.headerRow
                         Html.tbody [
                             for i in 0 .. (table.Length - 1)  do //für jedes Element in table wird folgendes gemacht:
-                                let element = List.item i table
-                                // for e in 0 .. (interactionState.Length - 1)  do
-                                //     let interElement = List.item e interactionState
-                                // let addElement (element': Interaction) =
-                                //     let newInterList = element'::interactionState
-                                //     newInterList
-                                    // |> List.mapi (fun indx a ->
-                                    //     if indx = index then element' //if index correct, then use this element, else just use the element before (a)
-                                    //     else a 
-                                    // )
-                                //         |> fun t ->
-                                //             t |> setInteractionState
-                                //             t |> setLocalStorage "Interaction"
-                                //         log "safed" 
-                                // let removeElement (element': Interaction)(index:int) =
-                                //     interactionState
-                                //     |> List.removeAt index
-                                //         |> List.mapi (fun indx a ->
-                                //             if indx = index then element'
-                                //             else a 
-                                //         )
-                                //         |> fun t ->
-                                //             t |> setInteractionState
-                                //             t |> setLocalStorage "Interaction"
-                                //         log "safed"   
+                                let element = List.item i table  
                                 let updateElement(index: int) (interList: Interaction list) =
-                                    interactionState
-                                    |> Map.map (fun ix list ->
-                                        if index = ix then interList //if the index matches, then use interlist, else just use the already existing list
-                                        else list
-                                    )
+                                    interactionState.Add (index, interList)
                                     |> fun t ->
                                         t |> setInteractionState
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
-                                GTtable.PaperElement(i, element, interactionState, updateElement)
+                                GTtable.PaperElement(i, element, interactionState, updateElement, setInteractionState)
                         ]
                     ]
                 ]
