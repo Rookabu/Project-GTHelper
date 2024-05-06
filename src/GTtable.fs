@@ -366,15 +366,15 @@ type GTtable =
                 else () // do nothing
 
         let addInteraction (newInteraction: Interaction, pubIndex: int, state: Map<int, Interaction list>) =
-            // let nextList =
-            //     match state.TryFind pubIndex with //try to find a list at the index
-            //     | Some list -> (newInteraction::list)//if the option is a list then add the interaction to this list
-            //     | None -> [newInteraction]  //if empty/None, then just the new interaction
-            // nextList 
-            // |> updateElement pubIndex 
-            // reset()
-            if state.IsEmpty = true then state.Add (pubIndex, [newInteraction])
-            else newInteraction::state.Item
+            log (state.TryFind pubIndex)
+            let nextList =
+                match state.TryFind pubIndex with //try to find a list at the index
+                | Some list -> (newInteraction::list)//if the option is a list then add the interaction to this list
+                | None -> [newInteraction]  //if empty/None, then just the new interaction
+            nextList 
+            |> updateElement pubIndex 
+            reset()
+            
 
         let removeInteraction (pubIndex: int, state:Map<int, Interaction list>, listIndx: int) =
             match state.TryFind pubIndex with
@@ -462,10 +462,8 @@ type GTtable =
             |> Array.choose id
 
         let parsePaperText (txt: string) =
-            let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries) 
-            log publications//split paper from each other
+            let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries) //split paper from each other
             let pubmergPairs = publications |> mergePairs
-            log pubmergPairs
             pubmergPairs
             |> Array.map (fun (pub: string) ->
             let split = pub.Split ("\n") //split = array of content and title
@@ -584,7 +582,6 @@ type GTtable =
                                         t |> setInteractionState
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
-                                    log interactionState
                                 GTtable.PaperElement(i, element, interactionState, updateElement)
                         ]
                     ]
