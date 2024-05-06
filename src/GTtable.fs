@@ -62,7 +62,7 @@ module private Helper =
                 prop.children [
                     Html.th "Nr."
                     Html.th "Title"
-                    Html.th ""
+                    Html.th "Interactions"
                 ]
             ]
         ]
@@ -248,11 +248,12 @@ module private Helper =
                             prop.className "tableElement"
                         ]
                         Daisy.dropdownContent [
-                            prop.className "p-1 shadow menu sm-base-150"
+                            prop.className "p-1 shadow menu sm-base-200"
                             prop.style [
-                                style.width 140
+                                style.width 145
                                 style.fontSize 16
-                                style.zIndex 1000
+                                style.zIndex 10
+                                
                             ]
                             prop.tabIndex 0
                             prop.children [
@@ -270,20 +271,11 @@ module private Helper =
         interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, 
         addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField
         ) =
-        // Daisy.indicator [
-        //     Daisy.indicatorItem [
-        //         prop.className "badge badge-secondary"
-        //         prop.text "New"
-        //     ]
-        //     Html.div [
-        //         prop.className "grid w-32 h-32 bg-base-300 place-items-center"
-        //         prop.text "Content"
-        //     ]
-        // ]
         Html.td [
             prop.className "flex"
             prop.children [
                 Daisy.collapse [
+                    prop.className "overflow-visible"
                     collapse.arrow
                     prop.children [
                         checkHandle (checkState, setCheckState)
@@ -291,7 +283,7 @@ module private Helper =
                             prop.style [
                                 style.fontSize 16
                             ]  
-                            prop.text "Interactions"
+                            prop.text 0 //replace with counter
                         ]
                         Daisy.collapseContent [
                             form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField)
@@ -301,7 +293,8 @@ module private Helper =
                                 if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button"
                                 else prop.className "button"
                                 prop.style [
-                                    style.marginTop 5
+                                    style.marginTop 10 //style of add button
+                                    style.alignItems.center
                                 ]
                                 prop.onClick (fun _ ->
                                     let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
@@ -444,7 +437,6 @@ type GTtable =
             let JSONString = Json.stringify nextInter //tabelle wird zu einem string convertiert
             Browser.WebStorage.localStorage.setItem(key, JSONString)
         
-
         let focusFileGetter() =
             match inputRef.current with
             | None -> ()
@@ -541,6 +533,7 @@ type GTtable =
                 Daisy.table [
                     prop.style [
                         style.maxWidth 1
+                        style.textAlign.center
                     ]
                     prop.children [
                         Helper.headerRow
