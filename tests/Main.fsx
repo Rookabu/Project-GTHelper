@@ -1,13 +1,8 @@
 ﻿#r "nuget: Expecto, 10.2.1"
 
-module GTHelper
-
-
-// [<EntryPoint>]
-let main argv =
-
 type interaction = obj
-
+let state: Map<int, interaction list>  = Map.empty //key= number of publication 
+let setState: Map<int, interaction list> -> unit = fun _ -> ()
 let addInteraction (newInteraction: interaction, pubIndex: int, state:Map<int, interaction list>) =
     let change (valueOption:option<interaction list>) =
         match valueOption with
@@ -17,8 +12,8 @@ let addInteraction (newInteraction: interaction, pubIndex: int, state:Map<int, i
     // |> fun t ->
     //     t |> setState
     //if not empty then change the given list and add the new interaction to the list
-
-open Expecto
+   
+open Expecto //patronum
 
 let tests = testList "main" [
     testCase "emptyState" (fun _ -> 
