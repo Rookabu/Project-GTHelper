@@ -540,13 +540,13 @@ type GTtable =
                         button.md
                         prop.className "button"
                         prop.onClick (fun _ ->
-                            let downLoad fileName fileContent =
+                            let downLoad fileName csvTable =
                                 let anchor = Browser.Dom.document.createElement "a"
-                                let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
+                                let encodedContent = csvTable |> sprintf "data:text/plain;charset=utf-8,%A" |> Fable.Core.JS.encodeURI
                                 anchor.setAttribute("href",  encodedContent)
                                 anchor.setAttribute("download", fileName)
                                 anchor.click()
-                            downLoad "GT-dataset" "hihi"
+                            downLoad "GT-dataset.csv" "csvPlaceholder"
                         )
                         prop.text "Download table"
                     ]

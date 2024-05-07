@@ -18,5 +18,6 @@
     <PackageReference Include="Feliz" Version="2.7.0" />
     <PackageReference Include="Feliz.Router" Version="4.0.0" />
     <PackageReference Include="Feliz.DaisyUI" Version="4.2.0" />
+    <PackageReference Include="FSharpAux.IO" Version="2.0.0" />
   </ItemGroup>
 </Project>
