@@ -77,6 +77,18 @@ body {
   border-color: #44546a;
 }
 
+.textCard {
+  background-color:#698ed0;
+  color: white;
+  border-color: #698ed0 ;
+}
+
+.textCardError {
+  background-color:#CE4B61;
+  color: white;
+  border-color: #CE4B61 ;
+}
+
 
 
 

@@ -60,9 +60,9 @@ module private Helper =
                     style.fontSize 16
                 ]
                 prop.children [
-                    Html.th "Nr."
+                    Html.th "No."
                     Html.th "Title"
-                    Html.th "Interactions"
+                    Html.th "No. of Interactions"
                 ]
             ]
         ]
@@ -285,11 +285,18 @@ module private Helper =
                                 prop.style [
                                 style.fontSize 16
                                 ] 
-                                badge.info
+                                let list =
+                                        match interactionState.TryFind pubIndex with 
+                                        | Some list -> list.Length
+                                        | None -> 0
+
+                                // badge.info
+
+                                if list = 0 then prop.className "textCardError"
+                                else prop.className "textCard"
                                 prop.text (
-                                    match interactionState.TryFind pubIndex with //try to find a list at the index
-                                    | Some list -> list.Length   //if the option is a list then add the interaction to this list
-                                    | None -> 0
+                                    if list = 0 then "unedited"
+                                    else list.ToString()
                                 )
                             ] //replace with counter
                         ]
@@ -532,7 +539,15 @@ type GTtable =
                     Daisy.button.button [
                         button.md
                         prop.className "button"
-                        prop.onClick (fun _ ->())
+                        prop.onClick (fun _ ->
+                            let downLoad fileName fileContent =
+                                let anchor = Browser.Dom.document.createElement "a"
+                                let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
+                                anchor.setAttribute("href",  encodedContent)
+                                anchor.setAttribute("download", fileName)
+                                anchor.click()
+                            downLoad "GT-dataset" "hihi"
+                        )
                         prop.text "Download table"
                     ]
                   ]
