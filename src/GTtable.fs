@@ -286,7 +286,11 @@ module private Helper =
                                 style.fontSize 16
                                 ] 
                                 badge.info
-                                prop.text 0
+                                prop.text (
+                                    match interactionState.TryFind pubIndex with //try to find a list at the index
+                                    | Some list -> list.Length   //if the option is a list then add the interaction to this list
+                                    | None -> 0
+                                )
                             ] //replace with counter
                         ]
                         Daisy.collapseContent [
