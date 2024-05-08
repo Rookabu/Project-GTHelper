@@ -576,17 +576,15 @@ type GTtable =
                                     ) 
                                     |> Map.toList
                                     |> List.map snd
-                                List.zip 
-                                    (List.zip interactionspartner1 interactionspartner2) 
-                                    (List.zip interactionType title)
-                                |> List.map (fun ((ip1,ip2),(it,t)) ->
+
+                                [for i in [0 .. (title.Length - 1)] do
                                     {
-                                        Title= t.Title |> String.concat " " 
-                                        Partner1 = ip1
-                                        Partner2 = ip2
-                                        InteractionType = it
-                                    }    
-                                )
+                                        Title= title.[i].Title |> String.concat " " 
+                                        Partner1 = interactionspartner1.[i]
+                                        Partner2 = interactionspartner2.[i]
+                                        InteractionType = interactionType.[i]
+                                    } 
+                                ] 
 
                             let GTparseToCSV (table: finishedTable list) =
                                 Seq.CSV "\t" true false table |> String.concat "\n" //werden durch \t in colums getrennt und die list durch \n
@@ -602,7 +600,7 @@ type GTtable =
 
                             downLoad "GT-datasetTEST.csv" "hihi"
                         )
-                        prop.text "Download table"
+                        prop.text "Download CABLE"
                     ]
                   ]
                 ]

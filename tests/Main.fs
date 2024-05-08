@@ -72,19 +72,19 @@ let finsihedList (title: GTelement list) (interaction:Map<int, Interaction list>
         ) 
         |> Map.toList
         |> List.map snd
-    List.zip 
-        (List.zip interactionspartner1 interactionspartner2) 
-        (List.zip interactionType title)
-    |> List.map (fun ((ip1,ip2),(it,t)) ->
-        {
-            Title= t.Title |> String.concat " " 
-            Partner1 = ip1
-            Partner2 = ip2
-            InteractionType = it
-        }    
-    )
+    // List.zip 
+    //     (List.zip interactionspartner1 interactionspartner2) 
+    //     (List.zip interactionType title)
+    // |> List.map (fun ((ip1,ip2),(it,t)) ->
 
-    
+    [for i in [0 .. (title.Length - 1)] do
+        {
+            Title= title.[i].Title |> String.concat " " 
+            Partner1 = interactionspartner1.[i]
+            Partner2 = interactionspartner2.[i]
+            InteractionType = interactionType.[i]
+        } 
+    ]   
 
 let GTparseToCSV (table: finishedTable list) =
     SeqIO.Seq.CSV "\t" true false table |> String.concat "\n"      
