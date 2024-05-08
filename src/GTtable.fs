@@ -6,6 +6,7 @@ open Feliz.DaisyUI
 open Fable.SimpleJson
 open Fable.Core.JsInterop
 open Browser
+open FSharpAux.IO
 
 type InteractionType =
     |ProteinProtein
@@ -35,6 +36,13 @@ type GTelement = {
 type ActiveField = 
     |Partner1
     |Partner2
+
+type finishedTable = {
+    Title: string 
+    Partner1: string
+    Partner2: string
+    InteractionType: string
+}
 
 module List =
   let rec removeAt index list =
@@ -540,13 +548,59 @@ type GTtable =
                         button.md
                         prop.className "button"
                         prop.onClick (fun _ ->
+                            let finsihedList (title: GTelement list) (interaction:Map<int, Interaction list>) =
+                                let interactionspartner1 = //Mappt über interaction list und geht in jeder interaction list per key in die erste interaction (header)
+                                    interaction
+                                    |> Map.map (fun (a:int) (i: Interaction list) ->
+                                        match i with
+                                        |list -> list.Head.Partner1 
+                                    ) // -> gibt eine map aus strings raus
+                                    |> Map.toList
+                                    |> List.map snd
+                                    
+
+                                let interactionspartner2 =
+                                    interaction
+                                    |> Map.map (fun (a:int) (i: Interaction list) ->
+                                        match i with
+                                        |list -> list.Head.Partner2 
+                                    )
+                                    |> Map.toList
+                                    |> List.map snd
+
+                                let interactionType =
+                                    interaction
+                                    |> Map.map (fun (a:int) (i: Interaction list) ->
+                                        match i with
+                                        |list -> list.Head.InteractionType.ToStringRdb()
+                                    ) 
+                                    |> Map.toList
+                                    |> List.map snd
+                                List.zip 
+                                    (List.zip interactionspartner1 interactionspartner2) 
+                                    (List.zip interactionType title)
+                                |> List.map (fun ((ip1,ip2),(it,t)) ->
+                                    {
+                                        Title= t.Title |> String.concat " " 
+                                        Partner1 = ip1
+                                        Partner2 = ip2
+                                        InteractionType = it
+                                    }    
+                                )
+
+                            let GTparseToCSV (table: finishedTable list) =
+                                Seq.CSV "\t" true false table |> String.concat "\n" //werden durch \t in colums getrennt und die list durch \n
+
+                            let csvString = GTparseToCSV (finsihedList table interactionState) 
+
                             let downLoad fileName csvTable =
                                 let anchor = Browser.Dom.document.createElement "a"
                                 let encodedContent = csvTable |> sprintf "data:text/plain;charset=utf-8,%A" |> Fable.Core.JS.encodeURI
                                 anchor.setAttribute("href",  encodedContent)
                                 anchor.setAttribute("download", fileName)
                                 anchor.click()
-                            downLoad "GT-dataset.csv" "csvPlaceholder"
+
+                            downLoad "GT-datasetTEST.csv" "hihi"
                         )
                         prop.text "Download table"
                     ]
