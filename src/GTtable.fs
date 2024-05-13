@@ -6,7 +6,6 @@ open Feliz.DaisyUI
 open Fable.SimpleJson
 open Fable.Core.JsInterop
 open Browser
-open FSharpAux.IO
 
 type InteractionType =
     |ProteinProtein
@@ -37,7 +36,7 @@ type ActiveField =
     |Partner1
     |Partner2
 
-type finishedTable = {
+type FinishedTable = {
     Title: string 
     Partner1: string
     Partner2: string
@@ -586,10 +585,10 @@ type GTtable =
                                     } 
                                 ] 
 
-                            let GTparseToCSV (table: finishedTable list) =
-                                Seq.CSV "\t" true false table |> String.concat "\n" //werden durch \t in colums getrennt und die list durch \n
+                            let gTparseToCSV (table: FinishedTable list) =
+                                "" //werden durch \t in colums getrennt und die list durch \n
 
-                            let csvString = GTparseToCSV (finsihedList table interactionState) 
+                            let csvString = gTparseToCSV (finsihedList table interactionState) 
 
                             let downLoad fileName csvTable =
                                 let anchor = Browser.Dom.document.createElement "a"
