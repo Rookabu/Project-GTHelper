@@ -585,8 +585,9 @@ type GTtable =
                                     } 
                                 ] 
 
-                            let gTparseToCSV (table: FinishedTable list) =
-                                "" //werden durch \t in colums getrennt und die list durch \n
+                            let gTparseToCSV (table: FinishedTable list) = //funktion welche die liste in csv umwandelt
+                                "" 
+                                
 
                             let csvString = gTparseToCSV (finsihedList table interactionState) 
 
@@ -597,9 +598,9 @@ type GTtable =
                                 anchor.setAttribute("download", fileName)
                                 anchor.click()
 
-                            downLoad "GT-datasetTEST.csv" "hihi"
+                            downLoad "GT-dataset.csv" "hihi"
                         )
-                        prop.text "Download CABLE"
+                        prop.text "Download FABLE"
                     ]
                   ]
                 ]
