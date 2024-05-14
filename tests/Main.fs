@@ -1,11 +1,11 @@
 ﻿open Expecto //patronum
 open Components
-open FSharpAux.IO
+
 
 
 //index = key
 
-type finishedTable = {
+type FinishedTable = {
     Title: string 
     Partner1: string
     Partner2: string
@@ -30,68 +30,58 @@ let interactionState = Map [
     (2, [{Partner1 = "KARL"; Partner2 = "COLUMBUS"; InteractionType = ProteineGene}])
     ]
 
-let finsihedList (title: GTelement list) (interaction:Map<int, Interaction list>)=
-    //gets the first interaction/element of each list
-    // let interactionspartner1 =
-    //     match interaction.TryFind index with
-    //     |Some list -> list.Head.Partner1
-    //     |None -> "" 
+let finsihedList (table: GTelement list) (interaction:Map<int, Interaction list>)=
+
+     //Mappt über interaction list und geht in jeder interaction list per key in die erste interaction (header)
+        // interaction
+        // |> Map.map (fun (a:int) (i: Interaction list) ->
+        //     match i with
+        //     |list -> list.Head.Partner1 
+        // ) // -> gibt eine map aus strings raus
+        // |> Map.toList
+        // |> List.map snd
+    let bigList =
+        interaction |> Map.toList |> List.map snd 
+
     // let interactionspartner2 =
-    //     match interaction.TryFind index with
-    //     |Some list -> list.Head.Partner2
-    //     |None -> "" 
+    //     interaction
+    //     |> Map.map (fun (a:int) (i: Interaction list) ->
+    //         match i with
+    //         |list -> list.Head.Partner2 
+    //     )
+    //     |> Map.toList
+    //     |> List.map snd
+
     // let interactionType =
-    //     match interaction.TryFind index with
-    //     |Some list -> list.Head.InteractionType.ToStringRdb()
-    //     |None -> "" 
+    //     interaction
+    //     |> Map.map (fun (a:int) (i: Interaction list) ->
+    //         match i with
+    //         |list -> list.Head.InteractionType.ToStringRdb()
+    //     ) 
+    //     |> Map.toList
+    //     |> List.map snd
 
-    let interactionspartner1 = //Mappt über interaction list und geht in jeder interaction list per key in die erste interaction (header)
-        interaction
-        |> Map.map (fun (a:int) (i: Interaction list) ->
-            match i with
-            |list -> list.Head.Partner1 
-        ) // -> gibt eine map aus strings raus
-        |> Map.toList
-        |> List.map snd
-        
-
-    let interactionspartner2 =
-        interaction
-        |> Map.map (fun (a:int) (i: Interaction list) ->
-            match i with
-            |list -> list.Head.Partner2 
-        )
-        |> Map.toList
-        |> List.map snd
-
-    let interactionType =
-        interaction
-        |> Map.map (fun (a:int) (i: Interaction list) ->
-            match i with
-            |list -> list.Head.InteractionType.ToStringRdb()
-        ) 
-        |> Map.toList
-        |> List.map snd
-    // List.zip 
-    //     (List.zip interactionspartner1 interactionspartner2) 
-    //     (List.zip interactionType title)
-    // |> List.map (fun ((ip1,ip2),(it,t)) ->
-
-    [for i in [0 .. (title.Length - 1)] do
+    [for i in [0 .. (table.Length - 1)] do
         {
-            Title= title.[i].Title |> String.concat " " 
-            Partner1 = interactionspartner1.[i]
-            Partner2 = interactionspartner2.[i]
-            InteractionType = interactionType.[i]
+            Title= table.[i].Title |> String.concat " " 
+            Partner1 = bigList[i].Head.Partner1
+            Partner2 = bigList[i].Head.Partner2
+            InteractionType = bigList[i].Head.InteractionType.ToStringRdb()
+        
         } 
     ]   
 
-let GTparseToCSV (table: finishedTable list) =
-    SeqIO.Seq.CSV "\t" true false table |> String.concat "\n"      
-
+let recordToCsv (record: FinishedTable) = //function to build a csv row
+    sprintf "%s\t%s\t%s\t%s" record.Title record.Partner1 record.Partner2 record.InteractionType 
+let csvStrings =
+    List.map recordToCsv (finsihedList table interactionState) //apply on each record
+let csvRowsWithHeader = 
+    String.concat "\n" csvStrings   //concat the row with "\n" between them
+    
 let tests = testList "main" [
+
     testCase "ensureCSVElement" (fun _ -> 
-        let actual =  GTparseToCSV (finsihedList table interactionState)    
+        let actual =  "Title\tPartner1\tPartner2\tInteractionType\n" + csvRowsWithHeader
         let expected = 
             "Title\tPartner1\tPartner2\tInteractionType\ntest hihi\tMARCO\tPOLO\tProtein-Protein\ntest2 hihi2\tKARL\tCOLUMBUS\tProtein-Gene"
         Expect.equal actual expected actual

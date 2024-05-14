@@ -276,6 +276,7 @@ module private Helper =
 
     let tableCellInteractions (
         interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, 
+        
         addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField
         ) =
         Html.td [
@@ -321,6 +322,8 @@ module private Helper =
                                 prop.onClick (fun _ ->
                                     let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
                                     addInteraction (newInteraction, pubIndex, interactionState) 
+                                    log interactionState.Count
+   
                                 )
                             ]
                             let interactionList = 
@@ -381,7 +384,6 @@ type GTtable =
                 else () // do nothing
 
         let addInteraction (newInteraction: Interaction, pubIndex: int, state: Map<int, Interaction list>) =
-            log state
             let nextList =
                 match state.TryFind pubIndex with //try to find a list at the index
                 | Some list -> (newInteraction::list)//if the option is a list then add the interaction to this list
@@ -548,59 +550,68 @@ type GTtable =
                         prop.className "button"
                         prop.onClick (fun _ ->
                             let finsihedList (title: GTelement list) (interaction:Map<int, Interaction list>) =
-                                let interactionspartner1 = //Mappt über interaction list und geht in jeder interaction list per key in die erste interaction (header)
-                                    interaction
-                                    |> Map.map (fun (a:int) (i: Interaction list) ->
-                                        match i with
-                                        |list -> list.Head.Partner1 
-                                    ) // -> gibt eine map aus strings raus
-                                    |> Map.toList
-                                    |> List.map snd
-                                    
-
-                                let interactionspartner2 =
-                                    interaction
-                                    |> Map.map (fun (a:int) (i: Interaction list) ->
-                                        match i with
-                                        |list -> list.Head.Partner2 
-                                    )
-                                    |> Map.toList
-                                    |> List.map snd
-
-                                let interactionType =
-                                    interaction
-                                    |> Map.map (fun (a:int) (i: Interaction list) ->
-                                        match i with
-                                        |list -> list.Head.InteractionType.ToStringRdb()
-                                    ) 
-                                    |> Map.toList
-                                    |> List.map snd
-
-                                [for i in [0 .. (title.Length - 1)] do
-                                    {
-                                        Title= title.[i].Title |> String.concat " " 
-                                        Partner1 = interactionspartner1.[i]
-                                        Partner2 = interactionspartner2.[i]
-                                        InteractionType = interactionType.[i]
-                                    } 
-                                ] 
-
-                            let gTparseToCSV (table: FinishedTable list) = //funktion welche die liste in csv umwandelt
-                                "" 
+                                // let interactionspartner1 = //Mappt über interaction list und geht in jeder interaction list per key in die erste interaction (header)
+                                //     interaction 
+                                //     |> Map.map (fun (i:int) (a: Interaction list) ->
+                                //         match a with
+                                //         |list -> list.Head.Partner1 
+                                //     ) // -> gibt eine map aus strings raus
+                                //     |> Map.toList
+                                //     |> List.map snd
                                 
+                                // let interactionspartner2 =
+                                //     interaction
+                                //     |> Map.map (fun (i:int) (a: Interaction list) ->
+                                //         match a with
+                                //         |list -> list.Head.Partner2 
+                                //     )
+                                //     |> Map.toList
+                                //     |> List.map snd
 
-                            let csvString = gTparseToCSV (finsihedList table interactionState) 
+                                // let interactionType =
+                                //     interaction
+                                //     |> Map.map (fun (i:int) (a: Interaction list) ->
+                                //         match a with
+                                //         |list -> list.Head.InteractionType.ToStringRdb()
+                                //     ) 
+                                //     |> Map.toList
+                                //     |> List.map snd
 
-                            let downLoad fileName csvTable =
+                                let bigList =
+                                    interaction |> Map.toList |> List.map snd 
+
+                                [for i in 0 .. (interactionState.Count - 1) do
+                                    {
+                                        Title= table.[i].Title |> String.concat " " 
+                                        Partner1 = bigList[i].[1].Partner1
+                                        Partner2 = bigList[i].[1].Partner2
+                                        InteractionType = bigList[i].[1].InteractionType.ToStringRdb()
+                                    
+                                    } 
+                                ]   
+
+                            let recordToCsv (record: FinishedTable) = //function to build a csv row
+                                sprintf "%s\t%s\t%s\t%s" record.Title record.Partner1 record.Partner2 record.InteractionType 
+                            let csvStrings =
+                                List.map recordToCsv (finsihedList table interactionState) //apply on each record
+                            let csvRows = 
+                                String.concat "\n" csvStrings   //concat the row with "\n" between them
+                                
+                            let csvRowsWithHeader = "Title\tPartner1\tPartner2\tInteractionType\n" + csvRows 
+
+                            let downLoad fileName fileContent =
                                 let anchor = Browser.Dom.document.createElement "a"
-                                let encodedContent = csvTable |> sprintf "data:text/plain;charset=utf-8,%A" |> Fable.Core.JS.encodeURI
+                                let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
                                 anchor.setAttribute("href",  encodedContent)
                                 anchor.setAttribute("download", fileName)
                                 anchor.click()
 
-                            downLoad "GT-dataset.csv" "hihi"
+                            log csvRowsWithHeader
+                            log interactionState
+                            
+                            downLoad "GT-dataset.csv" csvRowsWithHeader
                         )
-                        prop.text "Download FABLE"
+                        prop.text "Download table"
                     ]
                   ]
                 ]
@@ -621,6 +632,7 @@ type GTtable =
                                         t |> setInteractionState
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
+                                    log interactionState
                                 GTtable.PaperElement(i, element, interactionState, updateElement)
                         ]
                     ]
