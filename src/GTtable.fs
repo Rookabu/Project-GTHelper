@@ -549,53 +549,24 @@ type GTtable =
                         button.md
                         prop.className "button"
                         prop.onClick (fun _ ->
-                            let finsihedList (title: GTelement list) (interaction:Map<int, Interaction list>) =
-                                // let interactionspartner1 = //Mappt über interaction list und geht in jeder interaction list per key in die erste interaction (header)
-                                //     interaction 
-                                //     |> Map.map (fun (i:int) (a: Interaction list) ->
-                                //         match a with
-                                //         |list -> list.Head.Partner1 
-                                //     ) // -> gibt eine map aus strings raus
-                                //     |> Map.toList
-                                //     |> List.map snd
-                                
-                                // let interactionspartner2 =
-                                //     interaction
-                                //     |> Map.map (fun (i:int) (a: Interaction list) ->
-                                //         match a with
-                                //         |list -> list.Head.Partner2 
-                                //     )
-                                //     |> Map.toList
-                                //     |> List.map snd
+                            let gtElementsToCSV (ele: GTelement) (interaction:Map<int, Interaction list>) (pubIndex: int) =
+                                let title =
+                                    ele.Title |> String.concat " "
 
-                                // let interactionType =
-                                //     interaction
-                                //     |> Map.map (fun (i:int) (a: Interaction list) ->
-                                //         match a with
-                                //         |list -> list.Head.InteractionType.ToStringRdb()
-                                //     ) 
-                                //     |> Map.toList
-                                //     |> List.map snd
+                                let interPartner1,interPartner2,interType =
+                                    match interaction.TryFind (pubIndex + 1) with
+                                    |Some list -> list.[1].Partner1, list.[1].Partner2, list.[1].InteractionType.ToStringRdb()
+                                    |None -> "","",""
 
-                                let bigList =
-                                    interaction |> Map.toList |> List.map snd 
+                                [title; interPartner1; interPartner2; interType] |> String.concat "\t"
 
-                                [for i in 0 .. (interactionState.Count - 1) do
-                                    {
-                                        Title= table.[i].Title |> String.concat " " 
-                                        Partner1 = bigList[i].[1].Partner1
-                                        Partner2 = bigList[i].[1].Partner2
-                                        InteractionType = bigList[i].[1].InteractionType.ToStringRdb()
-                                    
-                                    } 
-                                ]   
+                            let applyOnEachElement (list: GTelement list) =
+                                List.mapi (fun i a ->
+                                    gtElementsToCSV a interactionState (i+1) 
+                                ) list
 
-                            let recordToCsv (record: FinishedTable) = //function to build a csv row
-                                sprintf "%s\t%s\t%s\t%s" record.Title record.Partner1 record.Partner2 record.InteractionType 
-                            let csvStrings =
-                                List.map recordToCsv (finsihedList table interactionState) //apply on each record
                             let csvRows = 
-                                String.concat "\n" csvStrings   //concat the row with "\n" between them
+                                String.concat "\n" (applyOnEachElement table)  
                                 
                             let csvRowsWithHeader = "Title\tPartner1\tPartner2\tInteractionType\n" + csvRows 
 
