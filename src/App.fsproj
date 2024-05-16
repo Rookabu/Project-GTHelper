@@ -3,6 +3,8 @@
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Types.fs" />
+    <Compile Include="CSVParsing.fs" />
     <None Include="index.html" />
     <Compile Include="Extensions.fs" />
     <Compile Include="GTtable.fs" />
@@ -10,7 +12,6 @@
     <Compile Include="Contact.fs" />
     <Compile Include="NavBar.fs" />
     <Compile Include="Main.fs" />
-    <Compile Include="Types.fs" />
     <None Include="styling.css" />
   </ItemGroup>
   <ItemGroup>

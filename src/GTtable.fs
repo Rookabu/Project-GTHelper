@@ -1,47 +1,18 @@
 
 namespace Components
 
+open Types
 open Feliz
 open Feliz.DaisyUI
 open Fable.SimpleJson
 open Fable.Core.JsInterop
 open Browser
 
-type InteractionType =
-    |ProteinProtein
-    |ProteineGene
-    |Other of string
 
-    member this.ToStringRdb() =
-        match this with
-        | ProteineGene -> "Protein-Gene"
-        | ProteinProtein -> "Protein-Protein"
-        | Other s -> "Other" 
-
-
-type Interaction = {
-    Partner1: string
-    Partner2: string
-    InteractionType: InteractionType
-}
-
-type GTelement = {
-    ///PaperTitle split by whitespace into single strings/words.
-    Title: string list 
-    ///PaperContent split by whitespace into single strings/words.
-    Content: string list
-}
 
 type ActiveField = 
     |Partner1
     |Partner2
-
-type FinishedTable = {
-    Title: string 
-    Partner1: string
-    Partner2: string
-    InteractionType: string
-}
 
 module List =
   let rec removeAt index list =
@@ -537,6 +508,7 @@ type GTtable =
                                 let reader = FileReader.Create() //creates a file reader
                                 reader.onload <- fun e -> 
                                     let allContent:string = e.target?result //reads the file after a load and prints it as a string
+                                    log allContent
                                     let newAbstract = parsePaperText allContent
                                     setTable newAbstract
                                     setLocalStorage "GTlist" newAbstract 
@@ -549,26 +521,7 @@ type GTtable =
                         button.md
                         prop.className "button"
                         prop.onClick (fun _ ->
-                            let gtElementsToCSV (ele: GTelement) (interaction:Map<int, Interaction list>) (pubIndex: int) =
-                                let title =
-                                    ele.Title |> String.concat " "
-
-                                let interPartner1,interPartner2,interType =
-                                    match interaction.TryFind (pubIndex + 1) with
-                                    |Some list -> list.[1].Partner1, list.[1].Partner2, list.[1].InteractionType.ToStringRdb()
-                                    |None -> "","",""
-
-                                [title; interPartner1; interPartner2; interType] |> String.concat "\t"
-
-                            let applyOnEachElement (list: GTelement list) =
-                                List.mapi (fun i a ->
-                                    gtElementsToCSV a interactionState (i+1) 
-                                ) list
-
-                            let csvRows = 
-                                String.concat "\n" (applyOnEachElement table)  
-                                
-                            let csvRowsWithHeader = "Title\tPartner1\tPartner2\tInteractionType\n" + csvRows 
+                            let content = CSVParsing.gtElementsToCSV table interactionState
 
                             let downLoad fileName fileContent =
                                 let anchor = Browser.Dom.document.createElement "a"
@@ -576,11 +529,8 @@ type GTtable =
                                 anchor.setAttribute("href",  encodedContent)
                                 anchor.setAttribute("download", fileName)
                                 anchor.click()
-
-                            log csvRowsWithHeader
-                            log interactionState
                             
-                            downLoad "GT-dataset.csv" csvRowsWithHeader
+                            downLoad "GT-dataset.csv" content
                         )
                         prop.text "Download table"
                     ]
