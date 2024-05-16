@@ -110,7 +110,6 @@ module private Helper =
     let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, interactionWordList, activeWordList, setCheckState) =
         Html.td [
             Daisy.collapse [
-                // prop.isChecked (checkState)
                 prop.className [if checkState then "collapse-open"]
                 prop.children [
                     if checkState = false then checkHandle (checkState, setCheckState) 
@@ -166,11 +165,12 @@ module private Helper =
                 )
                 prop.valueOrDefault (partnerStrValue)
                 //prop.valueOrDefault partnerStrValue //use addingWords
-                
                 prop.className "tableElement"
 
-                if activeFieldOption = Some activeField then prop.className "tableElementChecked"
+                if activeFieldOption = Some activeField then prop.className "tableElementChecked" 
+
                 else prop.className "tableElement"
+
             ]
         ]
 
@@ -190,7 +190,12 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1: string -> unit, setInput2: string -> unit, activeField: option<ActiveField> ) =
+    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1: string -> unit, setInput2: string -> unit, activeField: option<ActiveField>, buttonRef: IRefValue<option<Types.HTMLElement>> ) =
+        let focusButtonClicker() =
+            match buttonRef.current with
+            | None -> ()
+            | Some element ->
+                element?click()
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -247,9 +252,9 @@ module private Helper =
 
     let tableCellInteractions (
         interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, 
-        
-        addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField
+        addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField, buttonRef
         ) =
+      
         Html.td [
             prop.className "flex"
             prop.children [
@@ -277,10 +282,19 @@ module private Helper =
                                     if list = 0 then "unedited"
                                     else list.ToString()
                                 )
-                            ] //replace with counter
+                            ] 
                         ]
                         Daisy.collapseContent [
-                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField)
+                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField, buttonRef)
+
+                            // Daisy.button.button [
+                                // file.ghost
+                                // prop.hidden false
+                                // prop.onClick (fun _ ->
+                                //     focusButtonClicker()        
+                                // )
+                            // ] 
+
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -290,11 +304,14 @@ module private Helper =
                                     style.marginTop 10 //style of add button
                                     style.alignItems.center
                                 ]
-                                prop.onClick (fun _ ->
+                                prop.ref buttonRef
+                                let onClickHandler _ =
                                     let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
                                     addInteraction (newInteraction, pubIndex, interactionState) 
                                     log interactionState.Count
-   
+
+                                prop.onKeyDown (fun evt ->
+                                    onClickHandler evt
                                 )
                             ]
                             let interactionList = 
@@ -311,7 +328,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit) =
+    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit, buttonRef) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -375,7 +392,7 @@ type GTtable =
             prop.children [
                 Html.td (pubIndex + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
-                Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
+                Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField, buttonRef)
             ]
             prop.key pubIndex
         ]
@@ -383,6 +400,7 @@ type GTtable =
     [<ReactComponent>]
     static member Main() =
         let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
+        let buttonRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let isLocalStorageClear (key:string) () =
             match (Browser.WebStorage.localStorage.getItem key) with
@@ -554,7 +572,7 @@ type GTtable =
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
                                     log interactionState
-                                GTtable.PaperElement(i, element, interactionState, updateElement)
+                                GTtable.PaperElement(i, element, interactionState, updateElement, buttonRef)
                         ]
                     ]
                 ]
