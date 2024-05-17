@@ -303,7 +303,6 @@ module private Helper =
                                 let onClickHandler _ =
                                     let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
                                     addInteraction (newInteraction, pubIndex, interactionState) 
-                                    log interactionState.Count
 
                                 prop.onClick (fun evt ->
                                     onClickHandler evt
@@ -386,6 +385,8 @@ type GTtable =
             |> function 
                 | Some updatedList -> updateElement pubIndex updatedList 
                 | None -> ()
+            
+                
 
         Html.tr [
             prop.children [
@@ -465,19 +466,20 @@ type GTtable =
 
         let parsePaperText (txt: string) =
             let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries) //split paper from each other
+            log publications
             let pubmergPairs = publications |> mergePairs
             pubmergPairs
             |> Array.map (fun (pub: string) ->
-            let split = pub.Split ("\n") //split = array of content and title
-            //split from each string in the array between one paragraph
-            let title, content = split[0], split[1] //0 is title, 1 is content
-            let titleWords = Helper.splitTextIntoWords title
-            let contentWords = Helper.splitTextIntoWords content 
-            {
-                Title = titleWords
-                Content = contentWords
-            }
-            )
+                let split = pub.Split ("\n") //split = array of content and title
+                //split from each string in the array between one paragraph
+                let title, content = split[0], split[1] //0 is title, 1 is content
+                let titleWords = Helper.splitTextIntoWords title
+                let contentWords = Helper.splitTextIntoWords content 
+                {
+                    Title = titleWords
+                    Content = contentWords
+                }
+                )
             |> Array.toList
 
         Html.div [
@@ -524,7 +526,6 @@ type GTtable =
                                 let reader = FileReader.Create() //creates a file reader
                                 reader.onload <- fun e -> 
                                     let allContent:string = e.target?result //reads the file after a load and prints it as a string
-                                    log allContent
                                     let newAbstract = parsePaperText allContent
                                     setTable newAbstract
                                     setLocalStorage "GTlist" newAbstract 
@@ -552,7 +553,6 @@ type GTtable =
                     ]
                   ]
                 ]
-                
                 Daisy.table [
                     prop.tabIndex 0
                     prop.style [
@@ -575,6 +575,16 @@ type GTtable =
                         ]
                     ]
                 ]
+                Daisy.button.button [
+                        button.md
+                        prop.ariaHidden true
+                        prop.className "button"
+                        prop.onClick (fun _ ->
+                            setTable []
+                            setInteractionState Map.empty
+                        )
+                        prop.text "Reset"
+                    ]
             ]
         ]
 
