@@ -190,12 +190,8 @@ module private Helper =
             ]
         ]
 
-    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1: string -> unit, setInput2: string -> unit, activeField: option<ActiveField>, buttonRef: IRefValue<option<Types.HTMLElement>> ) =
-        let focusButtonClicker() =
-            match buttonRef.current with
-            | None -> ()
-            | Some element ->
-                element?click()
+    let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1: string -> unit, setInput2: string -> unit, activeField: option<ActiveField>) =
+
         Html.div [
             prop.className "flex gap-1 flex-col lg:flex-row"
             prop.children [
@@ -252,7 +248,7 @@ module private Helper =
 
     let tableCellInteractions (
         interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, 
-        addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField, buttonRef
+        addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField
         ) =
       
         Html.td [
@@ -285,7 +281,7 @@ module private Helper =
                             ] 
                         ]
                         Daisy.collapseContent [
-                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField, buttonRef)
+                            form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField)
 
                             // Daisy.button.button [
                                 // file.ghost
@@ -304,13 +300,16 @@ module private Helper =
                                     style.marginTop 10 //style of add button
                                     style.alignItems.center
                                 ]
-                                prop.ref buttonRef
                                 let onClickHandler _ =
                                     let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
                                     addInteraction (newInteraction, pubIndex, interactionState) 
                                     log interactionState.Count
 
-                                prop.onKeyDown (fun evt ->
+                                prop.onClick (fun evt ->
+                                    onClickHandler evt
+                                )
+
+                                prop.onKeyDown (key.enter, fun evt  ->
                                     onClickHandler evt
                                 )
                             ]
@@ -328,7 +327,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit, buttonRef) =
+    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -392,7 +391,7 @@ type GTtable =
             prop.children [
                 Html.td (pubIndex + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
-                Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField, buttonRef)
+                Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
             ]
             prop.key pubIndex
         ]
@@ -400,7 +399,6 @@ type GTtable =
     [<ReactComponent>]
     static member Main() =
         let inputRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
-        let buttonRef:IRefValue<Browser.Types.HTMLElement option> = React.useRef(None)
 
         let isLocalStorageClear (key:string) () =
             match (Browser.WebStorage.localStorage.getItem key) with
@@ -556,6 +554,7 @@ type GTtable =
                 ]
                 
                 Daisy.table [
+                    prop.tabIndex 0
                     prop.style [
                         style.maxWidth 1
                         style.textAlign.center
@@ -572,7 +571,7 @@ type GTtable =
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
                                     log interactionState
-                                GTtable.PaperElement(i, element, interactionState, updateElement, buttonRef)
+                                GTtable.PaperElement(i, element, interactionState, updateElement)
                         ]
                     ]
                 ]
