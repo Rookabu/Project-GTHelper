@@ -250,7 +250,6 @@ module private Helper =
         interactionState: Map<int, Interaction list>, input1, input2, inputType: InteractionType, setInputType, setField, 
         addInteraction: Interaction * int * Map<int,list<Interaction>> -> unit, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField
         ) =
-      
         Html.td [
             prop.className "flex"
             prop.children [
@@ -300,17 +299,12 @@ module private Helper =
                                     style.marginTop 10 //style of add button
                                     style.alignItems.center
                                 ]
-                                let onClickHandler _ =
+
+                                prop.onClick (fun _ ->
                                     let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
-                                    addInteraction (newInteraction, pubIndex, interactionState) 
-
-                                prop.onClick (fun evt ->
-                                    onClickHandler evt
+                                    addInteraction (newInteraction, pubIndex, interactionState)
                                 )
 
-                                prop.onKeyDown (key.enter, fun evt  ->
-                                    onClickHandler evt
-                                )
                             ]
                             let interactionList = 
                                 match Map.tryFind pubIndex interactionState with
@@ -326,7 +320,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit) =
+    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit, setinteractionState: Map<int,list<Interaction>> -> unit, setLocalStorageInteraction) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -385,10 +379,21 @@ type GTtable =
             |> function 
                 | Some updatedList -> updateElement pubIndex updatedList 
                 | None -> ()
-            
-                
+            if state.Item pubIndex = [] then
+                (state.Remove pubIndex)
+                |> fun t ->
+                t |> setinteractionState
+                t |> setLocalStorageInteraction "Interaction"
+
+        let onClickHandler _ =
+            let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
+            addInteraction (newInteraction, pubIndex, interactionState)
 
         Html.tr [
+            prop.tabIndex 0
+            prop.onKeyDown(fun e -> 
+                if e.code = "Enter" then onClickHandler e            
+            )
             prop.children [
                 Html.td (pubIndex + 1)
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
@@ -557,7 +562,7 @@ type GTtable =
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
                                     log interactionState
-                                GTtable.PaperElement(i, element, interactionState, updateElement)
+                                GTtable.PaperElement(i, element, interactionState, updateElement, setInteractionState, setLocalStorageInteraction)
                         ]
                     ]
                 ]
