@@ -312,9 +312,8 @@ type GTtable =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
-        let (checkState: bool, setCheckState) = React.useState (if pubIndex = 0 && interactionState.Item 0 = [] then true else false)
+        let (checkState: bool, setCheckState) = React.useState (if pubIndex = 0 && interactionState.IsEmpty then true else false)
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
-        
         let interactionWordList: string list = [
             match (Map.tryFind pubIndex interactionState) with
             |Some interactions ->
@@ -528,7 +527,7 @@ type GTtable =
                     ]
                     Daisy.button.button [
                         button.md
-                        prop.className "button"
+                        // prop.className "button"
                         prop.onClick (fun _ ->
                             let content = CSVParsing.gtElementsToCSV table interactionState
 
@@ -543,6 +542,7 @@ type GTtable =
                         )
                         prop.text "Download table"
                         if interactionState.IsEmpty then prop.disabled true; prop.className "button" 
+                        else prop.className "button"
                     ]
                   ]
                 ]
