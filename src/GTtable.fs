@@ -268,9 +268,6 @@ module private Helper =
                                         match interactionState.TryFind pubIndex with 
                                         | Some list -> list.Length
                                         | None -> 0
-
-                                // badge.info
-
                                 if list = 0 then prop.className "textCardError"
                                 else prop.className "textCard"
                                 prop.text (
@@ -281,15 +278,6 @@ module private Helper =
                         ]
                         Daisy.collapseContent [
                             form(setField, input1, input2, inputType, setInputType, setInput1, setInput2, activeField)
-
-                            // Daisy.button.button [
-                                // file.ghost
-                                // prop.hidden false
-                                // prop.onClick (fun _ ->
-                                //     focusButtonClicker()        
-                                // )
-                            // ] 
-
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
@@ -324,7 +312,7 @@ type GTtable =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
-        let (checkState: bool, setCheckState) = React.useState (if pubIndex = 0 then true else false)
+        let (checkState: bool, setCheckState) = React.useState (if pubIndex = 0 && interactionState.Item 0 = [] then true else false)
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
         
         let interactionWordList: string list = [
@@ -468,6 +456,7 @@ type GTtable =
             |> Array.toList
 
         Html.div [
+
             prop.className "childstyle"
             prop.children [
                 Daisy.card [
@@ -485,6 +474,23 @@ type GTtable =
                         ]
                     ]
                 ]
+                if table = [] then
+                    Daisy.card [
+                        prop.style [
+                            style.maxWidth 700
+                            style.textAlign.justify
+                            style.fontSize 20
+
+                        ] 
+                        prop.className "shadow-lg"
+                        prop.className "textCard"
+                        prop.children [
+                            Daisy.cardBody [
+                                Daisy.cardTitle "Hello there and welcome on my page!"
+                                Html.p "Start editing your abstracts by uploading your file using the 'Upload abstracts' button to create traning data sets"                             
+                            ]
+                        ]
+                    ]
                 Html.div [
                   prop.className "flex size-full justify-between"
                   prop.style [
@@ -536,6 +542,7 @@ type GTtable =
                             downLoad "GT-dataset.csv" content
                         )
                         prop.text "Download table"
+                        if interactionState.IsEmpty then prop.disabled true; prop.className "button" 
                     ]
                   ]
                 ]
