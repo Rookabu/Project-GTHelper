@@ -21,20 +21,21 @@ let table = [
     }
     ]
 
-let content = 
+let content =
     "Distinct Clades of Protein Phosphatase 2A Regulatory
 
-    Protein Phosphatase 2A (PP2A) is a strongly conserved and major protein phosphatase in all eukaryotes
+Protein phosphatase 2A (PP2A) is a strongly conserved and major protein phosphatase in all eukaryotes
 
-    
-    Histone Deacetylase Complex
 
-    Early responses of plants to environmental stress 
+Histone Deacetylase Complex
 
-    
-    WRKY transcription factors 
+Early responses of plants to environmental stressX
 
-    WRKY transcription factors in plants are known to be able "
+
+WRKY transcription factors
+
+WRKY transcription factors in plants are known to be able"
+
 
 let splitTextIntoWords (text: string) =
     text.Split([|' '; '\n'; '\t'; '\r'|], System.StringSplitOptions.RemoveEmptyEntries)
@@ -54,7 +55,7 @@ let publications (txt: string)= txt.Split([|'\n'|], System.StringSplitOptions.Re
 let parsePaperText (txt: string) =
     let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries)//split paper from each other
     printfn "%A" publications
-    let pubmergPairs = publications |> mergePairs
+    let pubmergPairs = publications |> mergePairs //divide pairs by "/n"
     pubmergPairs
     |> Array.map (fun (pub: string) ->
         let split = pub.Split ("\n") //split = array of content and title
@@ -162,7 +163,12 @@ let test_parsing = testList "parsing" [
     testCase "showing string array" (fun _ -> 
 
         let actual = publications content
-        let expected = [||]
+        let expected = [|"Distinct Clades of Protein Phosphatase 2A Regulatory";
+    "Protein phosphatase 2A (PP2A) is a strongly conserved and major protein phosphatase in all eukaryotes";
+    "Histone Deacetylase Complex";
+    "Early responses of plants to environmental stress";
+    "WRKY transcription factors";
+    "WRKY transcription factors in plants are known to be able"|]
         
 
         Expect.equal actual expected ""

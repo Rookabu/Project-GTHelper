@@ -466,7 +466,6 @@ type GTtable =
 
         let parsePaperText (txt: string) =
             let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries) //split paper from each other
-            log publications
             let pubmergPairs = publications |> mergePairs
             pubmergPairs
             |> Array.map (fun (pub: string) ->
@@ -526,6 +525,7 @@ type GTtable =
                                 let reader = FileReader.Create() //creates a file reader
                                 reader.onload <- fun e -> 
                                     let allContent:string = e.target?result //reads the file after a load and prints it as a string
+                                    log allContent
                                     let newAbstract = parsePaperText allContent
                                     setTable newAbstract
                                     setLocalStorage "GTlist" newAbstract 
