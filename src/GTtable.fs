@@ -412,31 +412,8 @@ type GTtable =
 
         let (interactionState: Map<int, Interaction list>, setInteractionState) = React.useState (initialInteraction "Interaction")
 
-        let exAbstract = [
-            {
-                Title = Helper.splitTextIntoWords "Example: Reduced Dormancy5 encodes a protein phosphatase 2C that is required for seed dormancy in Arabidopsis" 
-                Content = Helper.splitTextIntoWords "Seed dormancy determines germination timing and contributes to crop production and the adaptation of natural populations to their environment. 
-                    Our knowledge about its regulation is limited. In a mutagenesis screen of a highly dormant Arabidopsis thaliana line, the reduced dormancy5 (rdo5) mutant was isolated based on its strongly reduced seed dormancy. 
-                    Cloning of RDO5 showed that it encodes a PP2C phosphatase. Several PP2C phosphatases belonging to clade A are involved in abscisic acid signaling and control seed dormancy. However, RDO5 does not cluster with clade A phosphatases, 
-                    and abscisic acid levels and sensitivity are unaltered in the rdo5 mutant. RDO5 transcript could only be detected in seeds and was most abundant in dry seeds. RDO5 was found in cells throughout the embryo and is located in the nucleus. 
-                    A transcriptome analysis revealed that several genes belonging to the conserved PUF family of RNA binding proteins, in particular Arabidopsis PUMILIO9 (APUM9) and APUM11, showed strongly enhanced transcript levels in rdo5 during seed imbibition. 
-                    Further transgenic analyses indicated that APUM9 reduces seed dormancy. Interestingly, reduction of APUM transcripts by RNA interference complemented the reduced dormancy phenotype of rdo5, 
-                    indicating that RDO5 functions by suppressing APUM transcript levels."
-            }
-            {
-                Title = Helper.splitTextIntoWords "Distinct Clades of Protein Phosphatase 2A Regulatory B'/B56 Subunits Engage in Different Physiological Processes" 
-                Content = Helper.splitTextIntoWords "Protein phosphatase 2A (PP2A) is a strongly conserved and major protein phosphatase in all eukaryotes. 
-                    The canonical PP2A complex consists of a catalytic (C), scaffolding (A), and regulatory (B) subunit. Plants have three groups of evolutionary 
-                    distinct B subunits: B55, B' (B56), and B''. Here, the Arabidopsis B' group is reviewed and compared with other eukaryotes. Members of the B'α/B'β clade are especially important for chromatid cohesion, 
-                    and dephosphorylation of transcription factors that mediate brassinosteroid (BR) signaling in the nucleus. Other B' subunits interact with proteins at the cell membrane to dampen BR signaling or harness immune responses. 
-                    The transition from vegetative to reproductive phase is influenced differentially by distinct B' subunits; B'α and B'β being of little importance, whereas others (B'γ, B'ζ, B'η, B'θ, B'κ) 
-                    promote transition to flowering. Interestingly, the latter B' subunits have three motifs in a conserved manner, i.e., two docking sites for protein phosphatase 1 (PP1), and a POLO consensus phosphorylation site between these motifs. 
-                    This supports the view that a conserved PP1-PP2A dephosphorelay is important in a variety of signaling contexts throughout eukaryotes. A profound understanding of these regulators may help in designing future crops and understand environmental issues."
-            }
-        ]
-
         let initialTable (key: string) =
-            if isLocalStorageClear key () = true then exAbstract 
+            if isLocalStorageClear key () = true then [] 
             else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem key)  
 
         let (table, setTable) = React.useState (initialTable "GTlist")
@@ -457,16 +434,20 @@ type GTtable =
 
         let mergePairs (words: string array) =
             words
-            |> Array.mapi (fun i x -> 
-                if i % 2 = 0 && i + 1 < Array.length words then //wenn es das 1 und 3. word ist aber immernoch kleiner wie die aktuelle länge dann merge das word mit dem nächsten
-                    Some (x + "\n" + words.[i + 1])
-                else None
-            )
-            |> Array.choose id
+            |> Array.chunkBySize 2
+            |> Array.map (fun pair -> 
+                    match pair with
+                    | [|a; b|] -> a + "\n" + b
+                    | _ -> failwith "uneven chunk size")
+
+        let splitIntoArray (txt: string)= 
+            txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries)
+            |> Array.map (fun s -> s.Trim())
+            |> Array.filter (fun s -> s <> "")
 
         let parsePaperText (txt: string) =
-            let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries) //split paper from each other
-            let pubmergPairs = publications |> mergePairs
+            let publications = splitIntoArray txt//split paper from each other
+            let pubmergPairs = publications |> mergePairs //divide pairs by "/n"
             pubmergPairs
             |> Array.map (fun (pub: string) ->
                 let split = pub.Split ("\n") //split = array of content and title
@@ -555,10 +536,15 @@ type GTtable =
                 ]
                 Daisy.table [
                     prop.tabIndex 0
-                    prop.style [
-                        style.maxWidth 1
-                        style.textAlign.center
-                    ]
+                    if table = [] then
+                            prop.style [
+                                style.visibility.hidden
+                            ]
+                    else 
+                            prop.style [
+                                style.maxWidth 1
+                                style.textAlign.center
+                            ]
                     prop.children [
                         Helper.headerRow
                         Html.tbody [
@@ -575,13 +561,25 @@ type GTtable =
                         ]
                     ]
                 ]
+                
                 Daisy.button.button [
                         button.md
-                        prop.ariaHidden true
                         prop.className "button"
+                        if table = [] then
+                            prop.style [
+                                style.visibility.hidden
+                            ]
+                        else prop.className "button" 
                         prop.onClick (fun _ ->
-                            setTable []
-                            setInteractionState Map.empty
+                            []
+                            |> fun t ->
+                                t |> setTable 
+                                t |> setLocalStorage "GTlist"
+                            Map.empty
+                            |> fun t ->
+                                t |> setInteractionState
+                                t |> setLocalStorageInteraction "Interaction"
+
                         )
                         prop.text "Reset"
                     ]

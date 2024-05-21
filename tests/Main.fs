@@ -29,7 +29,7 @@ Protein phosphatase 2A (PP2A) is a strongly conserved and major protein phosphat
 
 Histone Deacetylase Complex
 
-Early responses of plants to environmental stressX
+Early responses of plants to environmental stress
 
 
 WRKY transcription factors
@@ -41,6 +41,7 @@ let splitTextIntoWords (text: string) =
     text.Split([|' '; '\n'; '\t'; '\r'|], System.StringSplitOptions.RemoveEmptyEntries)
     |> Array.map (fun s -> s.Replace(",", "").Replace(".", ""))
     |> Array.toList 
+    
 
 let mergePairs (words: string array) =
     words
@@ -50,11 +51,13 @@ let mergePairs (words: string array) =
             | [|a; b|] -> a + "\n" + b
             | _ -> failwith "uneven chunk size")
 
-let publications (txt: string)= txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries)
+let splitIntoArray (txt: string)= 
+    txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries)
+    |> Array.map (fun s -> s.Trim())
+    |> Array.filter (fun s -> s <> "")
 
 let parsePaperText (txt: string) =
-    let publications = txt.Split([|'\n'|], System.StringSplitOptions.RemoveEmptyEntries)//split paper from each other
-    printfn "%A" publications
+    let publications = splitIntoArray txt//split paper from each other
     let pubmergPairs = publications |> mergePairs //divide pairs by "/n"
     pubmergPairs
     |> Array.map (fun (pub: string) ->
@@ -161,17 +164,15 @@ let test_parsing = testList "parsing" [
         Expect.equal actual expected ""
         )
     testCase "showing string array" (fun _ -> 
-
-        let actual = publications content
+        let actual = splitIntoArray content
         let expected = [|"Distinct Clades of Protein Phosphatase 2A Regulatory";
     "Protein phosphatase 2A (PP2A) is a strongly conserved and major protein phosphatase in all eukaryotes";
     "Histone Deacetylase Complex";
     "Early responses of plants to environmental stress";
     "WRKY transcription factors";
     "WRKY transcription factors in plants are known to be able"|]
-        
 
-        Expect.equal actual expected ""
+        Expect.sequenceEqual actual expected ""
         )
 ]
 
