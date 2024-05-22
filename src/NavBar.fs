@@ -15,8 +15,9 @@ type NavBar =
                         prop.children [
                              Html.img [ prop.src "https://github.com/CSBiology/Branding/raw/main/logos/csb-tuk-black.svg"; prop.height 28; prop.width 112]
                         ]
+                        prop.onClick (fun _ ->
+                            ())
                     ]
-                    
                 ]
                 Daisy.navbarEnd [
                     Daisy.badge [
