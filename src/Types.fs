@@ -30,3 +30,10 @@ type GTelement = {
     ///PaperContent split by whitespace into single strings/words.
     Content: string list
 }
+
+[<RequireQualifiedAccess>]
+
+type Page =
+    |GTtable
+    |Contact
+    |Feedback

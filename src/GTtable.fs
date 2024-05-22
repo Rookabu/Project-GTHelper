@@ -76,7 +76,8 @@ module private Helper =
                                     prop.className "button"
                                     prop.onClick (fun _ ->
                                         removeInteraction (pubIndex, interactionState, i)
-                                    )                                    
+                                    )  
+                                                                      
                                 ]
                             ]
                         ] 
@@ -361,16 +362,13 @@ type GTtable =
             
         let removeInteraction (pubIndex: int, state:Map<int, Interaction list>, listIndx: int) =
             match state.TryFind pubIndex with
-            | Some list -> Some (list |> List.removeAt listIndx) //if the option is this list then remove this Interaction
-            | None -> None //if not, do nothing 
+            | Some list -> 
+                Some (list |> List.removeAt listIndx) //if the option is this list then remove this Interaction
+            | None -> None //if not, do nothing
             |> function 
                 | Some updatedList -> updateElement pubIndex updatedList 
                 | None -> ()
-            if state.Item pubIndex = [] then
-                (state.Remove pubIndex)
-                |> fun t ->
-                t |> setinteractionState
-                t |> setLocalStorageInteraction "Interaction"
+            
 
         let onClickHandler _ =
             let newInteraction = {Partner1 = input1; Partner2 = input2; InteractionType = inputType}
@@ -454,22 +452,25 @@ type GTtable =
                 )
             |> Array.toList
 
-        Html.div [
 
+
+       
+        Html.div [
             prop.className "childstyle"
             prop.children [
                 Daisy.card [
                     prop.style [
                         style.maxWidth 700
                         style.textAlign.justify
+
                     ] 
                     prop.children [
                         Daisy.cardBody [
                             Daisy.cardTitle "What is GroundTruth Helper about?"
-                            Html.p "By using GroundTruth Helper you can create a ground truth using biology abstracts to 
+                            Html.p "By using GroundTruth Helper you can create a ground truth using abstracts to 
                                 find protein/gene partners and their type of interaction. You can also use this website to create other types of datasets, 
                                 for example to train a large language model or just to simplify your research. You can then download your created data. 
-                                Just click on each partner in the abstract after expanding the abstract to assign it to partner 1 or 2."                             
+                                Just click on each partner in the abstract after expanding it to assign it to partner 1 or 2."                             
                         ]
                     ]
                 ]
@@ -563,7 +564,8 @@ type GTtable =
                             for i in 0 .. (table.Length - 1)  do //für jedes Element in table wird folgendes gemacht:
                                 let element = List.item i table  
                                 let updateElement(index: int) (interList: Interaction list) =
-                                    interactionState.Add (index, interList)
+                                    if interList = [] then  interactionState.Remove index
+                                    else interactionState.Add (index, interList)
                                     |> fun t ->
                                         t |> setInteractionState
                                         t |> setLocalStorageInteraction "Interaction"
