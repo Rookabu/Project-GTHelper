@@ -6,27 +6,48 @@ open Feliz.DaisyUI
 type NavBar =
     static member Subpagelink(setPage: Types.Page -> unit, statePage: Types.Page) = 
         Daisy.navbar [
-            prop.className "mb-2 shadow-lg bg-neutral text-neutral-content rounded-box"
+            prop.className "bg-base-200 shadow-lg bg-neutral text-neutral-content"
+            prop.className "navbarColor"
             prop.children [
                 Daisy.navbarStart [
-                    Daisy.button.button [
-                        button.square
-                        button.ghost
+                    Daisy.button.a [
+                        prop.href "https://csbiology.github.io/"
+                        prop.target.blank 
                         prop.children [
-                             Html.img [ prop.src "https://github.com/CSBiology/Branding/raw/main/logos/csb-tuk-black.svg"; prop.height 28; prop.width 112]
+                            Html.img [
+                                prop.src "./img/csb-wide-white.svg"
+                                prop.className "w-full h-full"
+                            ]
                         ]
-                        prop.onClick (fun _ ->
-                            ())
+                    ]
+                    Daisy.button.button [
+                        prop.text "Start"
+                        prop.onClick (fun _ -> setPage(Types.Page.GTtable))
+                        prop.className "button"
+                        prop.style [style.marginLeft 15]
+                    ]
+                ]
+                Daisy.navbarCenter [
+                    Daisy.cardTitle [
+                        prop.text "GroundTruth Helper"
+                        prop.style [
+                            style.color "#698ed0"
+                        ]
                     ]
                 ]
                 Daisy.navbarEnd [
-                    Daisy.badge [
-                        prop.text "Start"
-                        prop.onClick (fun _ -> setPage(Types.Page.GTtable))
-                    ]
-                    Daisy.badge [
+                    Daisy.button.button [
                         prop.text "Contact"
                         prop.onClick (fun _ -> setPage(Types.Page.Contact))
+                        prop.className "button"
+                        prop.style [
+                            style.marginRight 15
+                        ]
+                    ]
+                    Daisy.button.button [
+                        prop.text "Feedback"
+                        prop.onClick (fun _ -> setPage(Types.Page.Feedback))
+                        prop.className "button"
                     ]
                 ]
             ]

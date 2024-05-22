@@ -458,36 +458,59 @@ type GTtable =
         Html.div [
             prop.className "childstyle"
             prop.children [
-                Daisy.card [
-                    prop.style [
-                        style.maxWidth 700
-                        style.textAlign.justify
-
-                    ] 
-                    prop.children [
-                        Daisy.cardBody [
-                            Daisy.cardTitle "What is GroundTruth Helper about?"
-                            Html.p "By using GroundTruth Helper you can create a ground truth using abstracts to 
-                                find protein/gene partners and their type of interaction. You can also use this website to create other types of datasets, 
-                                for example to train a large language model or just to simplify your research. You can then download your created data. 
-                                Just click on each partner in the abstract after expanding it to assign it to partner 1 or 2."                             
-                        ]
-                    ]
-                ]
                 if table = [] then
                     Daisy.card [
                         prop.style [
+                            style.marginTop 100
                             style.maxWidth 700
                             style.textAlign.justify
                             style.fontSize 20
-
                         ] 
                         prop.className "shadow-lg"
                         prop.className "textCard"
                         prop.children [
                             Daisy.cardBody [
                                 Daisy.cardTitle "Hello there and welcome on my page!"
-                                Html.p "Start editing your abstracts by uploading your file using the 'Upload abstracts' button to create traning data sets"                             
+                                Daisy.cardTitle "What is GroundTruth Helper about?"
+                                Html.p "By using GroundTruth Helper you can create a ground truth using abstracts to 
+                                find protein/gene partners and their type of interaction. You can also create other types of datasets, 
+                                for example to train a large language model or just to simplify your research. You can then download your created data. 
+                                Just click on each partner in the abstract after expanding it to assign it to partner 1 or 2." 
+                                Html.p "Start editing your abstracts by uploading your file using this button!"
+                                Daisy.cardActions [
+                                    prop.className "card-actions justify-center"
+                                    prop.style [style.marginTop 30]
+                                    prop.children [
+                                        Daisy.formControl [
+                                            Daisy.button.button [
+                                                button.md
+                                                prop.className "button"
+                                                prop.onClick (fun _ ->
+                                                    focusFileGetter()
+                                                )
+                                                prop.text "Upload abstracts"
+                                            ]
+                                            Daisy.input [
+                                                prop.type' "file"
+                                                prop.ref inputRef
+                                                file.ghost
+                                                prop.hidden true
+                                                prop.accept ".txt, .csv, .tsv"
+                                                prop.onChange (fun (file: Types.File) ->
+                                                    let reader = FileReader.Create() //creates a file reader
+                                                    reader.onload <- fun e -> 
+                                                        let allContent:string = e.target?result //reads the file after a load and prints it as a string
+                                                        log allContent
+                                                        let newAbstract = parsePaperText allContent
+                                                        setTable newAbstract
+                                                        setLocalStorage "GTlist" newAbstract 
+                                                    file.slice()
+                                                    |> reader.readAsText //reads the file as a text
+                                                )
+                                            ] 
+                                        ]
+                                    ]
+                                ]                             
                             ]
                         ]
                     ]
@@ -496,10 +519,12 @@ type GTtable =
                   prop.style [
                     style.paddingLeft 100
                     style.paddingRight 100
+                    style.marginTop 100
                   ]
                   prop.children [
                     Daisy.formControl [
                         Daisy.button.button [
+                            if table = [] then prop.style [style.visibility.hidden]
                             button.md
                             prop.className "button"
                             prop.onClick (fun _ ->
@@ -544,6 +569,7 @@ type GTtable =
                         prop.text "Download table"
                         if interactionState.IsEmpty then prop.disabled true; prop.className "button" 
                         else prop.className "button"
+                        if table = [] then prop.style [style.visibility.hidden]
                     ]
                   ]
                 ]
@@ -593,7 +619,6 @@ type GTtable =
                             |> fun t ->
                                 t |> setInteractionState
                                 t |> setLocalStorageInteraction "Interaction"
-
                         )
                         prop.text "Reset"
                     ]
