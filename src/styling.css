@@ -90,7 +90,10 @@ body {
 }
 
 .navbarColor {
-  background-color: #222a35
+  background-color: #222a35;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 

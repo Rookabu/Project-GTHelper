@@ -340,12 +340,12 @@ type GTtable =
                 let newInput = if input1 = "" then word else input1 + " " + word
                 setInput1 newInput
                 log "setted input 1"
-                setActiveField (if input2 = "" then Some Partner2 else None)
+                // setActiveField (if input2 = "" then Some Partner2 else None)
             |Some Partner2 -> 
                 let newInput = if input2 = "" then word else input2 + " " + word
                 setInput2 newInput 
                 log "setted input 2"
-                setActiveField (if input1 = "" then Some Partner1 else None)
+                // setActiveField (if input1 = "" then Some Partner1 else None)
             |None -> 
                 if input1 = "" then setInput1 word
                 elif input2 = "" then setInput2 word
@@ -452,9 +452,6 @@ type GTtable =
                 )
             |> Array.toList
 
-
-
-       
         Html.div [
             prop.className "childstyle"
             prop.children [
@@ -470,7 +467,7 @@ type GTtable =
                         prop.className "textCard"
                         prop.children [
                             Daisy.cardBody [
-                                Daisy.cardTitle "Hello there and welcome on my page!"
+                                Daisy.cardTitle [prop.text "Hello there and welcome to my page! ✨"; prop.style [style.fontSize 27; style.marginBottom 30]]
                                 Daisy.cardTitle "What is GroundTruth Helper about?"
                                 Html.p "By using GroundTruth Helper you can create a ground truth using abstracts to 
                                 find protein/gene partners and their type of interaction. You can also create other types of datasets, 
@@ -488,7 +485,10 @@ type GTtable =
                                                 prop.onClick (fun _ ->
                                                     focusFileGetter()
                                                 )
-                                                prop.text "Upload abstracts"
+                                                prop.children [
+                                                    Html.i [prop.className "fa-solid fa-upload"]
+                                                    Html.span [ prop.text "Upload abstracts"]
+                                                ]
                                             ]
                                             Daisy.input [
                                                 prop.type' "file"
@@ -556,14 +556,12 @@ type GTtable =
                         // prop.className "button"
                         prop.onClick (fun _ ->
                             let content = CSVParsing.gtElementsToCSV table interactionState
-
                             let downLoad fileName fileContent =
                                 let anchor = Browser.Dom.document.createElement "a"
                                 let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
                                 anchor.setAttribute("href",  encodedContent)
                                 anchor.setAttribute("download", fileName)
                                 anchor.click()
-                            
                             downLoad "GT-dataset.csv" content
                         )
                         prop.text "Download table"
@@ -575,15 +573,12 @@ type GTtable =
                 ]
                 Daisy.table [
                     prop.tabIndex 0
-                    if table = [] then
-                            prop.style [
-                                style.visibility.hidden
-                            ]
+                    if table = [] then prop.style [style.visibility.hidden]
                     else 
-                            prop.style [
-                                style.maxWidth 1
-                                style.textAlign.center
-                            ]
+                        prop.style [
+                            style.maxWidth 1
+                            style.textAlign.center
+                        ]
                     prop.children [
                         Helper.headerRow
                         Html.tbody [
@@ -601,27 +596,26 @@ type GTtable =
                         ]
                     ]
                 ]
-                
                 Daisy.button.button [
-                        button.md
-                        prop.className "button"
-                        if table = [] then
-                            prop.style [
-                                style.visibility.hidden
-                            ]
-                        else prop.className "button" 
-                        prop.onClick (fun _ ->
-                            []
-                            |> fun t ->
-                                t |> setTable 
-                                t |> setLocalStorage "GTlist"
-                            Map.empty
-                            |> fun t ->
-                                t |> setInteractionState
-                                t |> setLocalStorageInteraction "Interaction"
-                        )
-                        prop.text "Reset"
-                    ]
+                    button.md
+                    prop.className "button"
+                    if table = [] then
+                        prop.style [
+                            style.visibility.hidden
+                        ]
+                    else prop.className "button" 
+                    prop.onClick (fun _ ->
+                        []
+                        |> fun t ->
+                            t |> setTable 
+                            t |> setLocalStorage "GTlist"
+                        Map.empty
+                        |> fun t ->
+                            t |> setInteractionState
+                            t |> setLocalStorageInteraction "Interaction"
+                    )
+                    prop.text "Reset to Start"
+                ]
             ]
         ]
 

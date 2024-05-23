@@ -6,6 +6,7 @@ open Feliz.DaisyUI
 type NavBar =
     static member Subpagelink(setPage: Types.Page -> unit, statePage: Types.Page) = 
         Daisy.navbar [
+            
             prop.className "bg-base-200 shadow-lg bg-neutral text-neutral-content"
             prop.className "navbarColor"
             prop.children [
@@ -21,7 +22,7 @@ type NavBar =
                         ]
                     ]
                     Daisy.button.button [
-                        prop.text "Start"
+                        prop.text "Editor"
                         prop.onClick (fun _ -> setPage(Types.Page.GTtable))
                         prop.className "button"
                         prop.style [style.marginLeft 15]
