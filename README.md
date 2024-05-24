@@ -40,4 +40,20 @@ This command starts a development server for the test application and makes it a
 To run the tests using the command line and of course in your CI server, you have to use the mocha test runner which doesn't use the browser but instead runs the code using node.js:
 ```
 npm test
-```# Project-GTHelper
+```
+
+### git notes 
+
+#### update developer to main
+
+1. Make sure your working tree is in a clean state
+
+``git status``
+
+2. Check out the branch you want to change, e.g. some-branch
+
+``git checkout some-branch``
+
+3. Reset that branch to some other branch/commit, e.g. target-branch
+
+``git reset --hard target-branch``
