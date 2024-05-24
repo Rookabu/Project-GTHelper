@@ -22,18 +22,10 @@ type NavBar =
                         ]
                     ]
                     Daisy.button.button [
-                        prop.text "Editor"
+                        prop.text "GroundTruth Helper"
                         prop.onClick (fun _ -> setPage(Types.Page.GTtable))
                         prop.className "button"
                         prop.style [style.marginLeft 15]
-                    ]
-                ]
-                Daisy.navbarCenter [
-                    Daisy.cardTitle [
-                        prop.text "GroundTruth Helper"
-                        prop.style [
-                            style.color "#698ed0"
-                        ]
                     ]
                 ]
                 Daisy.navbarEnd [
