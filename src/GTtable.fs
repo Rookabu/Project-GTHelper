@@ -201,7 +201,7 @@ module private Helper =
                 Daisy.formControl [
                     Daisy.label [
                         prop.className "title" 
-                        prop.text "InteractionType"
+                        prop.text "Interaction Type"
                         prop.style [style.fontSize 16]]
                     match inputType with
                     |Other _ ->
