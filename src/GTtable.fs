@@ -25,7 +25,6 @@ module private Helper =
 
     let splitTextIntoWords (text: string) =
         text.Split([|' '; '\n'; '\t'; '\r'|], System.StringSplitOptions.RemoveEmptyEntries)
-        |> Array.map (fun s -> s.Replace(",", "").Replace(".", ""))
         |> Array.toList 
 
     let log x = Browser.Dom.console.log x 
