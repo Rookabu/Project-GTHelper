@@ -10,11 +10,9 @@ type Contact =
             prop.className "childstyle"
             prop.children [
                 Daisy.card [
-                    
                     prop.style [
                         style.marginTop 100
                         style.maxWidth 700
-                        style.textAlign.justify
                         style.fontSize 20
                     ] 
                     
@@ -29,22 +27,26 @@ type Contact =
                             Html.p "Erwin-Schrödinger-Str. 56 R244"
                             Html.p "67663 Kaiserslautern, Germany"  
                             Daisy.label [
+                                prop.style [style.justifyContent.flexStart]
                                 prop.children [
                                     Html.i [prop.className "fa-solid fa-phone"]
-                                    Html.span [ prop.text "+ 49 631 205 4657"]
+                                    Html.span [ prop.text "+ 49 631 205 4657"; prop.style [style.marginLeft 10]]
                                 ]
                             ]   
                             Daisy.label [
+                                prop.style [style.justifyContent.flexStart]
                                 prop.children [
-                                    Html.i [prop.className "fa-solid fa-fax"]
-                                    Html.span [ prop.text "+ 49 631 205 3799"]
+                                    Html.i [prop.className "fa-solid fa-fax"; prop.style [style.justifyContent.spaceBetween]]
+                                    Html.span [ prop.text "+ 49 631 205 3799"; prop.style [style.marginLeft 10]]
                                 ]
                             ]   
-                            // Daisy.cardActions [
-                            //     prop.className "card-actions justify-center"
-                            //     prop.style [style.marginTop 30]
-                                
-                            // ]                             
+                            Html.p "Write me your feedback as an issue on"
+                            Html.a [
+                                prop.href "https://github.com/Rookabu/Project-GTHelper"
+                                prop.text "my github!" 
+                                prop.style [style.textDecoration.underline]
+                            ] 
+                                                         
                         ]
                     ]
                 ]
