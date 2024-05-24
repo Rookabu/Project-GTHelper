@@ -26,7 +26,7 @@ type Contact =
                             Html.p "Prof. Dr. Timo Mühlhaus"
                             Html.p [ prop.text "Computational Systems Biology"; prop.style [style.marginBottom 30]]
                             Html.p "RPTU University of Kaiserslautern"
-                            Html.p "Paul-Ehrlich-Str. 23 R109"
+                            Html.p "Erwin-Schrödinger-Str. 56 R244"
                             Html.p "67663 Kaiserslautern, Germany"  
                             Daisy.label [
                                 prop.children [

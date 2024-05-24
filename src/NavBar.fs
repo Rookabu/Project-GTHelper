@@ -37,10 +37,13 @@ type NavBar =
                             style.marginRight 15
                         ]
                     ]
-                    Daisy.button.button [
-                        prop.text "Feedback"
-                        prop.onClick (fun _ -> setPage(Types.Page.Feedback))
-                        prop.className "button"
+                    Daisy.button.a [
+                        prop.href "https://github.com/Rookabu/Project-GTHelper"
+                        prop.target.blank 
+                        button.ghost
+                        prop.children [
+                            Html.i [prop.className "fa-brands fa-github"; prop.style [style.fontSize (length.rem 3)]]
+                        ]
                     ]
                 ]
             ]
