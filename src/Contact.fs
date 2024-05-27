@@ -42,8 +42,9 @@ type Contact =
                             ]   
                             Html.p "Write me your feedback as an issue on"
                             Html.a [
-                                prop.href "https://github.com/Rookabu/Project-GTHelper"
+                                prop.href "https://github.com/Rookabu/Project-GTHelper/issues"
                                 prop.text "my github!" 
+                                prop.target.blank 
                                 prop.style [style.textDecoration.underline]
                             ] 
                                                          

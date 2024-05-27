@@ -6,7 +6,6 @@ open Feliz.DaisyUI
 type NavBar =
     static member Subpagelink(setPage: Types.Page -> unit, statePage: Types.Page) = 
         Daisy.navbar [
-            
             prop.className "bg-base-200 shadow-lg bg-neutral text-neutral-content"
             prop.className "navbarColor"
             prop.children [
@@ -41,6 +40,7 @@ type NavBar =
                         prop.href "https://github.com/Rookabu/Project-GTHelper"
                         prop.target.blank 
                         button.ghost
+                        prop.style [style.paddingLeft 0; style.paddingRight 0] 
                         prop.children [
                             Html.i [prop.className "fa-brands fa-github"; prop.style [style.fontSize (length.rem 3)]]
                         ]
