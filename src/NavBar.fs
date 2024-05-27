@@ -5,6 +5,7 @@ open Feliz.DaisyUI
 
 type NavBar =
     static member Subpagelink(setPage: Types.Page -> unit, statePage: Types.Page) = 
+        let logo = StaticFile.import "./img/csb-wide-white.svg"
         Daisy.navbar [
             prop.className "bg-base-200 shadow-lg bg-neutral text-neutral-content"
             prop.className "navbarColor"
@@ -15,7 +16,7 @@ type NavBar =
                         prop.target.blank 
                         prop.children [
                             Html.img [
-                                prop.src "./img/csb-wide-white.svg"
+                                prop.src logo
                                 prop.className "w-full h-full"
                             ]
                         ]
