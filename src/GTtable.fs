@@ -9,7 +9,6 @@ open Fable.Core.JsInterop
 open Browser
 
 
-
 type ActiveField = 
     |Partner1
     |Partner2
@@ -22,12 +21,11 @@ module List =
       | _, head :: tail -> head :: removeAt (index - 1) tail
 
 module private Helper =
-
     let splitTextIntoWords (text: string) =
         text.Split([|' '; '\n'; '\t'; '\r'|], System.StringSplitOptions.RemoveEmptyEntries)
-        |> Array.map (fun s -> s.Replace(",", "").Replace(".", ""))
+        // |> Array.map (fun s -> s.Replace(",", "").Replace(".", ""))
         |> Array.toList 
-
+    
     let log x = Browser.Dom.console.log x 
 
     let headerRow = 
@@ -87,14 +85,15 @@ module private Helper =
     let clickableWords (text, setNewClickedWord, interactionWordList: string list, activeWordList: string[]) =
         prop.children [
             for word: string in text do
+                let trimmedWord = CSVParsing.removeSymbols word
                 Html.span [
                     prop.onClick (fun _ -> 
-                        setNewClickedWord word 
+                        setNewClickedWord trimmedWord 
                     )
                     prop.text word
                     prop.className "hover:bg-orange-700"
-                    if interactionWordList |> List.contains word then prop.className "clickedText"
-                    if activeWordList |> Array.contains word then prop.className "clickedTextActive" //if word is in the List, then it changes its color
+                    if interactionWordList |> List.contains trimmedWord then prop.className "clickedText"
+                    if activeWordList |> Array.contains trimmedWord then prop.className "clickedTextActive" //if word is in the List, then it changes its color
                     prop.style [style.cursor.pointer; style.userSelect.none] 
                 ]
         ]
@@ -155,6 +154,11 @@ module private Helper =
                 prop.style [style.fontSize 16]
             ]
             Daisy.input [
+                prop.tabIndex 0
+                // prop.onKeyDown(fun e -> 
+                //     if e.code = "KeyR" then removeSymbols partnerStrValue
+                //     else ""        
+                // )
                 input.bordered 
                 input.sm 
                 prop.style [style.color.white; style.maxWidth 150]
@@ -315,6 +319,7 @@ type GTtable =
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
         let (checkState: bool, setCheckState) = React.useState (if pubIndex = 0 && interactionState.IsEmpty then true else false)
         let (activeField: ActiveField option, setActiveField) = React.useState (Some Partner1)
+        
         let interactionWordList: string list = [
             match (Map.tryFind pubIndex interactionState) with
             |Some interactions ->
@@ -407,6 +412,7 @@ type GTtable =
             else Json.parseAs<GTelement list> (Browser.WebStorage.localStorage.getItem key)  
 
         let (table, setTable) = React.useState (initialTable "GTlist")
+        let (isOnLoad, setonLoad) = React.useState (false)
 
         let setLocalStorage (key: string)(nextTable: 'a list) =
             let JSONString = Json.stringify nextTable //tabelle wird zu einem string convertiert
@@ -452,6 +458,45 @@ type GTtable =
                 )
             |> Array.toList
 
+        let upLoadButton =
+            Daisy.formControl [
+                Daisy.button.button [
+                    button.md
+                    prop.className "button"
+                    prop.onClick (fun _ ->
+                        focusFileGetter()
+                        setonLoad true
+                    )
+                    prop.children [
+                        Html.i [prop.className "fa-solid fa-upload"]
+                        Html.span [ prop.text "Upload abstracts"]
+                    ]
+                ]
+                Daisy.input [
+                    prop.type' "file"
+                    prop.ref inputRef
+                    file.ghost
+                    prop.hidden true
+                    prop.accept ".txt, .csv, .tsv"
+                    prop.onChange (fun (file: Types.File) ->
+                        let reader = FileReader.Create() //creates a file reader
+                        reader.onload <- fun e -> 
+                            let allContent:string = e.target?result //reads the file after a load and prints it as a string
+                            log allContent
+                            let newAbstract = parsePaperText allContent
+                            setTable newAbstract
+                            setLocalStorage "GTlist" newAbstract 
+                            file.slice()
+                            |> reader.readAsText //reads the file as a text  
+                    )
+                    prop.onLoad (fun _ ->
+                        setonLoad true
+                    )
+                ] 
+            ]
+                
+            
+
         Html.div [
             prop.className "childstyle"
             prop.children [
@@ -478,37 +523,12 @@ type GTtable =
                                     prop.className "card-actions justify-center"
                                     prop.style [style.marginTop 30]
                                     prop.children [
-                                        Daisy.formControl [
-                                            Daisy.button.button [
-                                                button.md
-                                                prop.className "button"
-                                                prop.onClick (fun _ ->
-                                                    focusFileGetter()
-                                                )
-                                                prop.children [
-                                                    Html.i [prop.className "fa-solid fa-upload"]
-                                                    Html.span [ prop.text "Upload abstracts"]
-                                                ]
+                                        upLoadButton
+                                        if isOnLoad = true then
+                                            Daisy.loading [
+                                                loading.spinner 
+                                                loading.lg
                                             ]
-                                            Daisy.input [
-                                                prop.type' "file"
-                                                prop.ref inputRef
-                                                file.ghost
-                                                prop.hidden true
-                                                prop.accept ".txt, .csv, .tsv"
-                                                prop.onChange (fun (file: Types.File) ->
-                                                    let reader = FileReader.Create() //creates a file reader
-                                                    reader.onload <- fun e -> 
-                                                        let allContent:string = e.target?result //reads the file after a load and prints it as a string
-                                                        log allContent
-                                                        let newAbstract = parsePaperText allContent
-                                                        setTable newAbstract
-                                                        setLocalStorage "GTlist" newAbstract 
-                                                    file.slice()
-                                                    |> reader.readAsText //reads the file as a text
-                                                )
-                                            ] 
-                                        ]
                                     ]
                                 ]                             
                             ]
@@ -522,35 +542,12 @@ type GTtable =
                     style.marginTop 100
                   ]
                   prop.children [
-                    Daisy.formControl [
-                        Daisy.button.button [
-                            if table = [] then prop.style [style.visibility.hidden]
-                            button.md
-                            prop.className "button"
-                            prop.onClick (fun _ ->
-                                focusFileGetter()
-                            )
-                            prop.text "Upload abstracts"
+                    upLoadButton
+                    if isOnLoad = true then
+                        Daisy.loading [
+                            loading.spinner 
+                            loading.lg
                         ]
-                        Daisy.input [
-                            prop.type' "file"
-                            prop.ref inputRef
-                            file.ghost
-                            prop.hidden true
-                            prop.accept ".txt, .csv, .tsv"
-                            prop.onChange (fun (file: Types.File) ->
-                                let reader = FileReader.Create() //creates a file reader
-                                reader.onload <- fun e -> 
-                                    let allContent:string = e.target?result //reads the file after a load and prints it as a string
-                                    log allContent
-                                    let newAbstract = parsePaperText allContent
-                                    setTable newAbstract
-                                    setLocalStorage "GTlist" newAbstract 
-                                file.slice()
-                                |> reader.readAsText //reads the file as a text
-                            )
-                        ] 
-                    ]
                     Daisy.button.button [
                         button.md
                         // prop.className "button"
@@ -579,6 +576,7 @@ type GTtable =
                             style.maxWidth 1
                             style.textAlign.center
                         ]
+                    prop.className "sm:width-[1000px]"
                     prop.children [
                         Helper.headerRow
                         Html.tbody [
@@ -613,6 +611,9 @@ type GTtable =
                         |> fun t ->
                             t |> setInteractionState
                             t |> setLocalStorageInteraction "Interaction"
+                        false
+                        |> fun t ->
+                            t |> setonLoad    
                     )
                     prop.text "Reset to Start"
                 ]

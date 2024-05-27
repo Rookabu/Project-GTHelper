@@ -1,7 +1,12 @@
 module CSVParsing
 open Types
 
+let removeSymbols (word: string) =
+    word.Trim[|'.'; ','; '(' ; ')'|]
+
+
 let gtElementToCSV (ele: GTelement) (interaction: Map<int, Interaction list>) (pubIndex: int) =
+
     let title =
         ele.Title |> String.concat " "
 
@@ -9,7 +14,7 @@ let gtElementToCSV (ele: GTelement) (interaction: Map<int, Interaction list>) (p
     |Some l -> 
         l
         |> List.map (fun e ->
-            [title; e.Partner1; e.Partner2; e.InteractionType.ToOutput()] |> String.concat "\t"        
+            [title; removeSymbols e.Partner1; removeSymbols e.Partner2; e.InteractionType.ToOutput()] |> String.concat "\t"        
         ) //this is a string list, where each one contains a different interaction but the same title of the element 
     |None -> []
 

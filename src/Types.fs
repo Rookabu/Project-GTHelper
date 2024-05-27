@@ -36,4 +36,3 @@ type GTelement = {
 type Page =
     |GTtable
     |Contact
-    |Feedback

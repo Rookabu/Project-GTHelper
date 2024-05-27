@@ -16,6 +16,6 @@ type View =
                 match currentpage with
                 |Types.Page.GTtable -> Components.GTtable.Main()
                 |Types.Page.Contact -> Components.Contact.Main() 
-                |Types.Page.Feedback -> Components.Feedback.Main()//wird gemachted da die jeweilige component aufgerufen werden soll je nach page (application state)
+               //wird gemachted da die jeweilige component aufgerufen werden soll je nach page (application state)
             ]
         ]

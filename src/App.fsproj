@@ -4,11 +4,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Types.fs" />
-    <Compile Include="CSVParsing.fs" />
     <None Include="index.html" />
     <Compile Include="Extensions.fs" />
+    <Compile Include="CSVParsing.fs" />
     <Compile Include="GTtable.fs" />
-    <Compile Include="Feedback.fs" />
     <Compile Include="Contact.fs" />
     <Compile Include="NavBar.fs" />
     <Compile Include="View.fs" />

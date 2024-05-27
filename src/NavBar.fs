@@ -6,7 +6,6 @@ open Feliz.DaisyUI
 type NavBar =
     static member Subpagelink(setPage: Types.Page -> unit, statePage: Types.Page) = 
         Daisy.navbar [
-            
             prop.className "bg-base-200 shadow-lg bg-neutral text-neutral-content"
             prop.className "navbarColor"
             prop.children [
@@ -22,18 +21,10 @@ type NavBar =
                         ]
                     ]
                     Daisy.button.button [
-                        prop.text "Editor"
+                        prop.text "GroundTruth Helper"
                         prop.onClick (fun _ -> setPage(Types.Page.GTtable))
                         prop.className "button"
                         prop.style [style.marginLeft 15]
-                    ]
-                ]
-                Daisy.navbarCenter [
-                    Daisy.cardTitle [
-                        prop.text "GroundTruth Helper"
-                        prop.style [
-                            style.color "#698ed0"
-                        ]
                     ]
                 ]
                 Daisy.navbarEnd [
@@ -45,10 +36,14 @@ type NavBar =
                             style.marginRight 15
                         ]
                     ]
-                    Daisy.button.button [
-                        prop.text "Feedback"
-                        prop.onClick (fun _ -> setPage(Types.Page.Feedback))
-                        prop.className "button"
+                    Daisy.button.a [
+                        prop.href "https://github.com/Rookabu/Project-GTHelper"
+                        prop.target.blank 
+                        button.ghost
+                        prop.style [style.paddingLeft 0; style.paddingRight 0] 
+                        prop.children [
+                            Html.i [prop.className "fa-brands fa-github"; prop.style [style.fontSize (length.rem 3)]]
+                        ]
                     ]
                 ]
             ]
