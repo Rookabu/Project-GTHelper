@@ -494,8 +494,97 @@ type GTtable =
                     )
                 ] 
             ]
-                
-            
+
+        let threeButtonElement =
+            Html.div [
+                    prop.className "flex size-full justify-between"
+                    prop.style [
+                        style.paddingLeft 100
+                        style.paddingRight 100
+                        style.marginTop 50
+                        style.marginBottom 50
+                    ]
+                    prop.children [
+                            Daisy.button.button [
+                                if table = [] then prop.style [style.visibility.hidden]
+                                button.md
+                                prop.className "button"
+                                prop.onClick (fun _ ->
+                                    focusFileGetter()
+                                )
+                                prop.text "Upload abstracts"
+                            ]
+                            Daisy.input [
+                                prop.type' "file"
+                                prop.ref inputRef
+                                file.ghost
+                                prop.hidden true
+                                prop.accept ".txt, .csv, .tsv"
+                                prop.onChange (fun (file: Types.File) ->
+                                    let reader = FileReader.Create() //creates a file reader
+                                    reader.onload <- fun e -> 
+                                        let allContent:string = e.target?result //reads the file after a load and prints it as a string
+                                        log allContent
+                                        let newAbstract = parsePaperText allContent
+                                        setTable newAbstract
+                                        setLocalStorage "GTlist" newAbstract 
+                                    file.slice()
+                                    |> reader.readAsText //reads the file as a text
+                                )
+                                prop.onLoadStart (fun _ ->
+                                    setonLoad true
+                                )
+                            ]
+                            // if isOnLoad = true then
+                            //     Daisy.loading [
+                            //         loading.spinner 
+                            //         loading.lg
+                            //     ] 
+                            Daisy.button.button [
+                                button.md
+                                prop.className "button"
+                                if table = [] then
+                                    prop.style [
+                                        style.visibility.hidden
+                                    ]
+                                else prop.className "button" 
+                                prop.onClick (fun _ ->
+                                    []
+                                    |> fun t ->
+                                        t |> setTable 
+                                        t |> setLocalStorage "GTlist"
+                                    Map.empty
+                                    |> fun t ->
+                                        t |> setInteractionState
+                                        t |> setLocalStorageInteraction "Interaction"
+                                    false
+                                    |> fun t ->
+                                        t |> setonLoad    
+                                )
+                                prop.text "Reset to Start"
+                            ]
+                            
+                            Daisy.button.button [
+                                button.md
+                                // prop.className "button"
+                                prop.onClick (fun _ ->
+                                    let content = CSVParsing.gtElementsToCSV table interactionState
+                                    let downLoad fileName fileContent =
+                                        let anchor = Browser.Dom.document.createElement "a"
+                                        let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
+                                        anchor.setAttribute("href",  encodedContent)
+                                        anchor.setAttribute("download", fileName)
+                                        anchor.click()
+                                    downLoad "GT-dataset.csv" content
+                                )
+                                prop.text "Download table"
+                                if interactionState.IsEmpty then prop.disabled true; prop.className "button" 
+                                else prop.className "button"
+                                if table = [] then prop.style [style.visibility.hidden]
+                            ]
+                        
+                    ]
+                ]
 
         Html.div [
             prop.className "childstyle"
@@ -507,6 +596,7 @@ type GTtable =
                             style.maxWidth 700
                             style.textAlign.justify
                             style.fontSize 20
+
                         ] 
                         prop.className "shadow-lg"
                         prop.className "textCard"
@@ -534,40 +624,7 @@ type GTtable =
                             ]
                         ]
                     ]
-                Html.div [
-                  prop.className "flex size-full justify-between"
-                  prop.style [
-                    style.paddingLeft 100
-                    style.paddingRight 100
-                    style.marginTop 100
-                  ]
-                  prop.children [
-                    upLoadButton
-                    if isOnLoad = true then
-                        Daisy.loading [
-                            loading.spinner 
-                            loading.lg
-                        ]
-                    Daisy.button.button [
-                        button.md
-                        // prop.className "button"
-                        prop.onClick (fun _ ->
-                            let content = CSVParsing.gtElementsToCSV table interactionState
-                            let downLoad fileName fileContent =
-                                let anchor = Browser.Dom.document.createElement "a"
-                                let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
-                                anchor.setAttribute("href",  encodedContent)
-                                anchor.setAttribute("download", fileName)
-                                anchor.click()
-                            downLoad "GT-dataset.csv" content
-                        )
-                        prop.text "Download table"
-                        if interactionState.IsEmpty then prop.disabled true; prop.className "button" 
-                        else prop.className "button"
-                        if table = [] then prop.style [style.visibility.hidden]
-                    ]
-                  ]
-                ]
+                threeButtonElement
                 Daisy.table [
                     prop.tabIndex 0
                     if table = [] then prop.style [style.visibility.hidden]
@@ -594,31 +651,14 @@ type GTtable =
                         ]
                     ]
                 ]
-                Daisy.button.button [
-                    button.md
-                    prop.className "button"
-                    if table = [] then
-                        prop.style [
-                            style.visibility.hidden
-                        ]
-                    else prop.className "button" 
-                    prop.onClick (fun _ ->
-                        []
-                        |> fun t ->
-                            t |> setTable 
-                            t |> setLocalStorage "GTlist"
-                        Map.empty
-                        |> fun t ->
-                            t |> setInteractionState
-                            t |> setLocalStorageInteraction "Interaction"
-                        false
-                        |> fun t ->
-                            t |> setonLoad    
-                    )
-                    prop.text "Reset to Start"
-                ]
+                // prop.style [style.marginBottom 50]
+ 
+                threeButtonElement
+
+                
             ]
         ]
+        
 
                    
                 
