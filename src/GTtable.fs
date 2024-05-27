@@ -591,11 +591,13 @@ type GTtable =
             prop.children [
                 if table = [] then
                     Daisy.card [
+                        
                         prop.style [
                             style.marginTop 100
                             style.maxWidth 700
                             style.textAlign.justify
                             style.fontSize 20
+                            style.overflow.hidden
 
                         ] 
                         prop.className "shadow-lg"

@@ -3,16 +3,15 @@
 @tailwind utilities;
 
 html {
-  overflow: auto;
-  background-color: #44546a
+  background-color: #44546a;
+  overflow: auto
 }
 
 body {
     background-color: #44546a;
     color: white; 
     width: 100vw;
-    height: 100vh; 	
-    overflow: auto
+    height: 100%; 
 }
 
 .button {
