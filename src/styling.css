@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/*------------------------------------*\
+    $SMALL COMPUTER SCREENS
+\*------------------------------------*/
+
+@media all and (max-width: 1034px) {
+
+}
+
+/*------------------------------------*\
+    $IPAD AND TABLET
+\*------------------------------------*/
+
+@media only screen and (max-width: 767px) {
+
+}
+
+/*------------------------------------*\
+    $IPHONE 4S LANDSCAPE
+\*------------------------------------*/
+
+@media only screen and (max-width : 480px) {
+
+}
+
+/*------------------------------------*\
+    $IHPONE 4S
+\*------------------------------------*/
+
+@media only screen and (max-width : 320px) {
+
+}
+
 html {
   overflow: auto;
   background-color: #44546a
