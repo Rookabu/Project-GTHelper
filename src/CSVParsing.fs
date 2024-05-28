@@ -2,7 +2,7 @@ module CSVParsing
 open Types
 
 let removeSymbols (word: string) =
-    word.Trim[|'.'; ','; '(' ; ')'|]
+    word.Trim[|'.'; ','; '(' ; ')';';'|]
 
 
 let gtElementToCSV (ele: GTelement) (interaction: Map<int, Interaction list>) (pubIndex: int) =

@@ -130,5 +130,11 @@ body {
   z-index: 10;
 }
 
+.tooltip::before {
+  max-width:  30rem;
+  background-color: #698ed0;
+  color: white
+}
+
 
 
