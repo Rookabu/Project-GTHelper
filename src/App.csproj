@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Types.fs" />
+    <None Include="index.html" />
+    <Compile Include="Extensions.fs" />
+    <Compile Include="CSVParsing.fs" />
+    <Compile Include="GTtable.fs" />
+    <Compile Include="Contact.fs" />
+    <Compile Include="NavBar.fs" />
+    <Compile Include="View.fs" />
+    <Compile Include="Main.fs" />
+    <None Include="styling.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fable.SimpleJson" Version="3.24.0" />
+    <PackageReference Include="Feliz" Version="2.7.0" />
+    <PackageReference Include="Feliz.Router" Version="4.0.0" />
+    <PackageReference Include="Feliz.DaisyUI" Version="4.2.0" />
+  </ItemGroup>
+</Project>

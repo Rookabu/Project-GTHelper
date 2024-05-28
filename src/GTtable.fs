@@ -596,15 +596,14 @@ type GTtable =
                             style.maxWidth 700
                             style.textAlign.justify
                             style.fontSize 20
-
                         ] 
-                        prop.className "shadow-lg"
+                        // prop.className "shadow-lg"
                         prop.className "textCard"
                         prop.children [
                             Daisy.cardBody [
                                 Daisy.cardTitle [prop.text "Hello there and welcome to my page! ✨"; prop.style [style.fontSize 27; style.marginBottom 30]]
                                 Daisy.cardTitle "What is GroundTruth Helper about?"
-                                Html.p "By using GroundTruth Helper you can create a ground truth using abstracts to 
+                                Html.p "By using GroundTruth Helper you can create a ground truth from abstracts to 
                                 find protein/gene partners and their type of interaction. You can also create other types of datasets, 
                                 for example to train a large language model or just to simplify your research. You can then download your created data. 
                                 Just click on each partner in the abstract after expanding it to assign it to partner 1 or 2." 
@@ -654,8 +653,6 @@ type GTtable =
                 // prop.style [style.marginBottom 50]
  
                 threeButtonElement
-
-                
             ]
         ]
         

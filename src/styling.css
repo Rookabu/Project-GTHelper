@@ -80,7 +80,8 @@ body {
 .textCard {
   background-color:#698ed0;
   color: white;
-  border-color: #698ed0 ;
+  border-color: #698ed0;
+  overflow-y: hidden;
 }
 
 .textCardError {
@@ -94,9 +95,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-
 }
-
 
 
 
