@@ -36,7 +36,7 @@ type NavBar =
                             style.marginRight 15
                         ]
                     ]
-                    Daisy.button.a [
+                    Html.a [
                         prop.href "https://github.com/Rookabu/Project-GTHelper"
                         prop.target.blank 
                         button.ghost
