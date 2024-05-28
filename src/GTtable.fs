@@ -497,8 +497,8 @@ type GTtable =
                             let newAbstract = parsePaperText allContent
                             setTable newAbstract
                             setLocalStorage "GTlist" newAbstract 
-                            file.slice()
-                            |> reader.readAsText //reads the file as a text  
+                        file.slice()
+                        |> reader.readAsText //reads the file as a text  
                     )
                     prop.onLoad (fun _ ->
                         setonLoad true
@@ -517,7 +517,6 @@ type GTtable =
                     ]
                     prop.children [
                             Daisy.button.button [
-                                if table = [] then prop.style [style.visibility.hidden]
                                 button.md
                                 prop.className "button"
                                 prop.onClick (fun _ ->
@@ -632,34 +631,33 @@ type GTtable =
                             ]
                         ]
                     ]
-                threeButtonElement
-                Daisy.table [
-                    prop.tabIndex 0
-                    if table = [] then prop.style [style.visibility.hidden]
-                    else 
+                else
+                    threeButtonElement
+                    Daisy.table [
+                        prop.tabIndex 0
                         prop.style [
                             style.maxWidth 1
                             style.textAlign.center
                         ]
-                    prop.className "sm:width-[1000px]"
-                    prop.children [
-                        Helper.headerRow
-                        Html.tbody [
-                            for i in 0 .. (table.Length - 1)  do //für jedes Element in table wird folgendes gemacht:
-                                let element = List.item i table  
-                                let updateElement(index: int) (interList: Interaction list) =
-                                    if interList = [] then  interactionState.Remove index
-                                    else interactionState.Add (index, interList)
-                                    |> fun t ->
-                                        t |> setInteractionState
-                                        t |> setLocalStorageInteraction "Interaction"
-                                    log "safed Interactions"
-                                    log interactionState
-                                GTtable.PaperElement(i, element, interactionState, updateElement)
+                        prop.className "sm:width-[1000px]"
+                        prop.children [
+                            Helper.headerRow
+                            Html.tbody [
+                                for i in 0 .. (table.Length - 1)  do //für jedes Element in table wird folgendes gemacht:
+                                    let element = List.item i table  
+                                    let updateElement(index: int) (interList: Interaction list) =
+                                        if interList = [] then  interactionState.Remove index
+                                        else interactionState.Add (index, interList)
+                                        |> fun t ->
+                                            t |> setInteractionState
+                                            t |> setLocalStorageInteraction "Interaction"
+                                        log "safed Interactions"
+                                        log interactionState
+                                    GTtable.PaperElement(i, element, interactionState, updateElement)
+                            ]
                         ]
                     ]
-                ]
-                threeButtonElement
+                    threeButtonElement
             ]
         ]
         
