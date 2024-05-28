@@ -597,7 +597,7 @@ type GTtable =
                 ]
 
         Html.div [
-            prop.className "childstyle overflow-hidden"
+            prop.className "childstyle"
             prop.children [
                 if table = [] then
                     Daisy.card [
@@ -639,7 +639,6 @@ type GTtable =
                             style.maxWidth 1
                             style.textAlign.center
                         ]
-                        prop.className "sm:width-[1000px]"
                         prop.children [
                             Helper.headerRow
                             Html.tbody [

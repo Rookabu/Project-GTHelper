@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /*------------------------------------*\
     $SMALL COMPUTER SCREENS
 \*------------------------------------*/
-
 @media all and (max-width: 1034px) {
 
 }
@@ -24,6 +24,10 @@
 
 @media only screen and (max-width : 480px) {
 
+  div#wrapper {
+    width: 400px;
+}
+
 }
 
 /*------------------------------------*\
@@ -37,7 +41,6 @@
 html {
   overflow: auto;
   background-color: #44546a
-  
 }
 
 body {
@@ -114,7 +117,6 @@ body {
   background-color:#698ed0;
   color: white;
   border-color: #698ed0;
-  overflow-y: hidden;
 }
 
 .textCardError {

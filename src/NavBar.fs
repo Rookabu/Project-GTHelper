@@ -7,8 +7,7 @@ type NavBar =
     static member Subpagelink(setPage: Types.Page -> unit, statePage: Types.Page) = 
         let logo = StaticFile.import "./img/csb-wide-white.svg"
         Daisy.navbar [
-            prop.className "bg-base-200 shadow-lg bg-neutral text-neutral-content"
-            prop.className "navbarColor"
+            prop.className "bg-base-200 shadow-lg bg-neutral text-neutral-content navbarColor"
             prop.children [
                 Daisy.navbarStart [
                     Daisy.button.a [
