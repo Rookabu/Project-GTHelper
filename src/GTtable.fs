@@ -38,7 +38,13 @@ module private Helper =
                 prop.children [
                     Html.th "No."
                     Html.th "Title"
-                    Html.th "No. of Interactions"
+                    Daisy.tooltip [
+                        tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
+                        prop.className "tooltip tooltip-open tooltip-larg"
+                        prop.children [
+                            Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
+                        ]
+                    ]
                 ]
             ]
         ]
@@ -148,11 +154,13 @@ module private Helper =
 
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
         Daisy.formControl [
+            
             Daisy.label [
                 prop.className "title" 
                 prop.text title
                 prop.style [style.fontSize 16]
             ]
+            
             Daisy.input [
                 prop.tabIndex 0
                 // prop.onKeyDown(fun e -> 
@@ -162,6 +170,7 @@ module private Helper =
                 input.bordered 
                 input.sm 
                 prop.style [style.color.white; style.maxWidth 150]
+                
                 prop.onMouseDown (fun _ ->
                     setField (Some activeField)
                 ) 
@@ -175,9 +184,9 @@ module private Helper =
                 if activeFieldOption = Some activeField then prop.className "tableElementChecked" 
 
                 else prop.className "tableElement"
-
             ]
         ]
+        
 
     let DropDownElement (inputType: InteractionType, setInputType) =
         let blurActiveElement() =
@@ -313,7 +322,7 @@ module private Helper =
 type GTtable =
 
     [<ReactComponent>]
-    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit, setinteractionState: Map<int,list<Interaction>> -> unit, setLocalStorageInteraction) =
+    static member PaperElement (pubIndex: int, element: GTelement, interactionState: Map<int, Interaction list>, updateElement: int -> list<Interaction> -> unit) =
         let (input1: string , setInput1) = React.useState ("")
         let (input2: string, setInput2) = React.useState ("")
         let (inputType: InteractionType, setInputType) = React.useState (ProteinProtein)
@@ -383,6 +392,8 @@ type GTtable =
             prop.tabIndex 0
             prop.onKeyDown(fun e -> 
                 if e.code = "Enter" then onClickHandler e            
+                if e.code = "ControlLeft" && activeField = (Some Partner2) then setActiveField (Some Partner1) 
+                elif e.code = "ControlLeft" && activeField = (Some Partner1) then setActiveField (Some Partner2)            
             )
             prop.children [
                 Html.td (pubIndex + 1)
@@ -587,18 +598,16 @@ type GTtable =
                 ]
 
         Html.div [
-            prop.className "childstyle"
+            prop.className "childstyle overflow-hidden"
             prop.children [
                 if table = [] then
                     Daisy.card [
                         prop.style [
                             style.marginTop 100
                             style.maxWidth 700
-                            style.textAlign.justify
                             style.fontSize 20
                         ] 
-                        // prop.className "shadow-lg"
-                        prop.className "textCard"
+                        prop.className "shadow-lg textCard"
                         prop.children [
                             Daisy.cardBody [
                                 Daisy.cardTitle [prop.text "Hello there and welcome to my page! ✨"; prop.style [style.fontSize 27; style.marginBottom 30]]
@@ -646,12 +655,10 @@ type GTtable =
                                         t |> setLocalStorageInteraction "Interaction"
                                     log "safed Interactions"
                                     log interactionState
-                                GTtable.PaperElement(i, element, interactionState, updateElement, setInteractionState, setLocalStorageInteraction)
+                                GTtable.PaperElement(i, element, interactionState, updateElement)
                         ]
                     ]
                 ]
-                // prop.style [style.marginBottom 50]
- 
                 threeButtonElement
             ]
         ]
