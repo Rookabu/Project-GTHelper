@@ -638,6 +638,9 @@ type GTtable =
                         prop.style [
                             style.maxWidth 1500
                             style.textAlign.center
+
+
+                            
                         ]
                         prop.children [
                             Helper.headerRow
