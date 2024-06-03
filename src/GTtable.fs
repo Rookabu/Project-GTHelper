@@ -40,11 +40,14 @@ module private Helper =
                     Html.th "Title"
                     Daisy.tooltip [
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
-                        prop.className "tooltip tooltip-open tooltip-larg"
+                        prop.className "tooltip"
                         prop.children [
                             Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
                         ]
                     ]
+                    // <div class="lg:tooltip" data-tip="hello">
+                    //     <button class="btn">Hover me</button>
+                    // </div>
                 ]
             ]
         ]
