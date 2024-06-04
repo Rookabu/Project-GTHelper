@@ -38,22 +38,27 @@ module private Helper =
                 prop.children [
                     Html.th "No."
                     Html.th "Title"
-                    let width = Browser.Dom.window.innerWidth
-                    match width with
-                    | w when w > 1025.0 -> //bigger equal
-                        Daisy.tooltip [
-                            tooltip.open'
-                            tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
-                            prop.className "tooltip"
-                            prop.children [
-                                Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
-                            ]
-                        ]
-                    | _ -> 
-                        Html.th "No. of Interactions"
+                    // let width = Browser.Dom.window.innerWidth
+                    // match width with
+                    // | w when w > 1025.0 -> //bigger equal
+                    //     Daisy.tooltip [
+                    //         tooltip.open'
+                    //         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
+                    //         prop.className "tooltip"
+                    //         prop.children [
+                    //             Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
+                    //         ]
+                    //     ]
+                    // | _ -> 
+                    //     Html.th "No. of Interactions"
                     // <div class="lg:tooltip" data-tip="hello">
                     //     <button class="btn">Hover me</button>
                     // </div>
+                    Html.th [
+                        prop.className "lg:tooltip tooltip-open"
+                        tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
+                        prop.text "No. of Interactions"
+                    ]
                 ]
             ]
         ]

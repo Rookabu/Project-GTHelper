@@ -85,7 +85,7 @@ type NavBar =
                                             Html.a [
                                                 prop.href "https://github.com/Rookabu/Project-GTHelper"
                                                 prop.target.blank 
-                                                prop.text "GitHub"
+                                                prop.text "Github"
                                             ]
                                         ]
                                     ]
