@@ -2,31 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-
 html {
   overflow: auto;
   background-color: #44546a
-}
-
-@media (min-width: 1025px) {
-  body {
-    background-color: #44546a;
-    color: white; 
-    width: 100vw;
-    height: 100vh; 	
-    overflow: auto
-  }
-}
-
-@media (max-width: 1024px) {
-  body {
-    background-color: #44546a;
-    color: white; 
-    width: 100vw;
-    
-    height: 100vh; 	
-    overflow: auto
-  }
 }
 
 body {
@@ -70,10 +48,6 @@ body {
   background-color: #8e4b1d; 
   border-color: #8e4b1d 
 }
-
-/* .table:hover {
-  background-color:  	#293240
-} */
 
 .childstyle {
     display: flex;
