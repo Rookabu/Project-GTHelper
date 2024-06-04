@@ -2,42 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/*------------------------------------*\
-    $SMALL COMPUTER SCREENS
-\*------------------------------------*/
-
-@media all and (max-width: 1034px) {
-
-}
-
-/*------------------------------------*\
-    $IPAD AND TABLET
-\*------------------------------------*/
-
-@media only screen and (max-width: 767px) {
-
-}
-
-/*------------------------------------*\
-    $IPHONE 4S LANDSCAPE
-\*------------------------------------*/
-
-@media only screen and (max-width : 480px) {
-
-}
-
-/*------------------------------------*\
-    $IHPONE 4S
-\*------------------------------------*/
-
-@media only screen and (max-width : 320px) {
-
-}
 
 html {
   overflow: auto;
   background-color: #44546a
-  
+}
+
+@media (min-width: 1025px) {
+  body {
+    background-color: #44546a;
+    color: white; 
+    width: 100vw;
+    height: 100vh; 	
+    overflow: auto
+  }
+}
+
+@media (max-width: 1024px) {
+  body {
+    background-color: #44546a;
+    color: white; 
+    width: 100vw;
+    height: 100vh; 	
+    overflow: auto
+  }
 }
 
 body {
@@ -114,7 +102,6 @@ body {
   background-color:#698ed0;
   color: white;
   border-color: #698ed0;
-  overflow-y: hidden;
 }
 
 .textCardError {
@@ -135,6 +122,11 @@ body {
   background-color: #698ed0;
   color: white
 }
+
+
+
+
+
 
 
 

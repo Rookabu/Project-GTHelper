@@ -38,12 +38,26 @@ module private Helper =
                 prop.children [
                     Html.th "No."
                     Html.th "Title"
-                    Daisy.tooltip [
+                    // let width = Browser.Dom.window.innerWidth
+                    // match width with
+                    // | w when w > 1025.0 -> //bigger equal
+                    //     Daisy.tooltip [
+                    //         tooltip.open'
+                    //         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
+                    //         prop.className "tooltip"
+                    //         prop.children [
+                    //             Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
+                    //         ]
+                    //     ]
+                    // | _ -> 
+                    //     Html.th "No. of Interactions"
+                    // <div class="lg:tooltip" data-tip="hello">
+                    //     <button class="btn">Hover me</button>
+                    // </div>
+                    Html.th [
+                        prop.className "lg:tooltip tooltip-open"
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
-                        prop.className "tooltip tooltip-open tooltip-larg"
-                        prop.children [
-                            Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
-                        ]
+                        prop.text "No. of Interactions"
                     ]
                 ]
             ]
@@ -122,11 +136,12 @@ module private Helper =
                     Daisy.collapseTitle [ 
                         Daisy.cardTitle [
                             prop.style [
-                                style.width 900
+                                // style.minWidth 800
                                 style.fontSize 16
                                 style.pointerEvents.unset
                                 style.flexWrap.wrap
                             ]
+                            // prop.className "min-w-96"
                             if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
                             else //checkSate = false
                                 prop.children [
@@ -508,96 +523,95 @@ type GTtable =
 
         let threeButtonElement =
             Html.div [
-                    prop.className "flex size-full justify-between"
-                    prop.style [
-                        style.paddingLeft 100
-                        style.paddingRight 100
-                        style.marginTop 50
-                        style.marginBottom 50
+                prop.className "flex size-full justify-between"
+                prop.style [
+                    style.paddingLeft 100
+                    style.paddingRight 100
+                    style.marginTop 50
+                    style.marginBottom 50
+                ]
+                prop.children [
+                    Daisy.button.button [
+                        button.md
+                        prop.className "button"
+                        prop.onClick (fun _ ->
+                            focusFileGetter()
+                        )
+                        prop.text "Upload abstracts"
                     ]
-                    prop.children [
-                            Daisy.button.button [
-                                button.md
-                                prop.className "button"
-                                prop.onClick (fun _ ->
-                                    focusFileGetter()
-                                )
-                                prop.text "Upload abstracts"
+                    Daisy.input [
+                        prop.type' "file"
+                        prop.ref inputRef
+                        file.ghost
+                        prop.hidden true
+                        prop.accept ".txt, .csv, .tsv"
+                        prop.onChange (fun (file: Types.File) ->
+                            let reader = FileReader.Create() //creates a file reader
+                            reader.onload <- fun e -> 
+                                let allContent:string = e.target?result //reads the file after a load and prints it as a string
+                                log allContent
+                                let newAbstract = parsePaperText allContent
+                                setTable newAbstract
+                                setLocalStorage "GTlist" newAbstract 
+                            file.slice()
+                            |> reader.readAsText //reads the file as a text
+                        )
+                        prop.onLoadStart (fun _ ->
+                            setonLoad true
+                        )
+                    ]
+                    // if isOnLoad = true then
+                    //     Daisy.loading [
+                    //         loading.spinner 
+                    //         loading.lg
+                    //     ] 
+                    Daisy.button.button [
+                        button.md
+                        prop.className "button"
+                        if table = [] then
+                            prop.style [
+                                style.visibility.hidden
                             ]
-                            Daisy.input [
-                                prop.type' "file"
-                                prop.ref inputRef
-                                file.ghost
-                                prop.hidden true
-                                prop.accept ".txt, .csv, .tsv"
-                                prop.onChange (fun (file: Types.File) ->
-                                    let reader = FileReader.Create() //creates a file reader
-                                    reader.onload <- fun e -> 
-                                        let allContent:string = e.target?result //reads the file after a load and prints it as a string
-                                        log allContent
-                                        let newAbstract = parsePaperText allContent
-                                        setTable newAbstract
-                                        setLocalStorage "GTlist" newAbstract 
-                                    file.slice()
-                                    |> reader.readAsText //reads the file as a text
-                                )
-                                prop.onLoadStart (fun _ ->
-                                    setonLoad true
-                                )
-                            ]
-                            // if isOnLoad = true then
-                            //     Daisy.loading [
-                            //         loading.spinner 
-                            //         loading.lg
-                            //     ] 
-                            Daisy.button.button [
-                                button.md
-                                prop.className "button"
-                                if table = [] then
-                                    prop.style [
-                                        style.visibility.hidden
-                                    ]
-                                else prop.className "button" 
-                                prop.onClick (fun _ ->
-                                    []
-                                    |> fun t ->
-                                        t |> setTable 
-                                        t |> setLocalStorage "GTlist"
-                                    Map.empty
-                                    |> fun t ->
-                                        t |> setInteractionState
-                                        t |> setLocalStorageInteraction "Interaction"
-                                    false
-                                    |> fun t ->
-                                        t |> setonLoad    
-                                )
-                                prop.text "Reset to Start"
-                            ]
-                            
-                            Daisy.button.button [
-                                button.md
-                                // prop.className "button"
-                                prop.onClick (fun _ ->
-                                    let content = CSVParsing.gtElementsToCSV table interactionState
-                                    let downLoad fileName fileContent =
-                                        let anchor = Browser.Dom.document.createElement "a"
-                                        let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
-                                        anchor.setAttribute("href",  encodedContent)
-                                        anchor.setAttribute("download", fileName)
-                                        anchor.click()
-                                    downLoad "GT-dataset.csv" content
-                                )
-                                prop.text "Download table"
-                                if interactionState.IsEmpty then prop.disabled true; prop.className "button" 
-                                else prop.className "button"
-                                if table = [] then prop.style [style.visibility.hidden]
-                            ]
-                        
+                        else prop.className "button" 
+                        prop.onClick (fun _ ->
+                            []
+                            |> fun t ->
+                                t |> setTable 
+                                t |> setLocalStorage "GTlist"
+                            Map.empty
+                            |> fun t ->
+                                t |> setInteractionState
+                                t |> setLocalStorageInteraction "Interaction"
+                            false
+                            |> fun t ->
+                                t |> setonLoad    
+                        )
+                        prop.text "Reset to Start"
+                    ]
+                    
+                    Daisy.button.button [
+                        button.md
+                        // prop.className "button"
+                        prop.onClick (fun _ ->
+                            let content = CSVParsing.gtElementsToCSV table interactionState
+                            let downLoad fileName fileContent =
+                                let anchor = Browser.Dom.document.createElement "a"
+                                let encodedContent = fileContent |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI
+                                anchor.setAttribute("href",  encodedContent)
+                                anchor.setAttribute("download", fileName)
+                                anchor.click()
+                            downLoad "GT-dataset.csv" content
+                        )
+                        prop.text "Download table"
+                        if interactionState.IsEmpty then prop.disabled true; prop.className "button" 
+                        else prop.className "button"
+                        if table = [] then prop.style [style.visibility.hidden]
                     ]
                 ]
+            ]
 
         Html.div [
-            prop.className "childstyle overflow-hidden"
+            prop.className "childstyle"
             prop.children [
                 if table = [] then
                     Daisy.card [
@@ -636,10 +650,12 @@ type GTtable =
                     Daisy.table [
                         prop.tabIndex 0
                         prop.style [
-                            style.maxWidth 1
+                            style.maxWidth 1500
                             style.textAlign.center
+
+
+                            
                         ]
-                        prop.className "sm:width-[1000px]"
                         prop.children [
                             Helper.headerRow
                             Html.tbody [
