@@ -8,6 +8,26 @@ html {
   background-color: #44546a
 }
 
+@media (min-width: 1025px) {
+  body {
+    background-color: #44546a;
+    color: white; 
+    width: 100vw;
+    height: 100vh; 	
+    overflow: auto
+  }
+}
+
+@media (max-width: 1024px) {
+  body {
+    background-color: #44546a;
+    color: white; 
+    width: 100vw;
+    height: 100vh; 	
+    overflow: auto
+  }
+}
+
 body {
     background-color: #44546a;
     color: white; 
@@ -102,6 +122,11 @@ body {
   background-color: #698ed0;
   color: white
 }
+
+
+
+
+
 
 
 
