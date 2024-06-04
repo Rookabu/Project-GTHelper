@@ -55,7 +55,7 @@ module private Helper =
                     //     <button class="btn">Hover me</button>
                     // </div>
                     Html.th [
-                        prop.className "lg:tooltip tooltip-open"
+                        prop.className "tooltip"
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
                         prop.text "No. of Interactions"
                     ]
@@ -523,21 +523,24 @@ type GTtable =
 
         let threeButtonElement =
             Html.div [
-                prop.className "flex size-full justify-between"
+                prop.className "contents lg:flex size-full justify-between"
                 prop.style [
                     style.paddingLeft 100
                     style.paddingRight 100
-                    style.marginTop 50
                     style.marginBottom 50
+                    style.marginTop 50
                 ]
                 prop.children [
                     Daisy.button.button [
                         button.md
-                        prop.className "button"
+                        prop.className "button mt-6 lg:mt-0"
                         prop.onClick (fun _ ->
                             focusFileGetter()
                         )
                         prop.text "Upload abstracts"
+                        // prop.style [
+                        //     style.marginTop (length.rem 1)
+                        // ]
                     ]
                     Daisy.input [
                         prop.type' "file"
@@ -590,6 +593,7 @@ type GTtable =
                     ]
                     
                     Daisy.button.button [
+                        prop.className "button mb-6 lg:mb-0"
                         button.md
                         // prop.className "button"
                         prop.onClick (fun _ ->
@@ -652,9 +656,6 @@ type GTtable =
                         prop.style [
                             style.maxWidth 1500
                             style.textAlign.center
-
-
-                            
                         ]
                         prop.children [
                             Helper.headerRow
