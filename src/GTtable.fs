@@ -8,7 +8,6 @@ open Fable.SimpleJson
 open Fable.Core.JsInterop
 open Browser
 
-
 type ActiveField = 
     |Partner1
     |Partner2
@@ -38,24 +37,9 @@ module private Helper =
                 prop.children [
                     Html.th "No."
                     Html.th "Title"
-                    // let width = Browser.Dom.window.innerWidth
-                    // match width with
-                    // | w when w > 1025.0 -> //bigger equal
-                    //     Daisy.tooltip [
-                    //         tooltip.open'
-                    //         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
-                    //         prop.className "tooltip"
-                    //         prop.children [
-                    //             Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
-                    //         ]
-                    //     ]
-                    // | _ -> 
-                    //     Html.th "No. of Interactions"
-                    // <div class="lg:tooltip" data-tip="hello">
-                    //     <button class="btn">Hover me</button>
-                    // </div>
                     Html.th [
-                        prop.className "tooltip"
+                        prop.className "lg:tooltip my-lg-tooltip tooltip-open"
+                        // tooltip.open'
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
                         prop.text "No. of Interactions"
                     ]
@@ -123,6 +107,8 @@ module private Helper =
             prop.type' "checkbox" 
             prop.onCheckedChange (fun (isChecked: bool) ->
                 setCheckState isChecked
+
+                
             )                                              
             prop.isChecked (checkState)
         ]
@@ -522,7 +508,6 @@ type GTtable =
                     // )
                 ] 
             ]
-
         let threeButtonElement =
             Html.div [
                 prop.className "contents lg:flex size-full justify-between"
@@ -550,8 +535,6 @@ type GTtable =
                             loading.lg
                             // prop.className "flex"
                         ]
-                    
-                   
                     Daisy.input [
                         prop.type' "file"
                         prop.ref inputRef
@@ -615,11 +598,8 @@ type GTtable =
                         else prop.className "button"
                         if table = [] then prop.style [style.visibility.hidden]
                     ]
-
-                    
                 ]
             ]
-
         Html.div [
             prop.className "childstyle"
             prop.children [
@@ -658,7 +638,6 @@ type GTtable =
                         ]
                 else
                     threeButtonElement
-                    
                     Daisy.table [
                         prop.tabIndex 0
                         prop.style [
