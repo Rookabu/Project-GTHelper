@@ -98,8 +98,8 @@ body {
   color: white
 } */
 
-@media (min-width: 1024px) {
-  .my-lg-tooltip::before {
+@media (min-width: 768px) {
+  .my-md-tooltip::before {
     max-width: 30rem !important;
     background-color: #698ed0 !important;
     color: white !important;

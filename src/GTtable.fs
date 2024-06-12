@@ -37,11 +37,11 @@ module private Helper =
                 prop.children [
                     Html.th [
                         prop.text "No."
-                        prop.className "hidden md:flex"
+                        prop.className "hidden lg:flex"
                     ]
                     Html.th "Title"
                     Html.th [
-                        prop.className "lg:tooltip my-lg-tooltip tooltip-open"
+                        prop.className "md:tooltip my-md-tooltip tooltip-open"
                         // tooltip.open'
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
                         prop.text "No. of Interactions"
@@ -407,7 +407,7 @@ type GTtable =
             prop.children [
                 Html.td [
                     prop.text (pubIndex + 1)
-                    prop.className "hidden md:flex" //is invivle, execpt for md screens and wider
+                    prop.className "hidden lg:flex" //is invivle, execpt for md screens and wider
                 ]
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
                 Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
