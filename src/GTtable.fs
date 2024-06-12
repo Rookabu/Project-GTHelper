@@ -35,7 +35,10 @@ module private Helper =
                     style.fontSize 16
                 ]
                 prop.children [
-                    Html.th "No."
+                    Html.th [
+                        prop.text "No."
+                        prop.className "hidden md:flex"
+                    ]
                     Html.th "Title"
                     Html.th [
                         prop.className "lg:tooltip my-lg-tooltip tooltip-open"
@@ -73,7 +76,7 @@ module private Helper =
                             ]
                             Html.td [
                                 Daisy.button.button [
-                                    prop.text "X"
+                                    prop.className "fa-solid fa-x"
                                     button.xs
                                     prop.className "button"
                                     prop.onClick (fun _ ->
@@ -108,7 +111,7 @@ module private Helper =
             prop.onCheckedChange (fun (isChecked: bool) ->
                 setCheckState isChecked
 
-                
+
             )                                              
             prop.isChecked (checkState)
         ]
@@ -120,23 +123,27 @@ module private Helper =
                 prop.children [
                     if checkState = false then checkHandle (checkState, setCheckState) 
                     Daisy.collapseTitle [ 
-                        Daisy.cardTitle [
-                            prop.style [
-                                // style.minWidth 800
-                                style.fontSize 16
-                                style.pointerEvents.unset
-                                style.flexWrap.wrap
+                        prop.className "px-0"
+                        prop.children [
+                            Daisy.cardTitle [
+                                prop.style [
+                                    // style.minWidth 800
+                                    style.fontSize 16
+                                    style.pointerEvents.unset
+                                    style.flexWrap.wrap
+                                ]
+                                
+                                // prop.className "min-w-96"
+                                if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
+                                else //checkSate = false
+                                    prop.children [
+                                        for word: string in title do
+                                            Html.span [
+                                                prop.text word  
+                                                prop.style [style.cursor.pointer; style.userSelect.none] 
+                                            ]
+                                    ] 
                             ]
-                            // prop.className "min-w-96"
-                            if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
-                            else //checkSate = false
-                                prop.children [
-                                    for word: string in title do
-                                        Html.span [
-                                            prop.text word  
-                                            prop.style [style.cursor.pointer; style.userSelect.none] 
-                                        ]
-                                ] 
                         ]
                     ]
                     Daisy.collapseContent [
@@ -146,6 +153,7 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 16
                             ] 
+                            prop.className "px-0"
                             clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
                         ]
                     ]
@@ -208,7 +216,7 @@ module private Helper =
     let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1: string -> unit, setInput2: string -> unit, activeField: option<ActiveField>) =
 
         Html.div [
-            prop.className "flex gap-1 flex-col lg:flex-row"
+            prop.className "flex gap-1 flex-col md:flex-row md:justify-between"
             prop.children [
                 labelAndInputField ("Partner 1", input1, activeField, Partner1, setField, setInput1)
                 labelAndInputField ("Partner 2", input2, activeField, Partner2, setField, setInput2)
@@ -296,8 +304,8 @@ module private Helper =
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
-                                if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button flex lg:inline-flex"
-                                else prop.className "button flex lg:inline-flex"
+                                if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button flex md:inline-flex"
+                                else prop.className "button flex md:inline-flex"
                                 prop.style [
                                     style.marginTop 10 //style of add button
                                     style.alignItems.center
@@ -397,7 +405,10 @@ type GTtable =
                 elif e.code = "ControlLeft" && activeField = (Some Partner1) then setActiveField (Some Partner2)            
             )
             prop.children [
-                Html.td (pubIndex + 1)
+                Html.td [
+                    prop.text (pubIndex + 1)
+                    prop.className "hidden md:flex" //is invivle, execpt for md screens and wider
+                ]
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
                 Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
             ]
@@ -508,33 +519,29 @@ type GTtable =
                     // )
                 ] 
             ]
-        let threeButtonElement =
+        let threeButtonElement (mb: int, mt: int)=
             Html.div [
-                prop.className "contents lg:flex size-full justify-between"
+                prop.className "contents md:flex size-full justify-between"
                 prop.style [
                     style.paddingLeft 100
                     style.paddingRight 100
-                    style.marginBottom 50
-                    style.marginTop 50
+                    style.marginBottom mb
+                    style.marginTop mt
                 ]
                 prop.children [
                     Daisy.button.button [
                         button.md
-                        prop.className "button mt-6 lg:mt-0"
+                        prop.className "button mt-6 md:mt-0"
                         prop.onClick (fun _ ->
                             focusFileGetter()
+                            
                         )
                         prop.text "Upload abstracts"
                         // prop.style [
                         //     style.marginTop (length.rem 1)
                         // ]
                     ]
-                    if isOnLoad = true then
-                        Daisy.loading [
-                            loading.spinner 
-                            loading.lg
-                            // prop.className "flex"
-                        ]
+                    
                     Daisy.input [
                         prop.type' "file"
                         prop.ref inputRef
@@ -550,6 +557,10 @@ type GTtable =
                                 setTable newAbstract
                                 setLocalStorage "GTlist" newAbstract 
                                 setonLoad false
+                                Map.empty
+                                |> fun t ->
+                                    t |> setInteractionState
+                                    t |> setLocalStorageInteraction "Interaction"
                             file.slice()
                             |> reader.readAsText //reads the file as a text
                             setonLoad true
@@ -598,10 +609,12 @@ type GTtable =
                         else prop.className "button"
                         if table = [] then prop.style [style.visibility.hidden]
                     ]
+                    
                 ]
+                
             ]
         Html.div [
-            prop.className "childstyle"
+            prop.className "childstyle px-12"
             prop.children [
                 if table = [] then
                     Daisy.card [
@@ -610,7 +623,7 @@ type GTtable =
                             style.maxWidth 700
                             style.fontSize 20
                         ] 
-                        prop.className "shadow-lg textCard"
+                        prop.className "shadow-lg textCard "
                         prop.children [
                             Daisy.cardBody [
                                 Daisy.cardTitle [prop.text "Hello there and welcome to my page! ✨"; prop.style [style.fontSize 27; style.marginBottom 30]]
@@ -625,7 +638,6 @@ type GTtable =
                                     prop.style [style.marginTop 30]
                                     prop.children [
                                         upLoadButton
-                                        
                                     ]
                                 ]                             
                             ]
@@ -637,7 +649,14 @@ type GTtable =
                             loading.lg
                         ]
                 else
-                    threeButtonElement
+                    threeButtonElement (10, 50)
+                    // if isOnLoad = true then
+                    Daisy.loading [
+                        loading.spinner 
+                        loading.lg
+                        if isOnLoad = true then prop.className "visible"
+                        else prop.className "invisible" 
+                    ]
                     Daisy.table [
                         prop.tabIndex 0
                         prop.style [
@@ -661,7 +680,14 @@ type GTtable =
                             ]
                         ]
                     ]
-                    threeButtonElement
+                    Daisy.loading [
+                        loading.spinner 
+                        loading.lg
+                        if isOnLoad = true then prop.className "visible"
+                        else prop.className "invisible" 
+                    ]
+                    threeButtonElement (50, 10)
+                    
             ]
         ]
         
