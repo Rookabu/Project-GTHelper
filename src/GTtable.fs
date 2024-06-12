@@ -253,7 +253,7 @@ module private Helper =
                                 style.fontSize 16  
                             ]                                            
                             prop.text (inputType.ToStringRdb())
-                            prop.className "tableElement"
+                            prop.className "tableElement flex"
                         ]
                         Daisy.dropdownContent [
                             prop.className "p-1 shadow menu sm-base-200"
@@ -310,8 +310,8 @@ module private Helper =
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
-                                if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button"
-                                else prop.className "button"
+                                if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button flex lg:inline-flex"
+                                else prop.className "button flex lg:inline-flex"
                                 prop.style [
                                     style.marginTop 10 //style of add button
                                     style.alignItems.center
@@ -491,7 +491,6 @@ type GTtable =
                     prop.className "button"
                     prop.onClick (fun _ ->
                         focusFileGetter()
-                        setonLoad true
                     )
                     prop.children [
                         Html.i [prop.className "fa-solid fa-upload"]
@@ -512,12 +511,15 @@ type GTtable =
                             let newAbstract = parsePaperText allContent
                             setTable newAbstract
                             setLocalStorage "GTlist" newAbstract 
+                            setonLoad false
                         file.slice()
                         |> reader.readAsText //reads the file as a text  
-                    )
-                    prop.onLoad (fun _ ->
                         setonLoad true
+                        
                     )
+                    // prop.onLoad (fun _ ->
+                    //     setonLoad true
+                    // )
                 ] 
             ]
 
@@ -542,6 +544,14 @@ type GTtable =
                         //     style.marginTop (length.rem 1)
                         // ]
                     ]
+                    if isOnLoad = true then
+                        Daisy.loading [
+                            loading.spinner 
+                            loading.lg
+                            // prop.className "flex"
+                        ]
+                    
+                   
                     Daisy.input [
                         prop.type' "file"
                         prop.ref inputRef
@@ -556,18 +566,12 @@ type GTtable =
                                 let newAbstract = parsePaperText allContent
                                 setTable newAbstract
                                 setLocalStorage "GTlist" newAbstract 
+                                setonLoad false
                             file.slice()
                             |> reader.readAsText //reads the file as a text
-                        )
-                        prop.onLoadStart (fun _ ->
                             setonLoad true
                         )
                     ]
-                    // if isOnLoad = true then
-                    //     Daisy.loading [
-                    //         loading.spinner 
-                    //         loading.lg
-                    //     ] 
                     Daisy.button.button [
                         button.md
                         prop.className "button"
@@ -611,6 +615,8 @@ type GTtable =
                         else prop.className "button"
                         if table = [] then prop.style [style.visibility.hidden]
                     ]
+
+                    
                 ]
             ]
 
@@ -639,18 +645,20 @@ type GTtable =
                                     prop.style [style.marginTop 30]
                                     prop.children [
                                         upLoadButton
-                                        if isOnLoad = true then
-                                            Daisy.loading [
-                                                loading.spinner 
-                                                loading.lg
-                                            ]
+                                        
                                     ]
                                 ]                             
                             ]
                         ]
                     ]
+                    if isOnLoad = true then
+                        Daisy.loading [
+                            loading.spinner 
+                            loading.lg
+                        ]
                 else
                     threeButtonElement
+                    
                     Daisy.table [
                         prop.tabIndex 0
                         prop.style [
