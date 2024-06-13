@@ -54,40 +54,54 @@ module private Helper =
         match interactionList with
         | [] -> Html.none
         | _ ->
-            Daisy.table [
-                Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
-                for i in 0 .. interactionList.Length - 1 do  
-                    let interaction = List.item i interactionList
-                    Html.tbody [
-                        Html.tr [
-                            Html.td [
-                                prop.text (interaction.Partner1)
-                            ] 
-                            Html.td [
-                                prop.text (interaction.Partner2)
-                            ]
-                            Html.td [
-                                prop.text (
-                                    match interaction.InteractionType with
-                                    |ProteinProtein -> "Protein-Protein"
-                                    |ProteineGene -> "Protein-Gene"
-                                    |Other s -> s 
-                                )
-                            ]
-                            Html.td [
-                                Daisy.button.button [
-                                    prop.className "fa-solid fa-x"
-                                    button.xs
-                                    prop.className "button"
-                                    prop.onClick (fun _ ->
-                                        removeInteraction (pubIndex, interactionState, i)
-                                    )  
-                                                                      
+        Html.div [
+            prop.className "overflow-x-auto pt-6 md:max-w-full max-w-40 text-left flex justify-center"
+            prop.children [
+
+                Html.table [
+                    prop.className "w-full"
+                    prop.children [
+                    Html.thead [Html.tr [Html.th [prop.text "Partner 1";prop.className "px-0" ]; Html.th [prop.text "Partner 2"; prop.className "px-3"]; Html.th [prop.text "Interaction Type";prop.className "px-0" ]]]
+                    for i in 0 .. interactionList.Length - 1 do  
+                        let interaction = List.item i interactionList
+                        Html.tbody [
+                            Html.tr [
+                                // prop.className "px-0"
+                                prop.children [
+                                    Html.td [
+                                        prop.text (interaction.Partner1)
+                                        prop.className "px-0"
+                                    ] 
+                                    Html.td [
+                                        prop.text (interaction.Partner2)
+                                        prop.className "px-3"
+                                    ]
+                                    Html.td [
+                                        prop.text (
+                                            match interaction.InteractionType with
+                                            |ProteinProtein -> "Protein-Protein"
+                                            |ProteineGene -> "Protein-Gene"
+                                            |Other s -> s 
+                                        )
+                                        prop.className "px-0"
+                                    ]
+                                    Html.td [
+                                        Daisy.button.button [
+                                            prop.className "fa-solid fa-x"
+                                            button.xs
+                                            prop.className "button"
+                                            prop.onClick (fun _ ->
+                                                removeInteraction (pubIndex, interactionState, i)
+                                            )                            
+                                        ]
+                                    ]
                                 ]
-                            ]
-                        ] 
+                            ] 
+                        ]
                     ]
-            ]    
+                ]
+            ]
+        ] 
 
     let clickableWords (text, setNewClickedWord, interactionWordList: string list, activeWordList: string[]) =
         prop.children [
@@ -189,9 +203,10 @@ module private Helper =
                 //prop.valueOrDefault partnerStrValue //use addingWords
                 prop.className "tableElement"
 
-                if activeFieldOption = Some activeField then prop.className "tableElementChecked" 
-
+                if activeFieldOption = Some activeField then prop.className "tableElementChecked"
                 else prop.className "tableElement"
+
+                if activeFieldOption = Some activeField then prop.autoFocus (true)
             ]
         ]
         
@@ -606,7 +621,7 @@ type GTtable =
                 
             ]
         Html.div [
-            prop.className "childstyle px-12"
+            prop.className "childstyle px-12 overflow-x-hidden"
             prop.children [
                 if table = [] then
                     Daisy.card [
@@ -653,7 +668,7 @@ type GTtable =
                     Daisy.table [
                         prop.tabIndex 0
                         prop.style [
-                            style.maxWidth 1500
+                            style.maxWidth 1300
                             style.textAlign.center
                         ]
                         prop.children [

@@ -106,6 +106,9 @@ body {
   }
 }
 
+.minitable {
+  text-overflow: ellipsis
+}
 
 
 
