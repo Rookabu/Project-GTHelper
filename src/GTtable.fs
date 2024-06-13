@@ -8,7 +8,6 @@ open Fable.SimpleJson
 open Fable.Core.JsInterop
 open Browser
 
-
 type ActiveField = 
     |Partner1
     |Partner2
@@ -36,26 +35,14 @@ module private Helper =
                     style.fontSize 16
                 ]
                 prop.children [
-                    Html.th "No."
-                    Html.th "Title"
-                    // let width = Browser.Dom.window.innerWidth
-                    // match width with
-                    // | w when w > 1025.0 -> //bigger equal
-                    //     Daisy.tooltip [
-                    //         tooltip.open'
-                    //         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
-                    //         prop.className "tooltip"
-                    //         prop.children [
-                    //             Html.th [prop.text "No. of Interactions"; prop.style [style.maxWidth (length.rem 30)]]
-                    //         ]
-                    //     ]
-                    // | _ -> 
-                    //     Html.th "No. of Interactions"
-                    // <div class="lg:tooltip" data-tip="hello">
-                    //     <button class="btn">Hover me</button>
-                    // </div>
                     Html.th [
-                        prop.className "tooltip"
+                        prop.text "No."
+                        prop.className "hidden lg:flex"
+                    ]
+                    Html.th "Title"
+                    Html.th [
+                        prop.className "md:tooltip my-md-tooltip tooltip-open"
+                        // tooltip.open'
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
                         prop.text "No. of Interactions"
                     ]
@@ -67,40 +54,56 @@ module private Helper =
         match interactionList with
         | [] -> Html.none
         | _ ->
-            Daisy.table [
-                Html.thead [Html.tr [Html.th "Partner 1"; Html.th "Partner 2"; Html.th "Interaction Type"]]
-                for i in 0 .. interactionList.Length - 1 do  
-                    let interaction = List.item i interactionList
-                    Html.tbody [
-                        Html.tr [
-                            Html.td [
-                                prop.text (interaction.Partner1)
-                            ] 
-                            Html.td [
-                                prop.text (interaction.Partner2)
-                            ]
-                            Html.td [
-                                prop.text (
-                                    match interaction.InteractionType with
-                                    |ProteinProtein -> "Protein-Protein"
-                                    |ProteineGene -> "Protein-Gene"
-                                    |Other s -> s 
-                                )
-                            ]
-                            Html.td [
-                                Daisy.button.button [
-                                    prop.text "X"
-                                    button.xs
-                                    prop.className "button"
-                                    prop.onClick (fun _ ->
-                                        removeInteraction (pubIndex, interactionState, i)
-                                    )  
-                                                                      
+        Html.div [
+            prop.className "overflow-x-auto pt-6 md:max-w-full max-w-40 text-left flex justify-center"
+            prop.children [
+                Daisy.table [
+                    prop.className "w-full"
+                    prop.children [
+                    Html.thead [Html.tr [Html.th [prop.text "Partner 1";prop.className "px-0" ]; Html.th [prop.text "Partner 2"; prop.className "px-3"]; Html.th [prop.text "Interaction Type";prop.className "px-0" ]]]
+                    for i in 0 .. interactionList.Length - 1 do  
+                        let interaction = List.item i interactionList
+                        Html.tbody [
+                            Html.tr [
+                                // prop.className "px-0"
+                                prop.children [
+                                    Html.td [
+                                        prop.text (interaction.Partner1)
+                                        prop.className "px-0"
+                                    ] 
+                                    Html.td [
+                                        prop.text (interaction.Partner2)
+                                        prop.className "px-3"
+                                    ]
+                                    Html.td [
+                                        prop.text (
+                                            match interaction.InteractionType with
+                                            |ProteinProtein -> "Protein-Protein"
+                                            |ProteineGene -> "Protein-Gene"
+                                            |Other s -> s 
+                                        )
+                                        prop.className "px-0"
+                                    ]
+                                    Html.td [
+                                        prop.className "px-0"
+                                        prop.children [
+                                            Daisy.button.button [
+                                                prop.className "fa-solid fa-x"
+                                                button.xs
+                                                prop.className "button"
+                                                prop.onClick (fun _ ->
+                                                    removeInteraction (pubIndex, interactionState, i)
+                                                )                            
+                                            ]
+                                        ]
+                                    ]
                                 ]
-                            ]
-                        ] 
+                            ] 
+                        ]
                     ]
-            ]    
+                ]
+            ]
+        ] 
 
     let clickableWords (text, setNewClickedWord, interactionWordList: string list, activeWordList: string[]) =
         prop.children [
@@ -123,6 +126,8 @@ module private Helper =
             prop.type' "checkbox" 
             prop.onCheckedChange (fun (isChecked: bool) ->
                 setCheckState isChecked
+
+
             )                                              
             prop.isChecked (checkState)
         ]
@@ -134,23 +139,26 @@ module private Helper =
                 prop.children [
                     if checkState = false then checkHandle (checkState, setCheckState) 
                     Daisy.collapseTitle [ 
-                        Daisy.cardTitle [
-                            prop.style [
-                                // style.minWidth 800
-                                style.fontSize 16
-                                style.pointerEvents.unset
-                                style.flexWrap.wrap
+                        prop.className "px-0"
+                        prop.children [
+                            Daisy.cardTitle [
+                                prop.style [
+                                    // style.minWidth 800
+                                    style.fontSize 16
+                                    style.pointerEvents.unset
+                                    style.flexWrap.wrap
+                                ]
+                                // prop.className "min-w-96"
+                                if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
+                                else //checkSate = false
+                                    prop.children [
+                                        for word: string in title do
+                                            Html.span [
+                                                prop.text word  
+                                                prop.style [style.cursor.pointer; style.userSelect.none] 
+                                            ]
+                                    ] 
                             ]
-                            // prop.className "min-w-96"
-                            if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
-                            else //checkSate = false
-                                prop.children [
-                                    for word: string in title do
-                                        Html.span [
-                                            prop.text word  
-                                            prop.style [style.cursor.pointer; style.userSelect.none] 
-                                        ]
-                                ] 
                         ]
                     ]
                     Daisy.collapseContent [
@@ -160,6 +168,7 @@ module private Helper =
                                 style.flexWrap.wrap
                                 style.fontSize 16
                             ] 
+                            prop.className "px-0"
                             clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
                         ]
                     ]
@@ -168,6 +177,9 @@ module private Helper =
         ]
 
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
+        let blurActiveElement() =
+            let e = Browser.Dom.document.activeElement
+            if e |> isNull |> not then e?blur()
         Daisy.formControl [
             
             Daisy.label [
@@ -177,11 +189,7 @@ module private Helper =
             ]
             
             Daisy.input [
-                prop.tabIndex 0
-                // prop.onKeyDown(fun e -> 
-                //     if e.code = "KeyR" then removeSymbols partnerStrValue
-                //     else ""        
-                // )
+                // prop.tabIndex 0
                 input.bordered 
                 input.sm 
                 prop.style [style.color.white; style.maxWidth 150]
@@ -196,9 +204,12 @@ module private Helper =
                 //prop.valueOrDefault partnerStrValue //use addingWords
                 prop.className "tableElement"
 
-                if activeFieldOption = Some activeField then prop.className "tableElementChecked" 
-
+                if activeFieldOption = Some activeField then prop.className "tableElementChecked"
                 else prop.className "tableElement"
+
+                prop.onKeyDown (fun e ->
+                    if e.code = "ControlLeft" then blurActiveElement()
+                )
             ]
         ]
         
@@ -222,7 +233,7 @@ module private Helper =
     let form(setField: option<ActiveField> -> unit, input1: string, input2: string, inputType: InteractionType, setInputType, setInput1: string -> unit, setInput2: string -> unit, activeField: option<ActiveField>) =
 
         Html.div [
-            prop.className "flex gap-1 flex-col lg:flex-row"
+            prop.className "flex gap-1 flex-col md:flex-row md:justify-between"
             prop.children [
                 labelAndInputField ("Partner 1", input1, activeField, Partner1, setField, setInput1)
                 labelAndInputField ("Partner 2", input2, activeField, Partner2, setField, setInput2)
@@ -310,8 +321,8 @@ module private Helper =
                             Daisy.button.button [
                                 button.sm
                                 prop.text "add Interaction"
-                                if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button flex lg:inline-flex"
-                                else prop.className "button flex lg:inline-flex"
+                                if input1 = "" || input2 = "" || inputType = Other "" then prop.disabled true; prop.className "button flex md:inline-flex"
+                                else prop.className "button flex md:inline-flex"
                                 prop.style [
                                     style.marginTop 10 //style of add button
                                     style.alignItems.center
@@ -406,12 +417,15 @@ type GTtable =
         Html.tr [
             prop.tabIndex 0
             prop.onKeyDown(fun e -> 
-                if e.code = "Enter" then onClickHandler e            
+                if e.code = "Enter" && input1 <> "" && input2 <> ""  then onClickHandler e            
                 if e.code = "ControlLeft" && activeField = (Some Partner2) then setActiveField (Some Partner1) 
                 elif e.code = "ControlLeft" && activeField = (Some Partner1) then setActiveField (Some Partner2)            
             )
             prop.children [
-                Html.td (pubIndex + 1)
+                Html.td [
+                    prop.text (pubIndex + 1)
+                    prop.className "hidden lg:flex" //is invivle, execpt for md screens and wider
+                ]
                 Helper.tableCellPaperContent (element.Content, element.Title, setNewClickedWord, checkState, interactionWordList, activeWordList, setCheckState) 
                 Helper.tableCellInteractions (interactionState, input1, input2, inputType, setInputType, setActiveField, addInteraction, pubIndex, removeInteraction, checkState, setCheckState, setInput1, setInput2, activeField)
             ]
@@ -515,7 +529,6 @@ type GTtable =
                         file.slice()
                         |> reader.readAsText //reads the file as a text  
                         setonLoad true
-                        
                     )
                     // prop.onLoad (fun _ ->
                     //     setonLoad true
@@ -523,35 +536,22 @@ type GTtable =
                 ] 
             ]
 
-        let threeButtonElement =
+        let threeButtonElement (mb: int, mt: int, upload: string, download: string)=
             Html.div [
-                prop.className "contents lg:flex size-full justify-between"
+                prop.className "contents md:flex size-full justify-between"
                 prop.style [
                     style.paddingLeft 100
                     style.paddingRight 100
-                    style.marginBottom 50
-                    style.marginTop 50
+                    style.marginBottom mb
+                    style.marginTop mt
                 ]
                 prop.children [
                     Daisy.button.button [
                         button.md
-                        prop.className "button mt-6 lg:mt-0"
-                        prop.onClick (fun _ ->
-                            focusFileGetter()
-                        )
+                        prop.className upload
+                        prop.onClick (fun _ -> focusFileGetter())
                         prop.text "Upload abstracts"
-                        // prop.style [
-                        //     style.marginTop (length.rem 1)
-                        // ]
                     ]
-                    if isOnLoad = true then
-                        Daisy.loading [
-                            loading.spinner 
-                            loading.lg
-                            // prop.className "flex"
-                        ]
-                    
-                   
                     Daisy.input [
                         prop.type' "file"
                         prop.ref inputRef
@@ -567,6 +567,10 @@ type GTtable =
                                 setTable newAbstract
                                 setLocalStorage "GTlist" newAbstract 
                                 setonLoad false
+                                Map.empty
+                                |> fun t ->
+                                    t |> setInteractionState
+                                    t |> setLocalStorageInteraction "Interaction"
                             file.slice()
                             |> reader.readAsText //reads the file as a text
                             setonLoad true
@@ -597,7 +601,7 @@ type GTtable =
                     ]
                     
                     Daisy.button.button [
-                        prop.className "button mb-6 lg:mb-0"
+                        prop.className download
                         button.md
                         // prop.className "button"
                         prop.onClick (fun _ ->
@@ -615,13 +619,12 @@ type GTtable =
                         else prop.className "button"
                         if table = [] then prop.style [style.visibility.hidden]
                     ]
-
                     
                 ]
+                
             ]
-
         Html.div [
-            prop.className "childstyle"
+            prop.className "childstyle px-12 overflow-x-hidden"
             prop.children [
                 if table = [] then
                     Daisy.card [
@@ -630,7 +633,7 @@ type GTtable =
                             style.maxWidth 700
                             style.fontSize 20
                         ] 
-                        prop.className "shadow-lg textCard"
+                        prop.className "shadow-lg textCard "
                         prop.children [
                             Daisy.cardBody [
                                 Daisy.cardTitle [prop.text "Hello there and welcome to my page! ✨"; prop.style [style.fontSize 27; style.marginBottom 30]]
@@ -645,7 +648,6 @@ type GTtable =
                                     prop.style [style.marginTop 30]
                                     prop.children [
                                         upLoadButton
-                                        
                                     ]
                                 ]                             
                             ]
@@ -657,12 +659,19 @@ type GTtable =
                             loading.lg
                         ]
                 else
-                    threeButtonElement
-                    
+                    threeButtonElement (0, 50, "button mt-6 md:mt-0", "button mb-0")
+                    // if isOnLoad = true then
+                    Daisy.loading [
+                        loading.spinner 
+                        loading.lg
+                        if isOnLoad = true then prop.className "visible"
+                        else prop.className "invisible" 
+                        prop.className "mb-0 md:mb-6"
+                    ]
                     Daisy.table [
                         prop.tabIndex 0
                         prop.style [
-                            style.maxWidth 1500
+                            style.maxWidth 1300
                             style.textAlign.center
                         ]
                         prop.children [
@@ -682,7 +691,14 @@ type GTtable =
                             ]
                         ]
                     ]
-                    threeButtonElement
+                    Daisy.loading [
+                        loading.spinner 
+                        loading.lg
+                        if isOnLoad = true then prop.className "visible"
+                        else prop.className "invisible" 
+                    ]
+                    threeButtonElement (50, 0, "button mt-0", "button mb-6 md:mb-0")
+                    
             ]
         ]
         

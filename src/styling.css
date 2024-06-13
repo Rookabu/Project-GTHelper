@@ -92,11 +92,25 @@ body {
   z-index: 10;
 }
 
-.tooltip::before {
+/* .tooltip::before {
   max-width:  30rem;
   background-color: #698ed0;
   color: white
+} */
+
+@media (min-width: 768px) {
+  .my-md-tooltip::before {
+    max-width: 30rem !important;
+    background-color: #698ed0 !important;
+    color: white !important;
+  }
 }
+
+.minitable {
+  text-overflow: ellipsis
+}
+
+
 
 
 
