@@ -132,7 +132,6 @@ module private Helper =
                                     style.pointerEvents.unset
                                     style.flexWrap.wrap
                                 ]
-                                
                                 // prop.className "min-w-96"
                                 if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
                                 else //checkSate = false
@@ -512,14 +511,14 @@ type GTtable =
                         file.slice()
                         |> reader.readAsText //reads the file as a text  
                         setonLoad true
-                        
                     )
                     // prop.onLoad (fun _ ->
                     //     setonLoad true
                     // )
                 ] 
             ]
-        let threeButtonElement (mb: int, mt: int)=
+
+        let threeButtonElement (mb: int, mt: int, upload: string, download: string)=
             Html.div [
                 prop.className "contents md:flex size-full justify-between"
                 prop.style [
@@ -531,17 +530,10 @@ type GTtable =
                 prop.children [
                     Daisy.button.button [
                         button.md
-                        prop.className "button mt-6 md:mt-0"
-                        prop.onClick (fun _ ->
-                            focusFileGetter()
-                            
-                        )
+                        prop.className upload
+                        prop.onClick (fun _ -> focusFileGetter())
                         prop.text "Upload abstracts"
-                        // prop.style [
-                        //     style.marginTop (length.rem 1)
-                        // ]
                     ]
-                    
                     Daisy.input [
                         prop.type' "file"
                         prop.ref inputRef
@@ -591,7 +583,7 @@ type GTtable =
                     ]
                     
                     Daisy.button.button [
-                        prop.className "button mb-6 lg:mb-0"
+                        prop.className download
                         button.md
                         // prop.className "button"
                         prop.onClick (fun _ ->
@@ -649,13 +641,14 @@ type GTtable =
                             loading.lg
                         ]
                 else
-                    threeButtonElement (10, 50)
+                    threeButtonElement (0, 50, "button mt-6 md:mt-0", "button mb-0")
                     // if isOnLoad = true then
                     Daisy.loading [
                         loading.spinner 
                         loading.lg
                         if isOnLoad = true then prop.className "visible"
                         else prop.className "invisible" 
+                        prop.className "mb-0 md:mb-6"
                     ]
                     Daisy.table [
                         prop.tabIndex 0
@@ -686,7 +679,7 @@ type GTtable =
                         if isOnLoad = true then prop.className "visible"
                         else prop.className "invisible" 
                     ]
-                    threeButtonElement (50, 10)
+                    threeButtonElement (50, 0, "button mt-0", "button mb-6 md:mb-0")
                     
             ]
         ]
