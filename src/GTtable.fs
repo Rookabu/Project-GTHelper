@@ -57,8 +57,7 @@ module private Helper =
         Html.div [
             prop.className "overflow-x-auto pt-6 md:max-w-full max-w-40 text-left flex justify-center"
             prop.children [
-
-                Html.table [
+                Daisy.table [
                     prop.className "w-full"
                     prop.children [
                     Html.thead [Html.tr [Html.th [prop.text "Partner 1";prop.className "px-0" ]; Html.th [prop.text "Partner 2"; prop.className "px-3"]; Html.th [prop.text "Interaction Type";prop.className "px-0" ]]]
@@ -86,13 +85,16 @@ module private Helper =
                                         prop.className "px-0"
                                     ]
                                     Html.td [
-                                        Daisy.button.button [
-                                            prop.className "fa-solid fa-x"
-                                            button.xs
-                                            prop.className "button"
-                                            prop.onClick (fun _ ->
-                                                removeInteraction (pubIndex, interactionState, i)
-                                            )                            
+                                        prop.className "px-0"
+                                        prop.children [
+                                            Daisy.button.button [
+                                                prop.className "fa-solid fa-x"
+                                                button.xs
+                                                prop.className "button"
+                                                prop.onClick (fun _ ->
+                                                    removeInteraction (pubIndex, interactionState, i)
+                                                )                            
+                                            ]
                                         ]
                                     ]
                                 ]
@@ -175,6 +177,9 @@ module private Helper =
         ]
 
     let labelAndInputField (title: string, partnerStrValue: string, activeFieldOption: ActiveField option, activeField: ActiveField, setField, setInput) =
+        let blurActiveElement() =
+            let e = Browser.Dom.document.activeElement
+            if e |> isNull |> not then e?blur()
         Daisy.formControl [
             
             Daisy.label [
@@ -184,11 +189,7 @@ module private Helper =
             ]
             
             Daisy.input [
-                prop.tabIndex 0
-                // prop.onKeyDown(fun e -> 
-                //     if e.code = "KeyR" then removeSymbols partnerStrValue
-                //     else ""        
-                // )
+                // prop.tabIndex 0
                 input.bordered 
                 input.sm 
                 prop.style [style.color.white; style.maxWidth 150]
@@ -206,7 +207,9 @@ module private Helper =
                 if activeFieldOption = Some activeField then prop.className "tableElementChecked"
                 else prop.className "tableElement"
 
-                if activeFieldOption = Some activeField then prop.autoFocus (true)
+                prop.onKeyDown (fun e ->
+                    if e.code = "ControlLeft" then blurActiveElement()
+                )
             ]
         ]
         
@@ -414,7 +417,7 @@ type GTtable =
         Html.tr [
             prop.tabIndex 0
             prop.onKeyDown(fun e -> 
-                if e.code = "Enter" then onClickHandler e            
+                if e.code = "Enter" && input1 <> "" && input2 <> ""  then onClickHandler e            
                 if e.code = "ControlLeft" && activeField = (Some Partner2) then setActiveField (Some Partner1) 
                 elif e.code = "ControlLeft" && activeField = (Some Partner1) then setActiveField (Some Partner2)            
             )
@@ -621,7 +624,7 @@ type GTtable =
                 
             ]
         Html.div [
-            prop.className "childstyle px-12 overflow-x-hidden"
+            prop.className "childstyle px-12 overflow-x-hidden pointer-events-none"
             prop.children [
                 if table = [] then
                     Daisy.card [
