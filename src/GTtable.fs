@@ -624,7 +624,7 @@ type GTtable =
                 
             ]
         Html.div [
-            prop.className "childstyle px-12 overflow-x-hidden pointer-events-none"
+            prop.className "childstyle px-12 overflow-x-hidden"
             prop.children [
                 if table = [] then
                     Daisy.card [
