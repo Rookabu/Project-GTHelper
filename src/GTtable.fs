@@ -55,11 +55,9 @@ module private Helper =
         | [] -> Html.none
         | _ ->
         Html.div [
-            prop.className "overflow-x-auto pt-6 md:max-w-full max-w-40 text-left flex justify-center"
+            prop.className "overflow-x-auto pt-6 md:w-full w-40"
             prop.children [
                 Daisy.table [
-                    prop.className "w-full"
-                    prop.children [
                     Html.thead [Html.tr [Html.th [prop.text "Partner 1";prop.className "px-0" ]; Html.th [prop.text "Partner 2"; prop.className "px-3"]; Html.th [prop.text "Interaction Type";prop.className "px-0" ]]]
                     for i in 0 .. interactionList.Length - 1 do  
                         let interaction = List.item i interactionList
@@ -100,10 +98,10 @@ module private Helper =
                                 ]
                             ] 
                         ]
-                    ]
                 ]
             ]
-        ] 
+        ]
+        
 
     let clickableWords (text, setNewClickedWord, interactionWordList: string list, activeWordList: string[]) =
         prop.children [
@@ -202,7 +200,7 @@ module private Helper =
                 )
                 prop.valueOrDefault (partnerStrValue)
                 //prop.valueOrDefault partnerStrValue //use addingWords
-                prop.className "tableElement"
+                prop.className "tableElement caret-white"
 
                 if activeFieldOption = Some activeField then prop.className "tableElementChecked"
                 else prop.className "tableElement"
@@ -248,7 +246,7 @@ module private Helper =
                            input.bordered 
                            input.sm 
                            prop.style [style.color.white; style.maxWidth 135]
-                           prop.className "tableElement"
+                           prop.className "tableElement caret-white"
                            prop.placeholder "What is it?"
                            prop.onChange (fun (s:string) ->
                                 setInputType (Other s)
@@ -260,7 +258,7 @@ module private Helper =
                         Daisy.button.button [
                             button.sm
                             prop.style [
-                                style.width 135
+                                style.width 138
                                 style.fontSize 16  
                             ]                                            
                             prop.text (inputType.ToStringRdb())
@@ -421,6 +419,7 @@ type GTtable =
                 if e.code = "ControlLeft" && activeField = (Some Partner2) then setActiveField (Some Partner1) 
                 elif e.code = "ControlLeft" && activeField = (Some Partner1) then setActiveField (Some Partner2)            
             )
+            prop.className " outline-none"
             prop.children [
                 Html.td [
                     prop.text (pubIndex + 1)
@@ -674,6 +673,7 @@ type GTtable =
                             style.maxWidth 1300
                             style.textAlign.center
                         ]
+                        prop.className "caret-transparent"
                         prop.children [
                             Helper.headerRow
                             Html.tbody [

@@ -1,4 +1,4 @@
-# Feliz Template
++# Feliz Template
 
 This template gets you up and running with a simple web app using [Fable](http://fable.io/) and [Feliz](https://github.com/Zaid-Ajaj/Feliz).
 
