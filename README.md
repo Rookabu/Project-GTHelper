@@ -4,7 +4,7 @@
 
 <img src= "image-11.png" width="800">
 
-## How to start?
+## How to start
 
 First of all, start by uploading your abstracts with titles as a txt., csv., or tsv. file using the 'Upload abstracts' button. 
 
