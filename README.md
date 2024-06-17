@@ -8,7 +8,7 @@ First off, start by uploading your abstrcats with titles as a txt., csv., or tsv
 
 It's important that the titles are separated from its abstract by one whitespace and an abstract should be followed by two whitespaces before a new title starts.
 
-![alt text](image.png)
+<img src= "image.png" width="600">
 
 After a quick load your abstracts should be shown in a table. 
 
@@ -16,25 +16,25 @@ After a quick load your abstracts should be shown in a table.
 
 The first abstract should be already unfolded automatically, you can fold and unfold each abstract by clicking on the row. Just click on a word in your abstract or title and it gets assigned to partner 1. Already clicked words are marked green.
 
-![alt text](image-1.png)
+<img src= "image-1.png" width="600">
 
 Now, click on a next word to add more to the first partner or just click in the field of partner 2 to add the next words to it by again clicking on a word. U can also use left control key to switch between partners.
 
 After you added words to both partners, choose your type of interaction by clicking on it. This can be Proteine-Proteine, Proteine-Gene or your own.
 
-![alt text](image-2.png)
+<img src= "image-2.png" width="600">
 
 Add your newly build Interaction by using the 'add Interaction' button or just press enter.
 
-![alt text](image-3.png)
+<img src= "image-3.png" width="600">
 
 Now you sucessfully added your first Interaction, which you can delete again if you want. Already added partners are marked orange.
 
-![alt text](image-7.png)
+<img src= "image-7.png" width="250">
 
 The blue number indicates how many partners you already added.
 
-![alt text](image-4.png)
+<img src= "image-4.png" width="250">
 
 Now you can start finding interaction partners in each abstract until your done. You can close the website if you want, your progress will be saved.
 
