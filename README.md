@@ -42,7 +42,7 @@ Now you can start finding interaction partners in each abstract until your done.
 
 You can easily donwload your created ground truth using the 'Download table' button. Your ground truth will be downloaded as a csv file and can be used to train a large language model or for other purposes.
 
-![alt text](image-6.png)
+<img src= "image-6.png" width="600">
 
 ## Want to edit other abstracts?
 
