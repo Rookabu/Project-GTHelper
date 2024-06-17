@@ -54,17 +54,10 @@ Just upload your next file or use the 'Reset to Start' button to return to the s
 
 Have fun! 
 
-
-
-# Feliz Template
-
-This template gets you up and running with a simple web app using [Fable](http://fable.io/) and [Feliz](https://github.com/Zaid-Ajaj/Feliz).
-
 ## Requirements
 
-* [dotnet SDK](https://www.microsoft.com/net/download/core) v7.0 or higher
+* [dotnet SDK](https://www.microsoft.com/net/download/core) v8.0 or higher
 * [node.js](https://nodejs.org) v18+ LTS
-
 
 ## Editor
 
