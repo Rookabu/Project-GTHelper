@@ -1,4 +1,4 @@
-## About
+# About
 
 This website is all about creating your own ground truth from abstracts. U can add as many Interactions as you want for example Proteine-Proteine, Proteine-Gene your own type of Interaction. 
 
@@ -11,7 +11,6 @@ It´s important that your titles should be separated from its abstract by one wh
 ![alt text](image.png)
 
 After a quick load your abstracts should be shown in a table. 
-
 
 # Feliz Template
 
