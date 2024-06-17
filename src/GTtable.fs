@@ -1,3 +1,4 @@
+
 namespace Components
 
 open Types
@@ -134,46 +135,46 @@ module private Helper =
         Html.td [
             prop.className "px-0"
             prop.children [
-                Daisy.collapse [
-                    prop.className [if checkState then "collapse-open"]
-                    prop.children [
-                        if checkState = false then checkHandle (checkState, setCheckState) 
-                        Daisy.collapseTitle [ 
-                            prop.className "px-0"
-                            prop.children [
-                                Daisy.cardTitle [
-                                    prop.style [
-                                        // style.minWidth 800
-                                        style.fontSize 16
-                                        style.pointerEvents.unset
-                                        style.flexWrap.wrap
-                                    ]
-                                    // prop.className "min-w-96"
-                                    if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
-                                    else //checkSate = false
-                                        prop.children [
-                                            for word: string in title do
-                                                Html.span [
-                                                    prop.text word  
-                                                    prop.style [style.cursor.pointer; style.userSelect.none] 
-                                                ]
-                                        ] 
-                                ]
-                            ]
-                        ]
-                        Daisy.collapseContent [
-                            Daisy.cardBody [
+            Daisy.collapse [
+                prop.className [if checkState then "collapse-open"]
+                prop.children [
+                    if checkState = false then checkHandle (checkState, setCheckState) 
+                    Daisy.collapseTitle [ 
+                        prop.className "px-0"
+                        prop.children [
+                            Daisy.cardTitle [
                                 prop.style [
-                                    style.flexDirection.row
-                                    style.flexWrap.wrap
+                                    // style.minWidth 800
                                     style.fontSize 16
-                                ] 
-                                prop.className "px-0"
-                                clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
+                                    style.pointerEvents.unset
+                                    style.flexWrap.wrap
+                                ]
+                                // prop.className "min-w-96"
+                                if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
+                                else //checkSate = false
+                                    prop.children [
+                                        for word: string in title do
+                                            Html.span [
+                                                prop.text word  
+                                                prop.style [style.cursor.pointer; style.userSelect.none] 
+                                            ]
+                                    ] 
                             ]
                         ]
                     ]
+                    Daisy.collapseContent [
+                        Daisy.cardBody [
+                            prop.style [
+                                style.flexDirection.row
+                                style.flexWrap.wrap
+                                style.fontSize 16
+                            ] 
+                            prop.className "px-0"
+                            clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
+                        ]
+                    ]
                 ]
+            ]
             ]
         ]
 
@@ -261,7 +262,7 @@ module private Helper =
                         Daisy.button.button [
                             button.sm
                             prop.style [
-                                style.width 138
+                                style.width 143
                                 style.fontSize 16  
                             ]                                            
                             prop.text (inputType.ToStringRdb())
