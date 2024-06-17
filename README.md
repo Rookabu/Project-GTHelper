@@ -1,12 +1,63 @@
-+# Feliz Template
+# About
 
-This template gets you up and running with a simple web app using [Fable](http://fable.io/) and [Feliz](https://github.com/Zaid-Ajaj/Feliz).
+[This website](https://rookabu.github.io/Project-GTHelper/) is all about creating your own ground truth from abstracts. You can add as many interactions as you want for each abstract. For example Protein-Protein, Protein-Gene or your own type of interaction. 
+
+<img src= "image-11.png" width="800">
+
+## How to start?
+
+First of all, start by uploading your abstracts with titles as a txt., csv., or tsv. file using the 'Upload abstracts' button. 
+
+It's important that the titles are separated from its abstract by one line and an abstract should be followed by two lines before a new title starts.
+
+<img src= "image.png" width="600">
+
+After a quick load your abstracts should be shown in a table. 
+
+## Start adding Interactions!
+
+The first abstract should be already unfolded automatically, you can fold and unfold each abstract by clicking the row. Just click on a word in your abstract or title and it gets assigned to partner 1. Already clicked words are marked green but can be clicked again.
+
+<img src= "image-1.png" width="600">
+
+Now, click on a other word to add more to the first partner or just click in the field of partner 2 to add the next words to it. You can also use left control key to switch between partners.
+
+After you added words to both partners, choose your type of interaction by clicking on it. This can be Protein-Protein, Protein-Gene or your own.
+
+<img src= "image-8.png" width="600">
+
+Add your newly build interaction by using the 'add Interaction' button or just press enter.
+
+<img src= "image-3.png" width="600">
+
+Now you sucessfully added your first interaction, which you can delete again if you want. Already added partners are marked orange.
+
+<img src= "image-7.png" width="250">
+
+The blue number indicates how many partners you already added for each abstract.
+
+<img src= "image-4.png" width="250">
+
+Now you can start finding interaction partners in each abstract until your done. You can close the website if you want, your progress will be saved.
+
+## You are finished ?
+
+You can easily download your created ground truth using the 'Download table' button. Your ground truth will be downloaded as a csv file and can be used to train a large language model or for other purposes.
+
+<img src= "image-6.png" width="600">
+
+## Want to edit other abstracts?
+
+Just upload your next file or use the 'Reset to Start' button to return to the start.
+
+<img src= "image-9.png" width="600">
+
+Have fun! 
 
 ## Requirements
 
-* [dotnet SDK](https://www.microsoft.com/net/download/core) v7.0 or higher
+* [dotnet SDK](https://www.microsoft.com/net/download/core) v8.0 or higher
 * [node.js](https://nodejs.org) v18+ LTS
-
 
 ## Editor
 

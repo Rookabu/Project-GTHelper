@@ -20,12 +20,13 @@ type NavBar =
         Html.div [ 
             let logo = StaticFile.import "./img/csb-wide-white.svg"
             Daisy.navbar [
-                prop.className "bg-base-100 shadow-lg navbarColor w-full"
+                prop.className "bg-base-100 shadow-lg navbarColor w-full py-0"
                 prop.children [
                     Daisy.navbarStart [
                         Daisy.button.a [
                             prop.href "https://csbiology.github.io/"
                             prop.target.blank 
+                            prop.className "bg-transparent border-0 hover:bg-[#222a35]"
                             prop.children [
                                 Html.img [
                                     prop.src logo
@@ -36,7 +37,7 @@ type NavBar =
                         Daisy.button.button [
                             prop.text "GroundTruth Helper"
                             prop.onClick (fun _ -> setPage(Types.Page.GTtable))
-                            prop.className "button hidden md:flex"
+                            prop.className " hidden md:flex text-white rounded-md bg-[#303b4a] border-[#303b4a] hover:bg-[#7c8797]"
                             prop.style [style.marginLeft 15]
                         ]
                     ]
@@ -44,7 +45,7 @@ type NavBar =
                         Daisy.button.button [
                             prop.text "Contact"
                             prop.onClick (fun _ -> setPage(Types.Page.Contact))
-                            prop.className "button hidden md:flex"
+                            prop.className " hidden md:flex text-white rounded-md bg-[#303b4a] border-[#303b4a] hover:bg-[#7c8797]"
                             prop.style [
                                 style.marginRight 15
                             ]
@@ -64,7 +65,7 @@ type NavBar =
                             prop.className "dropdown dropdown-end"
                             prop.children [
                                 Daisy.button.button [
-                                    prop.className "btn btn-ghost md:hidden"
+                                    prop.className "btn btn-ghost md:hidden rounded-md"
                                     prop.children [
                                         Html.i [prop.className "fa-solid fa-bars"; prop.style [style.fontSize (length.rem 2)]]
                                     ]

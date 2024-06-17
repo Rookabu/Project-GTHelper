@@ -41,10 +41,11 @@ module private Helper =
                     ]
                     Html.th "Title"
                     Html.th [
-                        prop.className "md:tooltip my-md-tooltip tooltip-open"
+                        prop.className "md:tooltip my-md-tooltip tooltip-open "
                         // tooltip.open'
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
                         prop.text "No. of Interactions"
+                        
                     ]
                 ]
             ]
@@ -132,6 +133,8 @@ module private Helper =
 
     let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, interactionWordList, activeWordList, setCheckState) =
         Html.td [
+            prop.className "px-0"
+            prop.children [
             Daisy.collapse [
                 prop.className [if checkState then "collapse-open"]
                 prop.children [
@@ -171,6 +174,7 @@ module private Helper =
                         ]
                     ]
                 ]
+            ]
             ]
         ]
 
@@ -258,7 +262,7 @@ module private Helper =
                         Daisy.button.button [
                             button.sm
                             prop.style [
-                                style.width 138
+                                style.width 143
                                 style.fontSize 16  
                             ]                                            
                             prop.text (inputType.ToStringRdb())
