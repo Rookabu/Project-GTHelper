@@ -18,7 +18,7 @@ The first abstract should be already unfolded automatically. Just click on a wor
 
 ![alt text](image-1.png)
 
-Now, click on a next word to add more to the first partner or just click in the field of partner 2 to add the next words to it by again clicking on it. U can also use left control key to switch between partners.
+Now, click on a next word to add more to the first partner or just click in the field of partner 2 to add the next words to it by again clicking on a word. U can also use left control key to switch between partners.
 
 After you added words to both partners, choose your type of interaction by clicking on it. This can be Proteine-Proteine, Proteine-Gene or your own.
 
@@ -30,9 +30,13 @@ Add your newly build Interaction by using the 'add Interaction' button or just p
 
 Now you sucessfully added your first Interaction, which you can delete again if you want. Already added partners are marked orange.
 
-The blue number indicates how many partners you already added. Now you can start finding interaction partners in each abstract until your done. You can close the website if you want, your progress will be saved.
+![alt text](image-7.png)
+
+The blue number indicates how many partners you already added.
 
 ![alt text](image-4.png)
+
+Now you can start finding interaction partners in each abstract until your done. You can close the website if you want, your progress will be saved.
 
 ## You are finished ?
 
@@ -40,13 +44,13 @@ You can easily donwload your created ground truth using the 'Download table' but
 
 ![alt text](image-6.png)
 
-Have fun! 
-
 ## Want to edit other abstracts?
 
 Just upload your next file or use the 'Reset to Start' button to return to the start.
 
 ![alt text](image-5.png)
+
+Have fun! 
 
 
 
