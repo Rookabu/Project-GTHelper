@@ -48,7 +48,7 @@ You can easily donwload your created ground truth using the 'Download table' but
 
 Just upload your next file or use the 'Reset to Start' button to return to the start.
 
-![alt text](image-5.png | width=100)
+![alt text](image-5.png|width=100)
 
 Have fun! 
 
