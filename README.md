@@ -14,7 +14,7 @@ After a quick load your abstracts should be shown in a table.
 
 ## Start adding Interactions!
 
-The first abstract should be already unfolded automatically. Just click on a word in your abstract or title and it gets assigned to partner 1. Already clicked words are marked green.
+The first abstract should be already unfolded automatically, you can fold and unfold each abstract by clicking on the row. Just click on a word in your abstract or title and it gets assigned to partner 1. Already clicked words are marked green.
 
 ![alt text](image-1.png)
 
@@ -48,10 +48,9 @@ You can easily donwload your created ground truth using the 'Download table' but
 
 Just upload your next file or use the 'Reset to Start' button to return to the start.
 
-![alt text](image-5.png)
+<img src= "image-5.png" width="100" height="100">
 
 Have fun! 
-
 
 
 
