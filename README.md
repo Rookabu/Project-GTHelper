@@ -1,16 +1,55 @@
 # About
 
-This website is all about creating your own ground truth from abstracts. U can add as many Interactions as you want for example Proteine-Proteine, Proteine-Gene your own type of Interaction. 
+This website is all about creating your own ground truth from abstracts. U can add as many Interactions as you want for each abstract. For example Proteine-Proteine, Proteine-Gene or your own type of Interaction. 
 
-## How to use?
+## How to start?
 
 First off, start by uploading your abstrcats with titles as a txt., csv., or tsv. file using the 'Upload abstracts' button. 
 
-It´s important that your titles should be separated from its abstract by one whitespace and an abstract should be folloed by two whitespaces before a new title starts.
+It´s important that your titles should be separated from its abstract by one whitespace and an abstract should be followed by two whitespaces before a new title starts.
 
 ![alt text](image.png)
 
 After a quick load your abstracts should be shown in a table. 
+
+## Start adding Interactions!
+
+The first abstract should be already unfolded automatically. Just click on a word in your abstract or title and it gets assigned to partner 1. Already clicked words are marked as green.
+
+![alt text](image-1.png)
+
+Now, click on a next word to add more to the first partner or just click in the field of partner 2 to add the next words to it by again clicking on it. U can also use left control key to switch between partners.
+
+After you added words to both partners, choose your type of interaction by clicking on it. This can be Proteine-Proteine, Proteine-Gene or your own.
+
+![alt text](image-2.png)
+
+Add your newly build Interaction by using the 'add Interaction' button or just press enter.
+
+![alt text](image-3.png)
+
+Now you sucessfully added your first Interaction, which you can delete again if you want. Already added partners are marked orange.
+
+The blue number indicates how many partners you already added. Now you can start finding interaction partners in each abstract until your done. You can close the website if you want, your progress will be saved.
+
+![alt text](image-4.png)
+
+## You are finished ?
+
+You can easily donwload your created ground truth using the 'Download table' button. Your ground truth will be downloaded as a csv file and can be used to train a large language model or for other purposes.
+
+![alt text](image-6.png)
+
+Have fun! 
+
+## Want to edit other abstracts?
+
+Just upload your next file or use the 'Reset to Start' button to return to the start.
+
+![alt text](image-5.png)
+
+
+
 
 # Feliz Template
 
