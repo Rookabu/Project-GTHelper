@@ -1,12 +1,14 @@
 # About
 
-This website is all about creating your own ground truth from abstracts. You can add as many interactions as you want for each abstract. For example Proteine-Proteine, Proteine-Gene or your own type of interaction. 
+This website is all about creating your own ground truth from abstracts. You can add as many interactions as you want for each abstract. For example Protein-Protein, Protein-Gene or your own type of interaction. 
+
+<img src= "image-10.png" width="800">
 
 ## How to start?
 
 First of all, start by uploading your abstracts with titles as a txt., csv., or tsv. file using the 'Upload abstracts' button. 
 
-It's important that the titles are separated from its abstract by one whitespace and an abstract should be followed by two whitespaces before a new title starts.
+It's important that the titles are separated from its abstract by one line and an abstract should be followed by two lines before a new title starts.
 
 <img src= "image.png" width="600">
 
@@ -20,7 +22,7 @@ The first abstract should be already unfolded automatically, you can fold and un
 
 Now, click on a other word to add more to the first partner or just click in the field of partner 2 to add the next words to it. You can also use left control key to switch between partners.
 
-After you added words to both partners, choose your type of interaction by clicking on it. This can be Proteine-Proteine, Proteine-Gene or your own.
+After you added words to both partners, choose your type of interaction by clicking on it. This can be Protein-Protein, Protein-Gene or your own.
 
 <img src= "image-8.png" width="600">
 
@@ -40,7 +42,7 @@ Now you can start finding interaction partners in each abstract until your done.
 
 ## You are finished ?
 
-You can easily donwload your created ground truth using the 'Download table' button. Your ground truth will be downloaded as a csv file and can be used to train a large language model or for other purposes.
+You can easily download your created ground truth using the 'Download table' button. Your ground truth will be downloaded as a csv file and can be used to train a large language model or for other purposes.
 
 <img src= "image-6.png" width="600">
 

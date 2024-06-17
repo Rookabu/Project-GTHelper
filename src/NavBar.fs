@@ -11,12 +11,11 @@ module Helper =
                 prop.onClick (fun _ -> 
                      setPage (subpage)
                 )
-                // prop.className "button"
             ]
         ]
 
 type NavBar =
-    static member Subpagelink(setPage: Types.Page -> unit, statePage: Types.Page) =
+    static member Subpagelink(setPage: Types.Page -> unit) =
         Html.div [ 
             let logo = StaticFile.import "./img/csb-wide-white.svg"
             Daisy.navbar [

@@ -1,4 +1,3 @@
-
 namespace Components
 
 open Types
@@ -41,10 +40,11 @@ module private Helper =
                     ]
                     Html.th "Title"
                     Html.th [
-                        prop.className "md:tooltip my-md-tooltip tooltip-open"
+                        prop.className "md:tooltip my-md-tooltip tooltip-open "
                         // tooltip.open'
                         tooltip.text "Press left Ctrl-key to switch between partners and Enter to add!"
                         prop.text "No. of Interactions"
+                        
                     ]
                 ]
             ]
@@ -132,42 +132,45 @@ module private Helper =
 
     let tableCellPaperContent (abst: string list, title: string list, setNewClickedWord: string -> unit, checkState: bool, interactionWordList, activeWordList, setCheckState) =
         Html.td [
-            Daisy.collapse [
-                prop.className [if checkState then "collapse-open"]
-                prop.children [
-                    if checkState = false then checkHandle (checkState, setCheckState) 
-                    Daisy.collapseTitle [ 
-                        prop.className "px-0"
-                        prop.children [
-                            Daisy.cardTitle [
-                                prop.style [
-                                    // style.minWidth 800
-                                    style.fontSize 16
-                                    style.pointerEvents.unset
-                                    style.flexWrap.wrap
+            prop.className "px-0"
+            prop.children [
+                Daisy.collapse [
+                    prop.className [if checkState then "collapse-open"]
+                    prop.children [
+                        if checkState = false then checkHandle (checkState, setCheckState) 
+                        Daisy.collapseTitle [ 
+                            prop.className "px-0"
+                            prop.children [
+                                Daisy.cardTitle [
+                                    prop.style [
+                                        // style.minWidth 800
+                                        style.fontSize 16
+                                        style.pointerEvents.unset
+                                        style.flexWrap.wrap
+                                    ]
+                                    // prop.className "min-w-96"
+                                    if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
+                                    else //checkSate = false
+                                        prop.children [
+                                            for word: string in title do
+                                                Html.span [
+                                                    prop.text word  
+                                                    prop.style [style.cursor.pointer; style.userSelect.none] 
+                                                ]
+                                        ] 
                                 ]
-                                // prop.className "min-w-96"
-                                if checkState then clickableWords (title, setNewClickedWord, interactionWordList, activeWordList)
-                                else //checkSate = false
-                                    prop.children [
-                                        for word: string in title do
-                                            Html.span [
-                                                prop.text word  
-                                                prop.style [style.cursor.pointer; style.userSelect.none] 
-                                            ]
-                                    ] 
                             ]
                         ]
-                    ]
-                    Daisy.collapseContent [
-                        Daisy.cardBody [
-                            prop.style [
-                                style.flexDirection.row
-                                style.flexWrap.wrap
-                                style.fontSize 16
-                            ] 
-                            prop.className "px-0"
-                            clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
+                        Daisy.collapseContent [
+                            Daisy.cardBody [
+                                prop.style [
+                                    style.flexDirection.row
+                                    style.flexWrap.wrap
+                                    style.fontSize 16
+                                ] 
+                                prop.className "px-0"
+                                clickableWords (abst, setNewClickedWord, interactionWordList, activeWordList)
+                            ]
                         ]
                     ]
                 ]
