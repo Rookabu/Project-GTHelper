@@ -1,3 +1,18 @@
+## About
+
+This website is all about creating your own ground truth from abstracts. U can add as many Interactions as you want for example Proteine-Proteine, Proteine-Gene your own type of Interaction. 
+
+## How to use?
+
+First off, start by uploading your abstrcats with titles as a txt., csv., or tsv. file using the 'Upload abstracts' button. 
+
+It´s important that your titles should be separated from its abstract by one whitespace and an abstract should be folloed by two whitespaces before a new title starts.
+
+![alt text](image.png)
+
+After a quick load your abstracts should be shown in a table. 
+
+
 # Feliz Template
 
 This template gets you up and running with a simple web app using [Fable](http://fable.io/) and [Feliz](https://github.com/Zaid-Ajaj/Feliz).
