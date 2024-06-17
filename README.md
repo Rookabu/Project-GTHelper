@@ -1,6 +1,6 @@
 # About
 
-This [Website](rookabu.github.io/Project-GTHelper/) is all about creating your own ground truth from abstracts. You can add as many interactions as you want for each abstract. For example Protein-Protein, Protein-Gene or your own type of interaction. 
+[This website](rookabu.github.io/Project-GTHelper/) is all about creating your own ground truth from abstracts. You can add as many interactions as you want for each abstract. For example Protein-Protein, Protein-Gene or your own type of interaction. 
 
 <img src= "image-11.png" width="800">
 
