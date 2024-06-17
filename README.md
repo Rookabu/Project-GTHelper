@@ -22,7 +22,7 @@ Now, click on a next word to add more to the first partner or just click in the 
 
 After you added words to both partners, choose your type of interaction by clicking on it. This can be Proteine-Proteine, Proteine-Gene or your own.
 
-<img src= "image-2.png" width="600">
+<img src= "image-8.png" width="600">
 
 Add your newly build Interaction by using the 'add Interaction' button or just press enter.
 
