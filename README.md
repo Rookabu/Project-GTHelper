@@ -6,7 +6,7 @@ This website is all about creating your own ground truth from abstracts. U can a
 
 First off, start by uploading your abstrcats with titles as a txt., csv., or tsv. file using the 'Upload abstracts' button. 
 
-It´s important that your titles should be separated from its abstract by one whitespace and an abstract should be followed by two whitespaces before a new title starts.
+It's important that the titles are separated from its abstract by one whitespace and an abstract should be followed by two whitespaces before a new title starts.
 
 ![alt text](image.png)
 
