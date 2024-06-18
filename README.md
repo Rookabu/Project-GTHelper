@@ -14,7 +14,7 @@ It's important that the titles are separated from its abstract by one line and a
 
 After a quick load your abstracts should be shown in a table. 
 
-## Start adding Interactions!
+## Start adding interactions!
 
 The first abstract should be already unfolded automatically, you can fold and unfold each abstract by clicking the row. Just click on a word in your abstract or title and it gets assigned to partner 1. Already clicked words are marked green but can be clicked again.
 
@@ -34,7 +34,7 @@ Now you sucessfully added your first interaction, which you can delete again if 
 
 <img src= "image-7.png" width="250">
 
-The blue number indicates how many partners you already added for each abstract.
+The blue number indicates how many interactions you already added for each abstract.
 
 <img src= "image-4.png" width="250">
 
